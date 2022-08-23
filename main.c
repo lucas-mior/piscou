@@ -5,6 +5,24 @@
 #include <unistd.h>
 #include <errno.h>
 
+char *filename = NULL;
+char* extras[9] = {NULL};
+char *config = "/home/lucas/.config/piscou/piscou.conf";
+FILE *conf;
+
+void preview(void) {
+   char buf[100];
+   if (!(conf = fopen(config, "r"))) {
+       fprintf(stderr, "%s\n", strerror(errno));
+       exit(1);
+   }
+   printf("\n\nopened config file!\n");
+   while (fgets(buf, sizeof(buf), conf)) {
+       printf("%s", buf);
+   }
+
+}
+
 void usage(void) {
     printf("usage: piscou <filename> [extras...]\n"
            "ARGUMENTS:\n"
@@ -12,11 +30,6 @@ void usage(void) {
            "extras: extra arguments passed to command\n");
     exit(0);
 }
-
-char *filename = NULL;
-char* extras[9] = {NULL};
-char *config = "/home/lucas/.config/piscou/piscou.conf";
-FILE *conf;
 
 int main(int argc, char *argv[]) {
     int option;
@@ -60,15 +73,6 @@ int main(int argc, char *argv[]) {
        i += 1;
    }
 
-   char buf[100];
-   if (!(conf = fopen(config, "r"))) {
-       fprintf(stderr, "%s\n", strerror(errno));
-       exit(1);
-   }
-   printf("\n\nopened config file!\n");
-   while (fgets(buf, sizeof(buf), conf)) {
-       printf("%s", buf);
-   }
-
+   preview();
    return 0;
 }
