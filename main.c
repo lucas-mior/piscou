@@ -11,8 +11,9 @@ void usage(void) {
     exit(0);
 }
 
+char *filename = NULL;
+
 int main(int argc, char *argv[]) {
-    printf("Hello from %s!\n", argv[0]);
     int option;
     while((option = getopt(argc, argv, "hx:")) != -1){ //get option from the getopt() method
       switch(option){
@@ -32,4 +33,10 @@ int main(int argc, char *argv[]) {
             break;
       }
    }
+   if (argv[optind] != NULL)
+       filename = argv[optind];
+   else
+       usage();
+
+   printf("filename: %s", filename);
 }
