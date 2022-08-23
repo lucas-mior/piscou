@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <regex.h>
 
 char *filename = NULL;
 char* extras[9] = {NULL};
@@ -11,16 +12,26 @@ char *config = "/home/lucas/.config/piscou/piscou.conf";
 FILE *conf;
 
 void preview(void) {
-   char buf[100];
+   char buf[256];
+   char *mime = buf;
+   char *comm = buf;
+
    if (!(conf = fopen(config, "r"))) {
        fprintf(stderr, "%s\n", strerror(errno));
        exit(1);
    }
    printf("\n\nopened config file!\n");
-   while (fgets(buf, sizeof(buf), conf)) {
-       printf("%s", buf);
-   }
 
+   /* regex_t r; */
+   /* int value; */
+   while (fgets(buf, sizeof(buf), conf)) {
+       comm = mime = buf;
+       comm = strstr(buf, " ");
+       mime[comm - mime - 1] = '\0';
+       printf("comm: %s\n", comm);
+       printf("mime: %s\n", mime);
+   }
+   fclose(conf);
 }
 
 void usage(void) {
