@@ -22,7 +22,7 @@ $(objs): Makefile piscou.h
 main.o: piscou.h
 
 .c.o:
-	$(CC) -Wall -Wextra -Wold-style-definition -pedantic $(cflags) $(cppflags) -O2 -c -o $@ $<
+	$(CC) -Wall -Wextra -Wold-style-definition -pedantic $(cflags) $(cppflags) -c -o $@ $<
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin

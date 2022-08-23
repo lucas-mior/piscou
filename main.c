@@ -12,9 +12,11 @@ void usage(void) {
 }
 
 char *filename = NULL;
+char* extras[9] = {NULL};
 
 int main(int argc, char *argv[]) {
     int option;
+    size_t i = 0;
     while((option = getopt(argc, argv, "hx:")) != -1){ //get option from the getopt() method
       switch(option){
          case 'h':
@@ -38,5 +40,19 @@ int main(int argc, char *argv[]) {
    else
        usage();
 
-   printf("filename: %s", filename);
+   printf("filename: %s\n", filename);
+
+   optind += 1;
+   while (optind < argc) {
+       extras[i] = argv[optind];
+       optind += 1;
+       i += 1;
+   }
+   i = 0;
+
+   printf("extras: ");
+   while (extras[i]) {
+       printf("%s ", extras[i]);
+       i += 1;
+   }
 }
