@@ -8,6 +8,7 @@ void usage(void) {
            "ARGUMENTS:\n"
            "filename: file to preview\n"
            "extras: extra arguments passed to command\n");
+    exit(0);
 }
 
 int main(int argc, char *argv[]) {
@@ -17,7 +18,6 @@ int main(int argc, char *argv[]) {
           switch(option){
              case 'h':
                 usage();
-                exit(0);
              case 'f': //here f is used for some file name
                 printf("Given File: %s\n", optarg);
                 break;
