@@ -1,7 +1,9 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 void usage(void) {
     printf("usage: piscou <filename> [extras...]\n"
@@ -13,6 +15,8 @@ void usage(void) {
 
 char *filename = NULL;
 char* extras[9] = {NULL};
+char *config = "/home/lucas/.config/piscou/piscou.conf";
+FILE *conf;
 
 int main(int argc, char *argv[]) {
     int option;
@@ -55,4 +59,16 @@ int main(int argc, char *argv[]) {
        printf("%s ", extras[i]);
        i += 1;
    }
+
+   char buf[100];
+   if (!(conf = fopen(config, "r"))) {
+       fprintf(stderr, "%s\n", strerror(errno));
+       exit(1);
+   }
+   printf("\n\nopened config file!\n");
+   while (fgets(buf, sizeof(buf), conf)) {
+       printf("%s", buf);
+   }
+
+   return 0;
 }
