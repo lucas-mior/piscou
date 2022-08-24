@@ -6,40 +6,52 @@
 #include <unistd.h>
 #include <errno.h>
 #include <regex.h>
+#include <magic.h>
 
 #include "util.h"
 
 char *filename = NULL;
 char *extras[9] = {NULL};
-char *config = "/home/lucas/.config/piscou/piscou.conf";
+char config[256];
 FILE *conf;
 
-void preview(void) {
+void open_config(void) {
+    printf("open_config()\n");
    char *cache = NULL;
    char *piscou = "piscou/piscou.conf";
-   char config[256];
 
    if (!(cache = getenv("XDG_CONFIG_HOME"))) {
        fprintf(stderr, "XDG_CONFIG_HOME needs to be set\n");
        exit(1);
    }
+    printf("cache = %s\n", cache);
 
    snprintf(config, sizeof(config), "%s/%s", cache, piscou);
    config[255] = '\0';
+
+    printf("config = %s\n", config);
 
    if (!(conf = fopen(config, "r"))) {
        fprintf(stderr, "%s\n", strerror(errno));
        exit(1);
    }
+}
 
+void preview(void) {
+   open_config();
    char buf[256];
    char *pbuf;
-   char *mime = NULL;
+   char *mime_conf = NULL;
+   char *mime_file = NULL;
    char *comm = NULL;
-   
+
    char *cargs[100] = {NULL};
    size_t i = 0;
 
+    magic_t m;
+    m = magic_open(MAGIC_MIME_TYPE);
+    magic_load(m, NULL);
+    mime_file = magic_file(m, filename);
    regex_t r;
    int v;
    bool match = false;
@@ -52,13 +64,22 @@ void preview(void) {
        if ((*pbuf == '#') || (*pbuf == '\n'))
            continue;
 
-       mime = strtok(pbuf, " ");
-       printf("mime: %s\n", mime);
-       v = regcomp(&r, mime, REG_EXTENDED);
+       mime_conf = strtok(pbuf, " ");
+       if (!strncmp(mime_conf, "fpath", 5)) {
+           printf("fpath!\n");
+           mime_conf = strtok(NULL, " \t\n");
+       }
+       v = regcomp(&r, mime_conf, REG_EXTENDED);
        if (v != 0) {
-           fprintf(stderr, "Error creating regex for mime %s\n", mime);
+           fprintf(stderr, "Error creating regex for mime_conf %s\n", mime_conf);
            continue;
        }
+
+        if(!strncmp(mime_file, mime_conf, 10)) {
+            printf("MAGIC: %s!\n", mime_file);
+        } else {
+            printf("NO magic: %s != %s\n", mime_file, mime_conf);
+        }
 
        match = regexec(&r, filename, 0, NULL, 0) == 0;
        if (match) {
@@ -73,7 +94,7 @@ void preview(void) {
                    break;
                printf("cargs[%ld]=%s\n", i, cargs[i]);
                if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
-                    cargs[i] = filename;  
+                    cargs[i] = filename;
                }
            }
            execvp(cargs[0], cargs);

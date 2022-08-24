@@ -2,7 +2,7 @@ PREFIX ?= /usr/local
 
 objs = main.o util.o
 
-ldlibs = $(LDLIBS)
+ldlibs = $(LDLIBS) -lmagic
 
 all: piscou
 
