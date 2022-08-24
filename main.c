@@ -44,8 +44,6 @@ void preview(void) {
    int v;
    bool match = false;
 
-   /* regex_t r; */
-   /* int value; */
    while (fgets(buf, sizeof(buf), conf)) {
        pbuf = buf;
 
