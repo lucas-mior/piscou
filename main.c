@@ -17,7 +17,6 @@ FILE *conf;
 char *cargs[100] = {NULL};
 
 void open_config(void) {
-    printf("open_config()\n");
     char *cache = NULL;
     char *piscou = "piscou/piscou.conf";
 
@@ -25,12 +24,9 @@ void open_config(void) {
         fprintf(stderr, "XDG_CONFIG_HOME needs to be set\n");
         exit(1);
     }
-    printf("cache = %s\n", cache);
 
     snprintf(config, sizeof(config), "%s/%s", cache, piscou);
     config[255] = '\0';
-
-     printf("config = %s\n", config);
 
     if (!(conf = fopen(config, "r"))) {
         fprintf(stderr, "%s\n", strerror(errno));
@@ -41,26 +37,21 @@ void open_config(void) {
 void parse_args(void) {
     regex_t r_filename, r_extras;
     regmatch_t groups[10];
-    char *pbuf = NULL;
 
     regcomp(&r_filename, ".*(%piscou-filename%).*", REG_EXTENDED);
     regcomp(&r_extras, "%piscou-extra([0-9])%", REG_EXTENDED);
 
     for (size_t i = 0; i < sizeof(cargs); i++) {
-        printf("cargs = %s\n", cargs[i]);
         if (cargs[i] == NULL)
             break;
 
         if (!regexec(&r_filename, cargs[i], 10, groups, 0)) {
-            printf("%%piscou-filename%%\n");
             cargs[i] = filename;
         }
         if (!regexec(&r_extras, cargs[i], 10, groups, 0)) {
-            printf("%%piscou-extras%%\n");
             char sourceCopy[strlen(cargs[i]) + 1];
             strcpy(sourceCopy, cargs[i]);
             sourceCopy[groups[1].rm_eo] = 0;
-            printf("number: %s\n", sourceCopy + groups[1].rm_so);
             int num = atoi(sourceCopy + groups[1].rm_so);
             cargs[i] = extras[num];
         }
@@ -108,21 +99,18 @@ void iterate_conf(void) {
             continue;
         }
 
-        if (!regexec(&r, comp_file, 0, NULL, 0)) {
-            printf("MATCH: %s!\n", comp_file);
-        } else {
-            printf("NO MATCH: %s != %s\n", comp_file, comp_conf);
+        if (regexec(&r, comp_file, 0, NULL, 0) == REG_NOMATCH) {
             continue;
+        } else {
+            size_t i = 0;
+            while ((comm = strtok(NULL, " \t\n"))) {
+                printf("comm: %s\n", comm);
+                cargs[i] = comm;
+                i += 1;
+            }
+            parse_args();
+            break;
         }
-
-        size_t i = 0;
-        while ((comm = strtok(NULL, " \t\n"))) {
-            printf("comm: %s\n", comm);
-            cargs[i] = comm;
-            i += 1;
-        }
-        parse_args();
-        break;
     }
     fclose(conf);
 }
