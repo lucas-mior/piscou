@@ -17,94 +17,94 @@ FILE *conf;
 
 void open_config(void) {
     printf("open_config()\n");
-   char *cache = NULL;
-   char *piscou = "piscou/piscou.conf";
+    char *cache = NULL;
+    char *piscou = "piscou/piscou.conf";
 
-   if (!(cache = getenv("XDG_CONFIG_HOME"))) {
-       fprintf(stderr, "XDG_CONFIG_HOME needs to be set\n");
-       exit(1);
-   }
+    if (!(cache = getenv("XDG_CONFIG_HOME"))) {
+        fprintf(stderr, "XDG_CONFIG_HOME needs to be set\n");
+        exit(1);
+    }
     printf("cache = %s\n", cache);
 
-   snprintf(config, sizeof(config), "%s/%s", cache, piscou);
-   config[255] = '\0';
+    snprintf(config, sizeof(config), "%s/%s", cache, piscou);
+    config[255] = '\0';
 
-    printf("config = %s\n", config);
+     printf("config = %s\n", config);
 
-   if (!(conf = fopen(config, "r"))) {
-       fprintf(stderr, "%s\n", strerror(errno));
-       exit(1);
-   }
+    if (!(conf = fopen(config, "r"))) {
+        fprintf(stderr, "%s\n", strerror(errno));
+        exit(1);
+    }
 }
 
 void iterate_conf() {
-   char buf[256];
-   char *pbuf;
-   char *mime_conf = NULL;
-   char *mime_file = NULL;
-   char *comm = NULL;
-   char *comp_conf = NULL;
-   char *comp_file = NULL;
+    char buf[256];
+    char *pbuf;
+    char *mime_conf = NULL;
+    char *mime_file = NULL;
+    char *comm = NULL;
+    char *comp_conf = NULL;
+    char *comp_file = NULL;
 
-   char *cargs[100] = {NULL};
-   size_t i = 0;
+    char *cargs[100] = {NULL};
+    size_t i = 0;
 
-   magic_t m;
-   m = magic_open(MAGIC_MIME_TYPE);
-   magic_load(m, NULL);
-   mime_file = (char *) magic_file(m, filename);
+    magic_t m;
+    m = magic_open(MAGIC_MIME_TYPE);
+    magic_load(m, NULL);
+    mime_file = (char *) magic_file(m, filename);
 
-   regex_t r;
-   int v;
+    regex_t r;
+    int v;
 
-   while (fgets(buf, sizeof(buf), conf)) {
-       pbuf = buf;
+    while (fgets(buf, sizeof(buf), conf)) {
+        pbuf = buf;
 
-       while ((*pbuf == ' ') || (*pbuf == '\t'))
-           pbuf++;
-       if ((*pbuf == '#') || (*pbuf == '\n'))
-           continue;
+        while ((*pbuf == ' ') || (*pbuf == '\t'))
+            pbuf++;
+        if ((*pbuf == '#') || (*pbuf == '\n'))
+            continue;
 
-       mime_conf = strtok(pbuf, " ");
-       if (!strncmp(mime_conf, "fpath", 5)) {
-           comp_conf = strtok(NULL, " \t");
-           comp_file = filename; 
-       } else {
-           comp_conf = mime_conf;
-           comp_file = mime_file; 
-       }
+        mime_conf = strtok(pbuf, " ");
+        if (!strncmp(mime_conf, "fpath", 5)) {
+            comp_conf = strtok(NULL, " \t");
+            comp_file = filename; 
+        } else {
+            comp_conf = mime_conf;
+            comp_file = mime_file; 
+        }
 
-       v = regcomp(&r, comp_conf, REG_EXTENDED);
-       if (v != 0) {
-           fprintf(stderr, "Error creating regex for mime_conf %s\n", comp_conf);
-           continue;
-       }
+        v = regcomp(&r, comp_conf, REG_EXTENDED);
+        if (v != 0) {
+            fprintf(stderr, "Error creating regex for mime_conf %s\n", comp_conf);
+            continue;
+        }
 
-       if(!regexec(&r, comp_file, 0, NULL, 0)) {
-           printf("MATCH: %s!\n", comp_file);
-       } else {
-           printf("NO MATCH: %s != %s\n", comp_file, comp_conf);
-           continue;
-       }
+        if(!regexec(&r, comp_file, 0, NULL, 0)) {
+            printf("MATCH: %s!\n", comp_file);
+        } else {
+            printf("NO MATCH: %s != %s\n", comp_file, comp_conf);
+            continue;
+        }
 
-       i = 0;
-       while ((comm = strtok(NULL, " \t\n"))) {
-           printf("comm: %s\n", comm);
-           cargs[i] = comm;
-           i += 1;
-       }
-       for (i = 0; i < sizeof(cargs); i++) {
-           if (cargs[i] == NULL)
-               break;
-           printf("cargs[%ld]=%s\n", i, cargs[i]);
-           if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
-                cargs[i] = filename;
-           }
-       }
-       execvp(cargs[0], cargs);
-       break;
-   }
-   fclose(conf);
+        i = 0;
+        while ((comm = strtok(NULL, " \t\n"))) {
+            printf("comm: %s\n", comm);
+            cargs[i] = comm;
+            i += 1;
+        }
+        for (i = 0; i < sizeof(cargs); i++) {
+            if (cargs[i] == NULL)
+                break;
+            printf("cargs[%ld]=%s\n", i, cargs[i]);
+            if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
+                 cargs[i] = filename;
+            }
+        }
+        execvp(cargs[0], cargs);
+        break;
+    }
+    fclose(conf);
 }
 
 void preview(void) {
