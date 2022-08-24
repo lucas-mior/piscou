@@ -9,7 +9,7 @@
 #include "util.h"
 
 char *filename = NULL;
-char* extras[9] = {NULL};
+char *extras[9] = {NULL};
 char *config = "/home/lucas/.config/piscou/piscou.conf";
 FILE *conf;
 
@@ -39,19 +39,10 @@ void preview(void) {
 int main(int argc, char *argv[]) {
     int option;
     size_t i = 0;
-    while((option = getopt(argc, argv, "hx:")) != -1){ //get option from the getopt() method
+    while((option = getopt(argc, argv, "h")) != -1){ //get option from the getopt() method
       switch(option){
          case 'h':
             usage(stdout);
-            break;
-         case 'f': //here f is used for some file name
-            printf("Given File: %s\n", optarg);
-            break;
-         case 'x': //here f is used for some file name
-            printf("Given File: %s\n", optarg);
-            break;
-         case ':':
-            printf("option needs a value\n");
             break;
          case '?': //used for some unknown options
             printf("unknown option: %c\n", optopt);
@@ -64,7 +55,6 @@ int main(int argc, char *argv[]) {
        usage(stderr);
 
    fprintf(stdout, "filename: %s\n", filename);
-   exit(0);
 
    optind += 1;
    while (optind < argc) {
@@ -72,13 +62,9 @@ int main(int argc, char *argv[]) {
        optind += 1;
        i += 1;
    }
-   i = 0;
 
-   printf("extras: ");
-   while (extras[i]) {
-       printf("%s ", extras[i]);
-       i += 1;
-   }
+   fprintf(stdout, "extras: %s\n", extras[0]);
+   exit(0);
 
    preview();
    return 0;
