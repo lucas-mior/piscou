@@ -37,8 +37,7 @@ void open_config(void) {
    }
 }
 
-void preview(void) {
-   open_config();
+void iterate_conf() {
    char buf[256];
    char *pbuf;
    char *mime_conf = NULL;
@@ -102,6 +101,11 @@ void preview(void) {
        }
    }
    fclose(conf);
+}
+
+void preview(void) {
+   open_config();
+   iterate_conf();
 }
 
 int main(int argc, char *argv[]) {
