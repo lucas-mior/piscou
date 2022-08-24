@@ -51,7 +51,7 @@ void preview(void) {
    magic_t m;
    m = magic_open(MAGIC_MIME_TYPE);
    magic_load(m, NULL);
-   mime_file = magic_file(m, filename);
+   mime_file = (char *) magic_file(m, filename);
    regex_t r;
    int v;
    bool match = false;
