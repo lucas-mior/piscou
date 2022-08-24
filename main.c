@@ -43,6 +43,8 @@ void iterate_conf() {
    char *mime_conf = NULL;
    char *mime_file = NULL;
    char *comm = NULL;
+   char *comp_conf = NULL;
+   char *comp_file = NULL;
 
    char *cargs[100] = {NULL};
    size_t i = 0;
@@ -51,6 +53,7 @@ void iterate_conf() {
    m = magic_open(MAGIC_MIME_TYPE);
    magic_load(m, NULL);
    mime_file = (char *) magic_file(m, filename);
+
    regex_t r;
    int v;
    bool match = false;
@@ -65,40 +68,42 @@ void iterate_conf() {
 
        mime_conf = strtok(pbuf, " ");
        if (!strncmp(mime_conf, "fpath", 5)) {
-           printf("fpath!\n");
-           mime_conf = strtok(NULL, " \t\n");
+           comp_conf = strtok(NULL, " \t");
+           comp_file = filename; 
+       } else {
+           comp_conf = mime_conf;
+           comp_file = mime_file; 
        }
-       v = regcomp(&r, mime_conf, REG_EXTENDED);
+
+       v = regcomp(&r, comp_conf, REG_EXTENDED);
        if (v != 0) {
-           fprintf(stderr, "Error creating regex for mime_conf %s\n", mime_conf);
+           fprintf(stderr, "Error creating regex for mime_conf %s\n", comp_conf);
            continue;
        }
 
-        if(!strncmp(mime_file, mime_conf, 10)) {
-            printf("MAGIC: %s!\n", mime_file);
-        } else {
-            printf("NO magic: %s != %s\n", mime_file, mime_conf);
-        }
-
-       match = regexec(&r, filename, 0, NULL, 0) == 0;
-       if (match) {
-           i = 0;
-           while ((comm = strtok(NULL, " \t\n"))) {
-               printf("comm: %s\n", comm);
-               cargs[i] = comm;
-               i += 1;
-           }
-           for (i = 0; i < sizeof(cargs); i++) {
-               if (cargs[i] == NULL)
-                   break;
-               printf("cargs[%ld]=%s\n", i, cargs[i]);
-               if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
-                    cargs[i] = filename;
-               }
-           }
-           execvp(cargs[0], cargs);
-           break;
+       if(!regexec(&r, comp_file, 0, NULL, 0)) {
+           printf("MATCH: %s!\n", comp_file);
+       } else {
+           printf("NO MATCH: %s != %s\n", comp_file, comp_conf);
+           continue;
        }
+
+       i = 0;
+       while ((comm = strtok(NULL, " \t\n"))) {
+           printf("comm: %s\n", comm);
+           cargs[i] = comm;
+           i += 1;
+       }
+       for (i = 0; i < sizeof(cargs); i++) {
+           if (cargs[i] == NULL)
+               break;
+           printf("cargs[%ld]=%s\n", i, cargs[i]);
+           if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
+                cargs[i] = filename;
+           }
+       }
+       execvp(cargs[0], cargs);
+       break;
    }
    fclose(conf);
 }
