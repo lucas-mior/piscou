@@ -49,11 +49,6 @@ void iterate_conf(void) {
     char *cargs[100] = {NULL};
     size_t i = 0;
 
-    magic_t m;
-    m = magic_open(MAGIC_MIME_TYPE);
-    magic_load(m, NULL);
-    mime_file = (char *) magic_file(m, filename);
-
     regex_t r;
     int v;
 
@@ -71,6 +66,10 @@ void iterate_conf(void) {
             comp_file = filename;
         } else {
             comp_conf = mime_conf;
+            magic_t m;
+            m = magic_open(MAGIC_MIME_TYPE);
+            magic_load(m, NULL);
+            mime_file = (char *) magic_file(m, filename);
             comp_file = mime_file;
         }
 
