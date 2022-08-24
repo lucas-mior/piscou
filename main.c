@@ -14,6 +14,7 @@ char *filename = NULL;
 char *extras[9] = {NULL};
 char config[256];
 FILE *conf;
+char *cargs[100] = {NULL};
 
 void open_config(void) {
     printf("open_config()\n");
@@ -37,6 +38,18 @@ void open_config(void) {
     }
 }
 
+void parse_args(void) {
+    for (size_t i = 0; i < sizeof(cargs); i++) {
+        if (cargs[i] == NULL)
+            break;
+        printf("cargs[%ld]=%s\n", i, cargs[i]);
+        if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
+             cargs[i] = filename;
+        }
+    }
+    return;
+}
+
 void iterate_conf(void) {
     char buf[256];
     char *pbuf;
@@ -45,9 +58,6 @@ void iterate_conf(void) {
     char *comm = NULL;
     char *comp_conf = NULL;
     char *comp_file = NULL;
-
-    char *cargs[100] = {NULL};
-    size_t i = 0;
 
     regex_t r;
     int v;
@@ -86,21 +96,13 @@ void iterate_conf(void) {
             continue;
         }
 
-        i = 0;
+        size_t i = 0;
         while ((comm = strtok(NULL, " \t\n"))) {
             printf("comm: %s\n", comm);
             cargs[i] = comm;
             i += 1;
         }
-        for (i = 0; i < sizeof(cargs); i++) {
-            if (cargs[i] == NULL)
-                break;
-            printf("cargs[%ld]=%s\n", i, cargs[i]);
-            if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
-                 cargs[i] = filename;
-            }
-        }
-        execvp(cargs[0], cargs);
+        parse_args();
         break;
     }
     fclose(conf);
