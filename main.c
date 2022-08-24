@@ -63,7 +63,8 @@ int main(int argc, char *argv[]) {
    else
        usage(stderr);
 
-   printf("filename: %s\n", filename);
+   fprintf(stdout, "filename: %s\n", filename);
+   exit(0);
 
    optind += 1;
    while (optind < argc) {
