@@ -37,7 +37,7 @@ void open_config(void) {
     }
 }
 
-void iterate_conf() {
+void iterate_conf(void) {
     char buf[256];
     char *pbuf;
     char *mime_conf = NULL;
@@ -68,10 +68,10 @@ void iterate_conf() {
         mime_conf = strtok(pbuf, " ");
         if (!strncmp(mime_conf, "fpath", 5)) {
             comp_conf = strtok(NULL, " \t");
-            comp_file = filename; 
+            comp_file = filename;
         } else {
             comp_conf = mime_conf;
-            comp_file = mime_file; 
+            comp_file = mime_file;
         }
 
         v = regcomp(&r, comp_conf, REG_EXTENDED);
@@ -80,7 +80,7 @@ void iterate_conf() {
             continue;
         }
 
-        if(!regexec(&r, comp_file, 0, NULL, 0)) {
+        if (!regexec(&r, comp_file, 0, NULL, 0)) {
             printf("MATCH: %s!\n", comp_file);
         } else {
             printf("NO MATCH: %s != %s\n", comp_file, comp_conf);
@@ -108,35 +108,35 @@ void iterate_conf() {
 }
 
 void preview(void) {
-   open_config();
-   iterate_conf();
+    open_config();
+    iterate_conf();
 }
 
 int main(int argc, char *argv[]) {
     int option;
-    size_t i = 0;
-    while((option = getopt(argc, argv, "h")) != -1){ //get option from the getopt() method
-      switch(option){
-         case 'h':
+    while ((option = getopt(argc, argv, "h")) != -1) {
+        switch (option) {
+        case 'h':
             usage(stdout);
             break;
-         case '?': //used for some unknown options
+        case '?':
             printf("unknown option: %c\n", optopt);
             break;
-      }
-   }
-   if (argv[optind] != NULL)
-       filename = argv[optind];
-   else
-       usage(stderr);
+        }
+    }
+    if (argv[optind] != NULL)
+        filename = argv[optind];
+    else
+        usage(stderr);
 
-   optind += 1;
-   while (optind < argc) {
-       extras[i] = argv[optind];
-       optind += 1;
-       i += 1;
-   }
+    size_t i = 0;
+    optind += 1;
+    while (optind < argc) {
+        extras[i] = argv[optind];
+        optind += 1;
+        i += 1;
+    }
 
-   preview();
-   return 0;
+    preview();
+    return 0;
 }
