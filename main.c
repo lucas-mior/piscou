@@ -11,7 +11,7 @@
 #include "util.h"
 
 char *filename = NULL;
-char *extras[9] = {NULL};
+char *extras[10] = {NULL};
 char config[256];
 FILE *conf;
 char *cargs[100] = {NULL};
@@ -42,7 +42,7 @@ void parse_args(void) {
     regex_t r_filename, r_extras;
 
     regcomp(&r_filename, "%piscou-filename%", REG_EXTENDED);
-    regcomp(&r_extras, "%piscou-extra[0-8]%", REG_EXTENDED);
+    regcomp(&r_extras, "%piscou-extra[0-9]%", REG_EXTENDED);
 
     for (size_t i = 0; i < sizeof(cargs); i++) {
         if (cargs[i] == NULL)
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 
     size_t i = 0;
     optind += 1;
-    while (optind < argc) {
+    while ((optind < argc) && i <= 9) {
         extras[i] = argv[optind];
         optind += 1;
         i += 1;
