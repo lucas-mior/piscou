@@ -30,19 +30,33 @@ void preview(void) {
        fprintf(stderr, "%s\n", strerror(errno));
        exit(1);
    }
-   printf("\n\nopened config file!\n");
+
    char buf[256];
-   char *mime = buf;
-   char *comm = buf;
+   char *pbuf;
+   char *mime = NULL;
+   char *comm = NULL;
+   
+   char **cargs = NULL;
+   size_t i = 0;
 
    /* regex_t r; */
    /* int value; */
    while (fgets(buf, sizeof(buf), conf)) {
-       comm = mime = buf;
-       comm = strstr(buf, " ");
-       mime[comm - mime - 1] = '\0';
-       printf("comm: %s\n", comm);
+       pbuf = buf;
+
+       while (*pbuf == ' ')
+           pbuf++;
+       if (*pbuf == '#')
+           continue;
+
+       mime = strtok(pbuf, " ");
        printf("mime: %s\n", mime);
+       while ((comm = strtok(NULL, " \t"))) {
+           i += 1;
+           cargs = realloc(cargs, i * sizeof(cargs[0]));
+           printf("comm: %s\n", comm);
+           cargs[i-1] = comm;
+       }
    }
    fclose(conf);
 }
