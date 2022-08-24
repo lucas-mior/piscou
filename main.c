@@ -130,16 +130,12 @@ int main(int argc, char *argv[]) {
    else
        usage(stderr);
 
-   fprintf(stdout, "filename: %s\n", filename);
-
    optind += 1;
    while (optind < argc) {
        extras[i] = argv[optind];
        optind += 1;
        i += 1;
    }
-
-   fprintf(stdout, "extras: %s\n", extras[0]);
 
    preview();
    return 0;
