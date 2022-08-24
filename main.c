@@ -56,7 +56,6 @@ void iterate_conf() {
 
    regex_t r;
    int v;
-   bool match = false;
 
    while (fgets(buf, sizeof(buf), conf)) {
        pbuf = buf;
