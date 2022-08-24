@@ -47,7 +47,7 @@ void preview(void) {
    while (fgets(buf, sizeof(buf), conf)) {
        pbuf = buf;
 
-       while (*pbuf == ' ')
+       while ((*pbuf == ' ') || (*pbuf == '\t'))
            pbuf++;
        if ((*pbuf == '#') || (*pbuf == '\n'))
            continue;
