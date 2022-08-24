@@ -14,15 +14,26 @@ char *config = "/home/lucas/.config/piscou/piscou.conf";
 FILE *conf;
 
 void preview(void) {
-   char buf[256];
-   char *mime = buf;
-   char *comm = buf;
+   char *cache = NULL;
+   char *piscou = "piscou/piscou.conf";
+   char config[256];
+
+   if (!(cache = getenv("XDG_CONFIG_HOME"))) {
+       fprintf(stderr, "XDG_CONFIG_HOME needs to be set\n");
+       exit(1);
+   }
+
+   snprintf(config, sizeof(config), "%s/%s", cache, piscou);
+   config[255] = '\0';
 
    if (!(conf = fopen(config, "r"))) {
        fprintf(stderr, "%s\n", strerror(errno));
        exit(1);
    }
    printf("\n\nopened config file!\n");
+   char buf[256];
+   char *mime = buf;
+   char *comm = buf;
 
    /* regex_t r; */
    /* int value; */
@@ -64,7 +75,6 @@ int main(int argc, char *argv[]) {
    }
 
    fprintf(stdout, "extras: %s\n", extras[0]);
-   exit(0);
 
    preview();
    return 0;
