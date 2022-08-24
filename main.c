@@ -78,6 +78,7 @@ void preview(void) {
                     cargs[i] = filename;  
                }
            }
+           execvp(cargs[0], cargs);
            break;
        }
    }
