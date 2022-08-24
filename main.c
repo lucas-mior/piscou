@@ -6,6 +6,8 @@
 #include <errno.h>
 #include <regex.h>
 
+#include "util.h"
+
 char *filename = NULL;
 char* extras[9] = {NULL};
 char *config = "/home/lucas/.config/piscou/piscou.conf";
@@ -41,6 +43,7 @@ int main(int argc, char *argv[]) {
       switch(option){
          case 'h':
             usage(stdout);
+            break;
          case 'f': //here f is used for some file name
             printf("Given File: %s\n", optarg);
             break;
