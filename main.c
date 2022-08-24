@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
 #include <regex.h>
@@ -36,8 +37,12 @@ void preview(void) {
    char *mime = NULL;
    char *comm = NULL;
    
-   char **cargs = NULL;
+   char *cargs[100] = {NULL};
    size_t i = 0;
+
+   regex_t r;
+   int v;
+   bool match = false;
 
    /* regex_t r; */
    /* int value; */
@@ -51,11 +56,26 @@ void preview(void) {
 
        mime = strtok(pbuf, " ");
        printf("mime: %s\n", mime);
-       while ((comm = strtok(NULL, " \t"))) {
-           i += 1;
-           cargs = realloc(cargs, i * sizeof(cargs[0]));
-           printf("comm: %s\n", comm);
-           cargs[i-1] = comm;
+       v = regcomp(&r, mime, REG_EXTENDED);
+       if (v != 0) {
+           fprintf(stderr, "Error creating regex for mime %s\n", mime);
+           continue;
+       }
+
+       match = regexec(&r, filename, 0, NULL, 0) == 0;
+       if (match) {
+           i = 0;
+           while ((comm = strtok(NULL, " \t\n"))) {
+               printf("comm: %s\n", comm);
+               cargs[i] = comm;
+               i += 1;
+           }
+           for (i = 0; i < sizeof(cargs); i++) {
+               if (cargs[i] == NULL)
+                   break;
+               printf("cargs[%ld]=%s\n", i, cargs[i]);
+           }
+           break;
        }
    }
    fclose(conf);
