@@ -34,21 +34,13 @@ void preview(void) {
    fclose(conf);
 }
 
-void usage(void) {
-    printf("usage: piscou <filename> [extras...]\n"
-           "ARGUMENTS:\n"
-           "filename: file to preview\n"
-           "extras: extra arguments passed to command\n");
-    exit(0);
-}
-
 int main(int argc, char *argv[]) {
     int option;
     size_t i = 0;
     while((option = getopt(argc, argv, "hx:")) != -1){ //get option from the getopt() method
       switch(option){
          case 'h':
-            usage();
+            usage(stdout);
          case 'f': //here f is used for some file name
             printf("Given File: %s\n", optarg);
             break;
@@ -66,7 +58,7 @@ int main(int argc, char *argv[]) {
    if (argv[optind] != NULL)
        filename = argv[optind];
    else
-       usage();
+       usage(stderr);
 
    printf("filename: %s\n", filename);
 
