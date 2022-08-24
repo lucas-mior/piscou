@@ -39,13 +39,22 @@ void open_config(void) {
 }
 
 void parse_args(void) {
+    regex_t r_filename, r_extras;
+
+    regcomp(&r_filename, "%piscou-filename%", REG_EXTENDED);
+    regcomp(&r_extras, "%piscou-extra[0-8]%", REG_EXTENDED);
+
     for (size_t i = 0; i < sizeof(cargs); i++) {
         if (cargs[i] == NULL)
             break;
-        printf("cargs[%ld]=%s\n", i, cargs[i]);
-        if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
-             cargs[i] = filename;
+
+        if (!regexec(&r_filename, cargs[i], 0, NULL, 0)) {
+            printf("%%piscou-filename%%\n");
         }
+        if (!regexec(&r_extras, cargs[i], 0, NULL, 0)) {
+            printf("%%piscou-extras%%\n");
+        }
+
     }
     return;
 }
