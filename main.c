@@ -48,10 +48,10 @@ void preview(void) {
    char *cargs[100] = {NULL};
    size_t i = 0;
 
-    magic_t m;
-    m = magic_open(MAGIC_MIME_TYPE);
-    magic_load(m, NULL);
-    mime_file = magic_file(m, filename);
+   magic_t m;
+   m = magic_open(MAGIC_MIME_TYPE);
+   magic_load(m, NULL);
+   mime_file = magic_file(m, filename);
    regex_t r;
    int v;
    bool match = false;
