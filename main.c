@@ -51,7 +51,7 @@ void preview(void) {
 
        while (*pbuf == ' ')
            pbuf++;
-       if (*pbuf == '#')
+       if ((*pbuf == '#') || (*pbuf == '\n'))
            continue;
 
        mime = strtok(pbuf, " ");
@@ -74,6 +74,9 @@ void preview(void) {
                if (cargs[i] == NULL)
                    break;
                printf("cargs[%ld]=%s\n", i, cargs[i]);
+               if (!strncmp(cargs[i], "%piscou-filename%", 100)) {
+                    cargs[i] = filename;  
+               }
            }
            break;
        }
