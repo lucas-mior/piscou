@@ -40,19 +40,31 @@ void open_config(void) {
 
 void parse_args(void) {
     regex_t r_filename, r_extras;
+    regmatch_t groups[10];
 
     regcomp(&r_filename, "%piscou-filename%", REG_EXTENDED);
-    regcomp(&r_extras, "%piscou-extra[0-9]%", REG_EXTENDED);
+    regcomp(&r_extras, "%piscou-extra([0-9])%", REG_EXTENDED);
 
     for (size_t i = 0; i < sizeof(cargs); i++) {
         if (cargs[i] == NULL)
             break;
 
-        if (!regexec(&r_filename, cargs[i], 0, NULL, 0)) {
+        if (!regexec(&r_filename, cargs[i], 10, groups, 0)) {
             printf("%%piscou-filename%%\n");
         }
-        if (!regexec(&r_extras, cargs[i], 0, NULL, 0)) {
+        if (!regexec(&r_extras, cargs[i], 10, groups, 0)) {
             printf("%%piscou-extras%%\n");
+            for (size_t g = 0; g < 10; g++) {
+                if (groups[g].rm_so == -1)
+                  break;  // No more groups
+
+                char sourceCopy[strlen(cargs[i]) + 1];
+                strcpy(sourceCopy, cargs[i]);
+                sourceCopy[groups[g].rm_eo] = 0;
+                printf("Group %lu: [%2u-%2u]: %s\n",
+                       g, groups[g].rm_so, groups[g].rm_eo,
+                       sourceCopy + groups[g].rm_so);
+              }
         }
 
     }
