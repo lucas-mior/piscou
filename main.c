@@ -9,12 +9,12 @@
 #include <magic.h>
 
 #include "util.h"
+#include "piscou.h"
 
 char *filename = NULL;
 char *extras[10] = {NULL};
 char config[256];
 FILE *conf;
-char *cargs[100] = {NULL};
 
 void open_config(void) {
     char *cache = NULL;
@@ -34,14 +34,14 @@ void open_config(void) {
     }
 }
 
-void parse_args(void) {
+void parse_args(char *cargs[]) {
     regex_t r_filename, r_extras;
     regmatch_t groups[10];
 
     regcomp(&r_filename, ".*(%piscou-filename%).*", REG_EXTENDED);
     regcomp(&r_extras, "%piscou-extra([0-9])%", REG_EXTENDED);
 
-    for (size_t i = 0; i < sizeof(cargs); i++) {
+    for (size_t i = 0; i < 10; i++) {
         if (cargs[i] == NULL)
             break;
 
@@ -61,28 +61,19 @@ void parse_args(void) {
 }
 
 void iterate_conf(void) {
-    char buf[256];
-    char *pbuf;
     char *mime_conf = NULL;
     char *mime_file = NULL;
-    char *comm = NULL;
     char *comp_conf = NULL;
     char *comp_file = NULL;
 
     regex_t r;
     int v;
 
-    while (fgets(buf, sizeof(buf), conf)) {
-        pbuf = buf;
+    for (size_t i = 0; i < sizeof(commands); i++) { 
 
-        while ((*pbuf == ' ') || (*pbuf == '\t'))
-            pbuf++;
-        if ((*pbuf == '#') || (*pbuf == '\n'))
-            continue;
-
-        mime_conf = strtok(pbuf, " ");
+        mime_conf = commands[i].mime;
         if (!strncmp(mime_conf, "fpath", 5)) {
-            comp_conf = strtok(NULL, " \t");
+            comp_conf = strtok(mime_conf, " \t");
             comp_file = filename;
         } else {
             comp_conf = mime_conf;
@@ -102,13 +93,7 @@ void iterate_conf(void) {
         if (regexec(&r, comp_file, 0, NULL, 0) == REG_NOMATCH) {
             continue;
         } else {
-            size_t i = 0;
-            while ((comm = strtok(NULL, " \t\n"))) {
-                printf("comm: %s\n", comm);
-                cargs[i] = comm;
-                i += 1;
-            }
-            parse_args();
+            parse_args(commands[i].args);
             break;
         }
     }
