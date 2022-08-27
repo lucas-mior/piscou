@@ -13,26 +13,7 @@
 
 char *filename = NULL;
 char *extras[10] = {NULL};
-char config[256];
 FILE *conf;
-
-void open_config(void) {
-    char *cache = NULL;
-    char *piscou = "piscou/piscou.conf";
-
-    if (!(cache = getenv("XDG_CONFIG_HOME"))) {
-        fprintf(stderr, "XDG_CONFIG_HOME needs to be set\n");
-        exit(1);
-    }
-
-    snprintf(config, sizeof(config), "%s/%s", cache, piscou);
-    config[255] = '\0';
-
-    if (!(conf = fopen(config, "r"))) {
-        fprintf(stderr, "%s\n", strerror(errno));
-        exit(1);
-    }
-}
 
 void parse_args(char *cargs[]) {
     regex_t r_filename, r_extras;
@@ -41,7 +22,9 @@ void parse_args(char *cargs[]) {
     regcomp(&r_filename, ".*(%piscou-filename%).*", REG_EXTENDED);
     regcomp(&r_extras, "%piscou-extra([0-9])%", REG_EXTENDED);
 
+    printf("parsing\n");
     for (size_t i = 0; i < 10; i++) {
+        printf("i = %ld\n", i);
         if (cargs[i] == NULL)
             break;
 
@@ -60,7 +43,7 @@ void parse_args(char *cargs[]) {
     return;
 }
 
-void iterate_conf(void) {
+void preview(void) {
     char *mime_conf = NULL;
     char *mime_file = NULL;
     char *comp_conf = NULL;
@@ -73,7 +56,7 @@ void iterate_conf(void) {
 
         mime_conf = commands[i].mime;
         if (!strncmp(mime_conf, "fpath", 5)) {
-            comp_conf = strtok(mime_conf, " \t");
+            comp_conf = mime_conf + 5;
             comp_file = filename;
         } else {
             comp_conf = mime_conf;
@@ -98,11 +81,6 @@ void iterate_conf(void) {
         }
     }
     fclose(conf);
-}
-
-void preview(void) {
-    open_config();
-    iterate_conf();
 }
 
 int main(int argc, char *argv[]) {
