@@ -32,10 +32,10 @@ void parse_args(char *cargs[]) {
             cargs[i] = filename;
         }
         if (!regexec(&r_extras, cargs[i], 10, groups, 0)) {
-            char sourceCopy[strlen(cargs[i]) + 1];
-            strcpy(sourceCopy, cargs[i]);
-            sourceCopy[groups[1].rm_eo] = 0;
-            int num = atoi(sourceCopy + groups[1].rm_so);
+            char copy[strlen(cargs[i]) + 1];
+            strcpy(copy, cargs[i]);
+            copy[groups[1].rm_eo] = 0;
+            int num = atoi(copy + groups[1].rm_so);
             cargs[i] = extras[num];
         }
     }
