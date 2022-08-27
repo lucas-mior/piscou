@@ -13,7 +13,6 @@
 
 char *filename = NULL;
 char *extras[10] = {NULL};
-FILE *conf;
 
 void parse_args(char *cargs[]) {
     regex_t r_filename, r_extras;
@@ -22,9 +21,7 @@ void parse_args(char *cargs[]) {
     regcomp(&r_filename, ".*(%piscou-filename%).*", REG_EXTENDED);
     regcomp(&r_extras, "%piscou-extra([0-9])%", REG_EXTENDED);
 
-    printf("parsing\n");
     for (size_t i = 0; i < 10; i++) {
-        printf("i = %ld\n", i);
         if (cargs[i] == NULL)
             break;
 
@@ -80,7 +77,6 @@ void preview(void) {
             break;
         }
     }
-    fclose(conf);
 }
 
 int main(int argc, char *argv[]) {
