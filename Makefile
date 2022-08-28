@@ -15,7 +15,7 @@ CC=gcc
 piscou: $(objs)
 	ctags --kinds-C=+l *.h *.c
 	vtags.sed tags > .tags.vim
-	$(CC) -Wall -Wextra -Wstrict-prototypes -pedantic $(cflags) $(LDFLAGS) -O2 -s -o $@ $(objs) $(ldlibs)
+	$(CC) -Wall -Wextra -Wold-style-definition -Wstrict-prototypes -pedantic $(cflags) $(LDFLAGS) -O2 -s -o $@ $(objs) $(ldlibs)
 
 $(objs): Makefile piscou.h
 
@@ -23,7 +23,7 @@ main.o: piscou.h
 util.o: piscou.h
 
 .c.o:
-	$(CC) -Wall -Wextra -Wold-style-definition -pedantic $(cflags) $(cppflags) -c -o $@ $<
+	$(CC) -Wall -Wextra -Wold-style-definition -Wstrict-prototypes -pedantic $(cflags) $(cppflags) -c -o $@ $<
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
