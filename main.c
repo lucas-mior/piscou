@@ -53,7 +53,7 @@ void preview(void) {
 
         mime_conf = commands[i].mime;
         if (!strncmp(mime_conf, "fpath", 5)) {
-            comp_conf = mime_conf + 5;
+            comp_conf = mime_conf + 6;
             comp_file = filename;
         } else {
             comp_conf = mime_conf;
