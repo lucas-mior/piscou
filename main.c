@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 500
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +8,8 @@
 #include <errno.h>
 #include <regex.h>
 #include <magic.h>
+#include <limits.h>
+#include <stdlib.h>
 
 #include "util.h"
 #include "piscou.h"
@@ -102,6 +105,10 @@ int main(int argc, char *argv[]) {
         extras[i] = argv[optind];
         optind += 1;
         i += 1;
+    }
+    if((filename = realpath(filename, NULL)) == NULL) {
+        perror("realpath() failed");
+        exit(1);
     }
 
     preview();
