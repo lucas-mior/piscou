@@ -49,7 +49,7 @@ void preview(void) {
     regex_t r;
     int v;
 
-    for (size_t i = 0; i < sizeof(commands); i++) { 
+    for (size_t i = 0; i < sizeof(commands); i++) {
 
         mime_conf = commands[i].mime;
         if (!strncmp(mime_conf, "fpath", 5)) {
