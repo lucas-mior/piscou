@@ -19,7 +19,7 @@ Rule rules[] = {
 {"opendocument", {"odt2txt", "%piscou-filename%"}},
 {"application/pdf", {"pdf.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {"application/csv", {"column", "-t", "-s", ",", "%piscou-filename%"}},
-{"application/json", {"head -n 40", "%piscou-filename%"}},
+{"application/json", {"head", "-n", "40", "%piscou-filename%"}},
 {"application/.*execu.+",  {"execu.sh", "%piscou-filename%", "%piscou-extra0%"}},
 {"application/x-objec.+",  {"execu.sh", "%piscou-filename%", "%piscou-extra0%"}},
 {"fpath .+\\.ff$", {"stiv", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
