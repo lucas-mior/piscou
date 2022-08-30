@@ -21,6 +21,7 @@ Rule rules[] = {
 {"application/csv", {"column", "-t", "-s", ",", "%piscou-filename%"}},
 {"application/json", {"head -n 40", "%piscou-filename%"}},
 {"application/.*execu.+",  {"execu.sh", "%piscou-filename%", "%piscou-extra0%"}},
+{"application/x-objec.+",  {"execu.sh", "%piscou-filename%", "%piscou-extra0%"}},
 {"fpath .+\\.ff$", {"stiv", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {"fpath .+\\.[1-9]$", {"man", "%piscou-filename%"}},
 {"image/.*dwg", {"stat", "%piscou-filename%"}},
