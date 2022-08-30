@@ -1,12 +1,12 @@
 #ifndef piscou_h
 #define piscou_h
 
-typedef struct Command {
+typedef struct Rule {
     char *mime;
     char *args[10];
-} Command;
+} Rule;
 
-Command commands[] = {
+Rule rules[] = {
 {"fpath v\\S{1,3}::", {"vfile.sh", "%piscou-filename%"}},
 {"fpath g\\S{1,3}::", {"gdir.sh", "%piscou-filename%"}},
 {"text/.*", {"bat", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},

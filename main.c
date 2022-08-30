@@ -52,9 +52,9 @@ void preview(void) {
     regex_t r;
     int v;
 
-    for (size_t i = 0; i < sizeof(commands); i++) {
+    for (size_t i = 0; i < sizeof(rules); i++) {
 
-        mime_conf = commands[i].mime;
+        mime_conf = rules[i].mime;
         if (!strncmp(mime_conf, "fpath", 5)) {
             comp_conf = mime_conf + 6;
             while (*comp_conf == ' ')
@@ -78,7 +78,7 @@ void preview(void) {
         if (regexec(&r, comp_file, 0, NULL, 0) == REG_NOMATCH) {
             continue;
         } else {
-            parse_args(commands[i].args);
+            parse_args(rules[i].args);
             break;
         }
     }
