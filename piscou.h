@@ -25,7 +25,7 @@ Rule rules[] = {
 {"fpath .+\\.ff$", {"stiv", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {"fpath .+\\.[1-9]$", {"man", "%piscou-filename%"}},
 {"image/.*dwg", {"stat", "%piscou-filename%"}},
-{"image/.*xml", {"head -n 40", "%piscou-filename%"}},
+{"image/.*xml", {"head", "-n", "40", "%piscou-filename%"}},
 {"image/.*", {"stiv", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {"audio/.*", {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {"video/.*", {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
