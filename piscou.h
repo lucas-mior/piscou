@@ -6,7 +6,7 @@ typedef struct Rule {
     char *args[10];
 } Rule;
 
-Rule rules[] = {
+static Rule rules[] = {
 {"fpath v\\S{1,3}::", {"vfile.sh", "%piscou-filename%"}},
 {"fpath g\\S{1,3}::", {"gdir.sh", "%piscou-filename%"}},
 {"text/.*", {"bat", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},

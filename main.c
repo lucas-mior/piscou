@@ -13,10 +13,10 @@
 #include "util.h"
 #include "piscou.h"
 
-char *filename = NULL;
-char *extras[10] = {NULL};
+static char *filename = NULL;
+static char *extras[10] = {NULL};
 
-void parse_args(char *cargs[]) {
+static void parse_args(char *cargs[]) {
     regex_t r_filename, r_extras;
     regmatch_t groups[10];
 
@@ -31,10 +31,11 @@ void parse_args(char *cargs[]) {
             cargs[i] = filename;
         }
         if (!regexec(&r_extras, cargs[i], 10, groups, 0)) {
+            int num;
             char copy[strlen(cargs[i]) + 1];
             strcpy(copy, cargs[i]);
             copy[groups[1].rm_eo] = 0;
-            int num = atoi(copy + groups[1].rm_so);
+            num = atoi(copy + groups[1].rm_so);
             cargs[i] = extras[num];
         }
     }
@@ -42,7 +43,7 @@ void parse_args(char *cargs[]) {
     return;
 }
 
-void preview(void) {
+static void preview(void) {
     char *mime_conf = NULL;
     char *mime_file = NULL;
     char *comp_conf = NULL;
@@ -60,8 +61,8 @@ void preview(void) {
                 comp_conf++;
             comp_file = filename;
         } else {
-            comp_conf = mime_conf;
             magic_t m;
+            comp_conf = mime_conf;
             m = magic_open(MAGIC_MIME_TYPE);
             magic_load(m, NULL);
             mime_file = (char *) magic_file(m, filename);
@@ -85,11 +86,12 @@ void preview(void) {
 
 int main(int argc, char *argv[]) {
     int option;
+    size_t i = 0;
+
     while ((option = getopt(argc, argv, "h")) != -1) {
         switch (option) {
         case 'h':
             usage(stdout);
-            break;
         case '?':
             printf("unknown option: %c\n", optopt);
             break;
@@ -100,7 +102,6 @@ int main(int argc, char *argv[]) {
     else
         usage(stderr);
 
-    size_t i = 0;
     optind += 1;
     while ((optind < argc) && i <= 9) {
         extras[i] = argv[optind];

@@ -3,6 +3,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include "util.h"
+
 void usage(FILE *stream) {
     fprintf(stream,
             "usage: piscou <filename> [extras...]\n"
