@@ -24,6 +24,8 @@ add the following line:
 ```
 {"text/.+", {"cat", "%piscou-filename%"}}
 ```
+If a line is not matched but the 1st word is exactly `fpath`,
+then the 2nd argument is interpreted as a file path regex.
 
 ## Rationale
 Piscou is intended to be as fast as possible,
