@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 
-objs = main.o util.o
+objs = piscou.o
 
 ldlibs = $(LDLIBS) -lmagic
 
@@ -19,8 +19,7 @@ piscou: $(objs)
 
 $(objs): Makefile piscou.h
 
-main.o: piscou.h
-util.o: piscou.h
+piscou.o: piscou.h
 
 .c.o:
 	$(CC) -Weverything $(cflags) $(cppflags) -s -O2 -c -o $@ $<

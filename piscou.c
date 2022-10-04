@@ -26,11 +26,19 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "util.h"
 #include "piscou.h"
 
 static char *filename = NULL;
 static char *extras[10] = {NULL};
+
+void usage(FILE *stream) {
+    fprintf(stream,
+            "usage: piscou <filename> [extras...]\n"
+            "ARGUMENTS:\n"
+            "filename: file to preview\n"
+            "extras: extra arguments passed to command\n");
+    exit(1);
+}
 
 static void parse_args(char *cargs[]) {
     regex_t r_filename, r_extras;
