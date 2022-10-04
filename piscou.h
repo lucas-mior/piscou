@@ -14,6 +14,8 @@
 /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
+#include <stdio.h>
+
 #ifndef piscou_h
 #define piscou_h
 
@@ -25,5 +27,9 @@ typedef struct Rule {
 static Rule rules[] = {
 {".+", {"file", "--mime-type", "%piscou-filename%"}}
 };
+
+static void usage(FILE *);
+static void parse_args(char *cargs[]);
+static void preview(void);
 
 #endif /* piscou_h */
