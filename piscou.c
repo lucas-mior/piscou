@@ -116,6 +116,7 @@ int main(int argc, char *argv[]) {
         switch (option) {
         case 'h':
             usage(stdout);
+            break;
         case '?':
             printf("unknown option: %c\n", optopt);
             break;
