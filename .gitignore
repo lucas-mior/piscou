@@ -1,0 +1,6 @@
+tags
+.tags.vim
+compile_commands.json
+*.o
+piscou
+.cache

@@ -1,0 +1,48 @@
+.TH piscou 1 "November 2023" "Version 1.0" "User Commands"
+
+.SH NAME
+piscou \- File previewer that executes a program according to the file's mimetype.
+
+.SH SYNOPSIS
+.B piscou
+.I %piscou-filename%
+[%piscou-extra0% %piscou-extra1% ...]
+
+.SH DESCRIPTION
+.B piscou
+is a file previewer that executes a program based on the file's mimetype. It is designed to be as fast as possible, and users can choose previewing programs with short startup times.
+
+.PP
+Users can pass up to 10 arguments to the program after the filename.
+
+.SH CONFIGURATION
+.P
+Edit
+.B config.h
+and recompile. Note that by default,
+.B piscou
+might call programs that are not installed on your system.
+
+.SH LIMITATIONS
+.P
+All limitations are configurable via
+.B config.h
+. The default settings are:
+.IP \(bu 4
+Users can pass up to 10 "extra" arguments to
+.B piscou
+.IP \(bu 4
+Users can pass up to 16 arguments to each program.
+.IP \(bu 4
+Each argument of those 16 can be up to 256 characters long.
+
+.SH RATIONALE
+.P
+.B piscou
+is designed to prioritize speed. It is recommended to choose previewing programs with short startup times.
+
+.SH REPORTING BUGS
+.P
+Please report any bugs or issues on the
+.B piscou
+GitHub Issues page: https://github.com/lucas-mior/piscou/issues.
