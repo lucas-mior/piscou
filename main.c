@@ -65,7 +65,6 @@ int main(int argc, char **argv) {
         if ((mime == NULL) && (path == NULL))
             continue;
 
-
         if (mime) {
             Regex regex_config;
             regex_config.string = mime;
