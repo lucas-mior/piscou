@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "commands.h"
 
 #define LENGTH(X) (int) (sizeof (X) / sizeof (*X))
 
@@ -39,11 +40,14 @@ static void parse_command_run(char * const *, int, char **);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
+#include "cindex_mime.c"
+#include "cindex_path.c"
 
 int main(int argc, char **argv) {
     char buffer[256];
     char *file_mime = NULL;
     bool found = false;
+    int index;
 
     if (argc <= 1)
         usage(stderr);
@@ -58,31 +62,10 @@ int main(int argc, char **argv) {
         file_mime = "text/plain";
     }
 
-    for (int i = 0; i < LENGTH(rules); i += 1) {
-        char *mime = rules[i].match[0];
-        char *path = rules[i].match[1];
-
-        if ((mime == NULL) && (path == NULL))
-            continue;
-
-        if (mime) {
-            Regex regex_config;
-            regex_config.string = mime;
-            compile_regex(&regex_config);
-            if (!MATCH_REGEX_SIMPLE(regex_config, file_mime))
-                continue;
-        }
-        if (path) {
-            Regex regex_config;
-            regex_config.string = path;
-            compile_regex(&regex_config);
-            if (!MATCH_REGEX_SIMPLE(regex_config, filename))
-                continue;
-        }
-
-        found = true;
-        parse_command_run(rules[i].command, argc, argv);
-    }
+    if ((index = index_mime(file_mime)) >= 0)
+        parse_command_run(commands[index], argc, argv);
+    if ((index = index_path(file_mime)) >= 0)
+        parse_command_run(commands[index], argc, argv);
 
     if (!found) {
         printf("No previewer set for file: ");

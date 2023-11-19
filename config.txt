@@ -1,0 +1,20 @@
+inode/directory         .* {"ls", "-1A", "--color", "%piscou-filename%"}
+opendoc.+spreadsheet    .* {"ods.sh", "%piscou-filename%"}
+officed.+spreadsheet    .* {"xlsx.sh", "%piscou-filename%"}
+office.+word            .* {"docx.sh", "%piscou-filename%", "%piscou-extra0%"}
+office.+pres            .* {"ppt.sh", "%piscou-filename%", "%piscou-extra0%"}
+opendocument            .* {"odt2txt", "%piscou-filename%"}
+appl.+/pdf              .* {"pdf.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}
+appl.+/csv              .* {"column", "-t", "-s", ",", "%piscou-filename%"}
+appl.+/json             .* {"head", "-n", "40", "%piscou-filename%"}
+appl.+/.*execu.+        .* {"objdump", "-T", "%piscou-filename%", "%piscou-extra0%"}
+appl.+/zip              .* {"unzip", "-l", "%piscou-filename%"}
+appl.+/gzip             .* {"tar", "tf", "%piscou-filename%"}
+appl.+/x-subrip         .* {"/usr/bin/cat", "%piscou-filename%"}
+image/.*dwg             .* {"stat", "%piscou-filename%"}
+image/.*xml             .* {"head", "-n", "40", "%piscou-filename%"}
+image/.*                .* {"stiv", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}
+image/.*                .* {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}
+audio/.*                .* {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}
+video/.*                .* {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}
+text/.+                 .* {"bat", "-p", "--pager=never", "--color=always", "%piscou-filename%"}

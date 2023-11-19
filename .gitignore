@@ -4,3 +4,6 @@ compile_commands.json
 *.o
 piscou
 .cache
+commands.h
+index_mime.c
+index_path.c
