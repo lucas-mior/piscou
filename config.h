@@ -10,11 +10,9 @@
 typedef struct Rule {
     char *match[2];
     char *command[MAX_ARGS];
-    regex_t regex_mime;
-    regex_t regex_path;
 } Rule;
 
-static Rule rules[] = {
+static const Rule rules[] = {
 /* mimetype            filename      command */
 {{NULL,      "v[a-z0-9]{1,3}::." }, {"vfile.sh", "%piscou-filename%"}},
 {{NULL,      "g[a-z0-9]{1,3}::." }, {"gdir.sh", "%piscou-filename%"}},
