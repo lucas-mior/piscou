@@ -29,8 +29,8 @@ debug: clean
 debug: piscou
 
 piscou: $(src) $(headers) Makefile
-	ctags --kinds-C=+l *.h *.c
-	vtags.sed tags > .tags.vim
+	-ctags --kinds-C=+l *.h *.c
+	-vtags.sed tags > .tags.vim
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(src) $(ldlibs)
 
 install: all
