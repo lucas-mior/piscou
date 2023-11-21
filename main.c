@@ -148,7 +148,7 @@ void parse_command_run(char * const *command, int argc, char **argv) {
                     int left = (int) strlen(copy + end);
                     if (left >= (MAX_ARGUMENT_LENGTH - (start + extra_len))) {
                         fprintf(stderr, "Too long argument."
-                                        "Max length is %d.\n",
+                                        " Max length is %d.\n",
                                          MAX_ARGUMENT_LENGTH);
                         goto ignore;
                     }
