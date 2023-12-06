@@ -13,8 +13,7 @@ all: release
 
 clang: CC=clang
 clang: CFLAGS += -Weverything -Wno-unsafe-buffer-usage
-clang: clean
-clang: piscou
+clang: clean release
 
 CFLAGS += -std=c99 -D_DEFAULT_SOURCE
 CFLAGS += -Wall -Wextra
@@ -25,8 +24,7 @@ release: piscou
 debug: CFLAGS += -g
 debug: CFLAGS += -DPISCOU_DEBUG -fsanitize=undefined
 debug: CFLAGS += -Wno-format-zero-length
-debug: clean
-debug: piscou
+debug: clean piscou
 
 piscou: $(src) $(headers) Makefile
 	-ctags --kinds-C=+l *.h *.c
