@@ -30,12 +30,12 @@ typedef struct Regex {
     char *string;
 } Regex;
 
-static char *xstrdup(char *);
-static int get_extra_number(char *, regmatch_t);
-static int get_mime(char *, char *);
-static void array_push(Array *, char *);
-static void compile_regex(Regex *);
-static void parse_command_run(char * const *, int, char **);
+static inline char *xstrdup(char *);
+static inline int get_extra_number(char *, regmatch_t);
+static inline int get_mime(char *, char *);
+static inline void array_push(Array *, char *);
+static inline void compile_regex(Regex *);
+static inline void parse_command_run(char * const *, int, char **);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
