@@ -91,7 +91,8 @@ int main(int argc, char **argv) {
     exit(EXIT_SUCCESS);
 }
 
-void parse_command_run(char * const *command, int argc, char **argv) {
+void
+parse_command_run(char * const *command, int argc, char **argv) {
     Array args = {0};
     Regex regex_filename;
     Regex regex_extras;
@@ -177,7 +178,8 @@ ignore:
     return;
 }
 
-int get_mime(char *buffer, char *file) {
+int
+get_mime(char *buffer, char *file) {
     do {
         magic_t magic;
         const char *mime;
@@ -199,13 +201,15 @@ int get_mime(char *buffer, char *file) {
     return -1;
 }
 
-void usage(FILE *stream) {
+void
+usage(FILE *stream) {
     fprintf(stream, "usage: piscou %%piscou-filename%%"
                     " [ %%piscou-extra0%% %%piscou-extra1%% ... ]\n");
     exit(stream != stdout);
 }
 
-char *xstrdup(char *string) {
+char *
+xstrdup(char *string) {
     char *p;
     size_t size;
 
@@ -219,7 +223,8 @@ char *xstrdup(char *string) {
     return p;
 }
 
-void compile_regex(Regex *regex) {
+void
+compile_regex(Regex *regex) {
     if (regcomp(&regex->regex, regex->string, REG_EXTENDED)) {
         fprintf(stderr, "Could not compile regex %s.\n", regex->string);
         exit(EXIT_FAILURE);
@@ -227,7 +232,8 @@ void compile_regex(Regex *regex) {
     return;
 }
 
-int get_extra_number(char *string, regmatch_t pmatch) {
+int
+get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
     int start = pmatch.rm_so;
     int end = pmatch.rm_eo;
@@ -239,7 +245,8 @@ int get_extra_number(char *string, regmatch_t pmatch) {
     return number;
 }
 
-void array_push(Array *array, char *string) {
+void
+array_push(Array *array, char *string) {
     array->array[array->len] = string;
     array->len += 1;
     return;
