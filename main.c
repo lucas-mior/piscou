@@ -44,13 +44,11 @@ static char *filename;
 int main(int argc, char **argv) {
     char buffer[256];
     char *file_mime = NULL;
-    char *name = NULL;
     bool found = false;
 
     if (argc <= 1)
         usage(stderr);
 
-    name = basename(argv[1]);
     if ((filename = realpath(argv[1], NULL))) {
         if (get_mime(buffer, filename) < 0)
             file_mime = "text/plain";
@@ -88,8 +86,12 @@ int main(int argc, char **argv) {
     }
 
     if (!found) {
-        printf("No previewer set for file:\n\n");
-        printf("%s:\n    %s", name, file_mime);
+        char error_message[512];
+        snprintf(error_message, sizeof (error_message),
+                 "No previewer set for file:\n\n"
+                 "%s:\n    %s\n", basename(argv[1]), file_mime);
+        fputs(error_message, stderr);
+        fputs(error_message, stdout);
     }
     exit(EXIT_SUCCESS);
 }
