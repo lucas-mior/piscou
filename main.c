@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
     }
 
     if (!found) {
-        printf("No previewer set for file: ");
+        printf("No previewer set for file:\n");
         printf("%s: %s", filename, file_mime);
     }
     exit(EXIT_SUCCESS);
