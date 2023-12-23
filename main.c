@@ -87,11 +87,11 @@ int main(int argc, char **argv) {
 
     if (!found) {
         char error_message[512];
-        snprintf(error_message, sizeof (error_message),
-                 "No previewer set for file:\n\n"
-                 "%s:\n    %s\n", basename(argv[1]), file_mime);
-        fputs(error_message, stderr);
-        fputs(error_message, stdout);
+        int n = snprintf(error_message, sizeof (error_message),
+                         "No previewer set for file:\n\n"
+                         "%s:\n    %s\n", basename(argv[1]), file_mime);
+        write(STDERR_FILENO, error_message, n + 1);
+        write(STDOUT_FILENO, error_message, n + 1);
     }
     exit(EXIT_SUCCESS);
 }
