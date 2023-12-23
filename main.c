@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <limits.h>
+#include <libgen.h>
 #include <magic.h>
 #include <regex.h>
 #include <stdbool.h>
@@ -43,11 +44,13 @@ static char *filename;
 int main(int argc, char **argv) {
     char buffer[256];
     char *file_mime = NULL;
+    char *name = NULL;
     bool found = false;
 
     if (argc <= 1)
         usage(stderr);
 
+    name = basename(argv[1]);
     if ((filename = realpath(argv[1], NULL))) {
         if (get_mime(buffer, filename) < 0)
             file_mime = "text/plain";
@@ -85,8 +88,8 @@ int main(int argc, char **argv) {
     }
 
     if (!found) {
-        printf("No previewer set for file:\n");
-        printf("%s: %s", filename, file_mime);
+        printf("No previewer set for file:\n\n");
+        printf("%s:\n    %s", name, file_mime);
     }
     exit(EXIT_SUCCESS);
 }
