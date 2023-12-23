@@ -90,8 +90,8 @@ int main(int argc, char **argv) {
         int n = snprintf(error_message, sizeof (error_message),
                          "No previewer set for file:\n\n"
                          "%s:\n    %s\n", basename(argv[1]), file_mime);
-        write(STDERR_FILENO, error_message, n + 1);
-        write(STDOUT_FILENO, error_message, n + 1);
+        write(STDERR_FILENO, error_message, n);
+        write(STDOUT_FILENO, error_message, n);
     }
     exit(EXIT_SUCCESS);
 }
