@@ -42,11 +42,13 @@ static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
+char *program;
 
 int main(int argc, char **argv) {
     char buffer[256];
     char *file_mime = NULL;
     bool found = false;
+    program = basename(argv[0]);
 
     if (argc <= 1)
         usage(stderr);
