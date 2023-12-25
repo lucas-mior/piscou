@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -37,6 +38,7 @@ static inline int get_mime(char *, char *);
 static inline void array_push(Array *, char *);
 static inline void compile_regex(Regex *);
 static inline void parse_command_run(char * const *, int, char **);
+static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
@@ -123,8 +125,8 @@ parse_command_run(char * const *command, int argc, char **argv) {
             int extra_index = get_extra_number(argument, pmatch[1]);
 
             if ((extra_index + 2) >= argc) {
-                fprintf(stderr, "Extra argument %d not passed to piscou."
-                                " Ignoring...\n", extra_index);
+                error("Extra argument %d not passed to piscou. Ignoring...\n",
+                      extra_index);
                 goto ignore;
             }
             array_push(&args, argv[extra_index + 2]);
@@ -143,8 +145,8 @@ parse_command_run(char * const *command, int argc, char **argv) {
                 int extra_index = get_extra_number(copy, pmatch[1]);
 
                 if ((extra_index + 2) >= argc) {
-                    fprintf(stderr, "Extra argument %d not passed to piscou."
-                                    " Ignoring...\n", extra_index);
+                    error("Extra argument %d not passed to piscou."
+                          " Ignoring...\n", extra_index);
                     goto ignore;
                 }
 
@@ -153,9 +155,8 @@ parse_command_run(char * const *command, int argc, char **argv) {
                 if (extra_len > diff) {
                     int left = (int) strlen(copy + end);
                     if (left >= (MAX_ARGUMENT_LENGTH - (start + extra_len))) {
-                        fprintf(stderr, "Too long argument."
-                                        " Max length is %d.\n",
-                                         MAX_ARGUMENT_LENGTH);
+                        error("Too long argument. Max length is %d.\n",
+                              MAX_ARGUMENT_LENGTH);
                         goto ignore;
                     }
                     memmove(copy + start + extra_len,
@@ -177,8 +178,7 @@ ignore:
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #else
     execvp(args.array[0], args.array);
-    fprintf(stderr, "Error executing %s: %s\n",
-                    args.array[0], strerror(errno));
+    error("Error executing %s: %s\n", args.array[0], strerror(errno));
 #endif
     return;
 }
@@ -220,7 +220,7 @@ xstrdup(char *string) {
 
     size = strlen(string) + 1;
     if ((p = malloc(size)) == NULL) {
-        fprintf(stderr, "Error allocating %zu bytes.\n", size);
+        error("Error allocating %zu bytes.\n", size);
         exit(EXIT_FAILURE);
     }
 
@@ -231,7 +231,7 @@ xstrdup(char *string) {
 void
 compile_regex(Regex *regex) {
     if (regcomp(&regex->regex, regex->string, REG_EXTENDED)) {
-        fprintf(stderr, "Could not compile regex %s.\n", regex->string);
+        error("Could not compile regex %s.\n", regex->string);
         exit(EXIT_FAILURE);
     }
     return;
@@ -255,4 +255,42 @@ array_push(Array *array, char *string) {
     array->array[array->len] = string;
     array->len += 1;
     return;
+}
+
+void
+error(char *format, ...) {
+    int n;
+    va_list args;
+    char buffer[BUFSIZ];
+
+    va_start(args, format);
+    n = vsnprintf(buffer, sizeof (buffer) - 1, format, args);
+    va_end(args);
+
+    if (n < 0) {
+        fprintf(stderr, "Error in vsnprintf()\n");
+        exit(EXIT_FAILURE);
+    }
+
+    buffer[n] = '\0';
+    write(STDERR_FILENO, buffer, (size_t) n);
+
+#ifdef DEBUGGING
+    switch (fork()) {
+        char *notifiers[2] = { "dunstify", "notify-send" };
+        case -1:
+            fprintf(stderr, "Error forking: %s\n", strerror(errno));
+            break;
+        case 0:
+            for (uint i = 0; i < LENGTH(notifiers); i += 1) {
+                execlp(notifiers[i], notifiers[i], "-u", "critical", 
+                                     program, buffer, NULL);
+            }
+            fprintf(stderr, "Error trying to exec dunstify.\n");
+            break;
+        default:
+            break;
+    }
+    exit(EXIT_FAILURE);
+#endif
 }
