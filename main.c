@@ -1,5 +1,4 @@
 #include <errno.h>
-#include <limits.h>
 #include <libgen.h>
 #include <magic.h>
 #include <regex.h>

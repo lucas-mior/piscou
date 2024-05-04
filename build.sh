@@ -50,6 +50,7 @@ case "$target" in
         testing
         ;;
     "install")
+        $0 build
         set -x
         install -Dm755 piscou ${DESTDIR}${PREFIX}/bin/piscou
         install -Dm644 piscou.1 ${DESTDIR}${PREFIX}/man/man1/piscou.1
