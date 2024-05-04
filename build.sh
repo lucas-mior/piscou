@@ -22,7 +22,8 @@ target="${1:-build}"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
-SRC=$(ls *.c)
+main="main.c"
+program="piscou"
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-disabled-macro-expansion -Wno-unused-macros "
@@ -43,8 +44,8 @@ fi
 case "$target" in
     "uninstall")
         set -x
-        rm -f ${DESTDIR}${PREFIX}/bin/piscou
-        rm -f ${DESTDIR}${PREFIX}/man/man1/piscou.1
+        rm -f ${DESTDIR}${PREFIX}/bin/${program}
+        rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
     "test")
         testing
@@ -52,14 +53,14 @@ case "$target" in
     "install")
         [ ! -f $program ] && $0 build
         set -x
-        install -Dm755 piscou ${DESTDIR}${PREFIX}/bin/piscou
-        install -Dm644 piscou.1 ${DESTDIR}${PREFIX}/man/man1/piscou.1
+        install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
+        install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
     "build"|"debug")
         ctags --kinds-C=+l *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         set -x
-        $CC $CFLAGS -o piscou main.c $LDFLAGS
+        $CC $CFLAGS -o ${program} "$main" $LDFLAGS
         ;;
     *)
         echo "usage: $0 [ uninstall / test / install / build / debug ]"
