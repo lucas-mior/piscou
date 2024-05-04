@@ -6,8 +6,8 @@ piscou executes a program acording to the file's mimetype and/or filename.
 ```
 $ git clone https://github.com/lucas-mior/piscou
 $ cd piscou
-$ make
-$ sudo make install
+$ ./build.sh
+$ sudo ./build.sh install
 ```
 
 ## Usage
