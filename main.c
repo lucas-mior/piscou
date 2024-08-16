@@ -49,6 +49,7 @@ typedef struct Regex {
 } Regex;
 
 static inline char *xstrdup(char *);
+static inline char *xmemdup(char *string, ssize_t n);
 static inline int get_extra_number(char *, regmatch_t);
 static inline int get_mime(char *, char *);
 static inline void array_push(Array *, char *);
@@ -153,10 +154,10 @@ parse_command_run(char * const *command, int argc, char **argv) {
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, pmatch)) {
             char *pos;
             char copy[MAX_ARGUMENT_LENGTH] = {0};
+            int extra_len;
             strcpy(copy, argument);
             do {
                 char *extra;
-                int extra_len;
                 int start = pmatch[0].rm_so;
                 int end = pmatch[0].rm_eo;
                 int diff = end - start;
@@ -185,13 +186,13 @@ parse_command_run(char * const *command, int argc, char **argv) {
                 memmove(pos + extra_len, copy + end, strlen(copy + end) + 1);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pos, pmatch));
 
-            array_push(&args, xstrdup(copy));
+            array_push(&args, xmemdup(copy, pos + extra_len - copy));
 ignore:
             continue;
         }
         array_push(&args, argument);
     }
-#ifdef PISCOU_DEBUG
+#if PISCOU_DEBUG
     for (int i = 0; i < args.len + 1; i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #else
@@ -243,6 +244,19 @@ xstrdup(char *string) {
     }
 
     memcpy(p, string, size);
+    return p;
+}
+
+char *
+xmemdup(char *string, ssize_t n) {
+    char *p;
+
+    if ((p = malloc(n + 1)) == NULL) {
+        error("Error allocating %zu bytes.\n", n + 1);
+        exit(EXIT_FAILURE);
+    }
+
+    memcpy(p, string, n + 1);
     return p;
 }
 

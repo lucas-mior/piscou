@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# shellcheck disable=SC2086
 testing () {
     for src in *.c; do
         [ "$src" = "main.c" ] && continue
@@ -15,7 +16,7 @@ testing () {
 
         set +x 
     done
-    rm *.exe
+    rm ./*.exe
 }
 
 target="${1:-build}"
@@ -35,10 +36,13 @@ if [ $CC = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
 fi
 
+echo "target=$target"
 if [ "$target" = "debug" ]; then
-    CFLAGS="$CFLAGS -g -fsanitize=undefined -DPISCOU_DEBUG"
+    CFLAGS="$CFLAGS -g -fsanitize=undefined "
+    CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=1"
 else
     CFLAGS="$CFLAGS -O2 -flto "
+    CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=0"
 fi
 
 case "$target" in
@@ -57,10 +61,10 @@ case "$target" in
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
     "build"|"debug")
-        ctags --kinds-C=+l *.h *.c 2> /dev/null || true
+        ctags --kinds-C=+l ./*.h ./*.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         set -x
-        $CC $CFLAGS -o ${program} "$main" $LDFLAGS
+        $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
         ;;
     *)
         echo "usage: $0 [ uninstall / test / install / build / debug ]"
