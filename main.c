@@ -48,7 +48,7 @@ typedef struct Regex {
     char *string;
 } Regex;
 
-static inline char *xmemdup(char *string, ssize_t n);
+static inline char *xmemdup(char *string, size_t n);
 static inline int get_extra_number(char *, regmatch_t);
 static inline int get_mime(char *, char *);
 static inline void array_push(Array *, char *);
@@ -58,7 +58,7 @@ static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
-char *program;
+static char *program;
 
 int main(int argc, char **argv) {
     char buffer[256];
@@ -110,8 +110,8 @@ int main(int argc, char **argv) {
         int n = snprintf(error_message, sizeof (error_message),
                          "No previewer set for file:\n\n"
                          "%s:\n    %s\n", basename(argv[1]), file_mime);
-        write(STDERR_FILENO, error_message, n);
-        write(STDOUT_FILENO, error_message, n);
+        write(STDERR_FILENO, error_message, (size_t) n);
+        write(STDOUT_FILENO, error_message, (size_t) n);
     }
     exit(EXIT_SUCCESS);
 }
@@ -185,7 +185,7 @@ parse_command_run(char * const *command, int argc, char **argv) {
                 memmove(pos + extra_len, copy + end, strlen(copy + end) + 1);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pos, pmatch));
 
-            array_push(&args, xmemdup(copy, pos + extra_len - copy));
+            array_push(&args, xmemdup(copy, (size_t) (pos + extra_len - copy)));
 ignore:
             continue;
         }
@@ -232,7 +232,7 @@ usage(FILE *stream) {
 }
 
 char *
-xmemdup(char *string, ssize_t n) {
+xmemdup(char *string, size_t n) {
     char *p;
 
     if ((p = malloc(n + 1)) == NULL) {
