@@ -26,8 +26,6 @@ DESTDIR="${DESTDIR:-/}"
 main="main.c"
 program="piscou"
 
-CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
-CFLAGS="$CFLAGS -Wextra -Wall -Wno-disabled-macro-expansion -Wno-unused-macros "
 LDFLAGS="$LDFLAGS $(pkg-config libmagic --libs)"
 
 CC=${CC:-cc}
@@ -35,6 +33,9 @@ if [ $CC = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything "
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
 fi
+CFLAGS="$CFLAGS -Wextra -Wall "
+CFLAGS="$CFLAGS -Wno-disabled-macro-expansion -Wno-unused-parameter "
+CFLAGS="$CFLAGS -Wno-unused-variable "
 
 echo "target=$target"
 if [ "$target" = "debug" ]; then
