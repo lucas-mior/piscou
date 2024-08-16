@@ -1,23 +1,6 @@
 #!/bin/sh
 
 # shellcheck disable=SC2086
-testing () {
-    for src in *.c; do
-        [ "$src" = "main.c" ] && continue
-        printf "Testing $src...\n"
-
-        flags="$(awk '/flags:/ { $1=$2=""; print $0 }' "$src")"
-        set -x
-        if $CC $CFLAGS -D TESTING_THIS_FILE=1 $src -o $src.exe $flags; then
-            ./$src.exe
-        else
-            printf "Failed to compile ${RED} $src ${RES}, is main() defined?\n"
-        fi
-
-        set +x 
-    done
-    rm ./*.exe
-}
 
 target="${1:-build}"
 PREFIX="${PREFIX:-/usr/local}"
@@ -52,9 +35,6 @@ case "$target" in
         rm -f ${DESTDIR}${PREFIX}/bin/${program}
         rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
-    "test")
-        testing
-        ;;
     "install")
         [ ! -f $program ] && $0 build
         set -x
@@ -68,6 +48,6 @@ case "$target" in
         $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
         ;;
     *)
-        echo "usage: $0 [ uninstall / test / install / build / debug ]"
+        echo "usage: $0 [ uninstall / install / build / debug ]"
         ;;
 esac
