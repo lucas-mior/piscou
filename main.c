@@ -48,7 +48,6 @@ typedef struct Regex {
     char *string;
 } Regex;
 
-static inline char *xstrdup(char *);
 static inline char *xmemdup(char *string, ssize_t n);
 static inline int get_extra_number(char *, regmatch_t);
 static inline int get_mime(char *, char *);
@@ -230,21 +229,6 @@ usage(FILE *stream) {
     fprintf(stream, "usage: piscou %%piscou-filename%%"
                     " [ %%piscou-extra0%% %%piscou-extra1%% ... ]\n");
     exit(stream != stdout);
-}
-
-char *
-xstrdup(char *string) {
-    char *p;
-    size_t size;
-
-    size = strlen(string) + 1;
-    if ((p = malloc(size)) == NULL) {
-        error("Error allocating %zu bytes.\n", size);
-        exit(EXIT_FAILURE);
-    }
-
-    memcpy(p, string, size);
-    return p;
 }
 
 char *
