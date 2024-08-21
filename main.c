@@ -149,6 +149,7 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
 
     for (uint32 i = 0; command[i]; i += 1) {
         char *argument = command[i];
+        char *pointer = argument;
         regmatch_t matches[MAX_EXTRAS + 1];
 
         if (MATCH_REGEX_SIMPLE(regex_filename, argument)) {
@@ -166,8 +167,7 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
             array_push(&args, argv[extra_index]);
             continue;
         }
-        if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, matches)) {
-            char *pointer;
+        if (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
             char copy[MAX_ARGUMENT_LENGTH] = {0};
             uint32 extra_len;
             uint32 arg_len;
