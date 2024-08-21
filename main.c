@@ -193,10 +193,10 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                         goto ignore;
                     }
                     memmove(&assembled[start + extra_length],
-                            &assembled[end], (size_t) left + 1);
+                            &assembled[end], MAX_ARGUMENT_LENGTH - end);
                 } else {
                     memmove(&assembled[start + extra_length],
-                            &assembled[end], strlen(&assembled[end]) + 1);
+                            &assembled[end], MAX_ARGUMENT_LENGTH - end);
                 }
                 pointer = memcpy(&assembled[start],
                                  argv[extra_index], (size_t) extra_length);
