@@ -175,7 +175,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 uint32 end = (uint32) matches[0].rm_eo;
                 uint32 left = (uint32) strlen(&pointer[end]) + 1;
                 int32 extra_index = get_extra_number(pointer, matches[1]);
-                int32 total_length;
+                uint32 total_length;
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -184,7 +184,8 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 }
 
                 extra_length = (uint32) strlen(argv[extra_index]);
-                total_length = pointer - &assembled[0] + extra_length + left;
+                total_length = (uint32) (pointer - &assembled[0])
+                               + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
                     error("Too long argument. Max length is %d.\n",
                           MAX_ARGUMENT_LENGTH);
