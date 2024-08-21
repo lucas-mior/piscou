@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -34,6 +35,7 @@
 #include "config.h"
 
 typedef int32_t int32;
+typedef uint32_t uint32;
 
 #define LENGTH(X) (int32) (sizeof (X) / sizeof (*X))
 
@@ -54,8 +56,8 @@ typedef struct Regex {
     char *string;
 } Regex;
 
-static inline char *xmemdup(char *string, size_t n);
-static inline int32 get_extra_number(char *, regmatch_t);
+static inline char *xmemdup(char *string, uint32 n);
+static inline uint32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *);
 static inline void compile_regex(Regex *);
 static inline void parse_command_run(char * const *, int32, char **);
@@ -69,11 +71,11 @@ int main(int argc, char **argv) {
     char buffer[PATH_MAX];
     magic_t magic;
     const char *file_mime = NULL;
+    int fd;
+    uint32 map_size;
+    char *filemap;
     bool found = false;
     program = basename(argv[0]);
-    int fd;
-    size_t map_size;
-    char *filemap;
 
     if (argc <= 1)
         usage(stderr);
@@ -90,7 +92,7 @@ int main(int argc, char **argv) {
                 error("Error getting file information: %s\n", strerror(errno));
                 exit(EXIT_FAILURE);
             }
-            map_size = lines_stat.st_size;
+            map_size = (uint32) lines_stat.st_size;
             if (map_size <= 0) {
                 error("map_size: %zu\n", map_size);
                 exit(EXIT_FAILURE);
@@ -178,9 +180,9 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras, argument, pmatch)) {
-            int32 extra_index = get_extra_number(argument, pmatch[1]);
+            uint32 extra_index = get_extra_number(argument, pmatch[1]);
 
-            if ((extra_index + 2) >= argc) {
+            if ((extra_index + 2) >= (uint32) argc) {
                 error("Extra argument %d not passed to piscou. Ignoring...\n",
                       extra_index);
                 goto ignore;
@@ -191,25 +193,26 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, pmatch)) {
             char *pos;
             char copy[MAX_ARGUMENT_LENGTH] = {0};
-            int32 extra_len;
+            uint32 extra_len;
+            uint32 arg_len;
             strcpy(copy, argument);
             do {
                 char *extra;
-                int32 start = pmatch[0].rm_so;
-                int32 end = pmatch[0].rm_eo;
-                int32 diff = end - start;
-                int32 extra_index = get_extra_number(copy, pmatch[1]);
+                uint32 start = (uint32) pmatch[0].rm_so;
+                uint32 end = (uint32) pmatch[0].rm_eo;
+                uint32 diff = end - start;
+                uint32 extra_index = get_extra_number(copy, pmatch[1]);
 
-                if ((extra_index + 2) >= argc) {
+                if ((extra_index + 2) >= (uint32) argc) {
                     error("Extra argument %d not passed to piscou."
                           " Ignoring...\n", extra_index);
                     goto ignore;
                 }
 
                 extra = argv[extra_index + 2];
-                extra_len = (int32) strlen(extra);
+                extra_len = (uint32) strlen(extra);
                 if (extra_len > diff) {
-                    int32 left = (int32) strlen(copy + end);
+                    uint32 left = (uint32) strlen(copy + end);
                     if (left >= (MAX_ARGUMENT_LENGTH - (start + extra_len))) {
                         error("Too long argument. Max length is %d.\n",
                               MAX_ARGUMENT_LENGTH);
@@ -223,7 +226,8 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 memmove(pos + extra_len, copy + end, strlen(copy + end) + 1);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pos, pmatch));
 
-            array_push(&args, xmemdup(copy, (size_t) (pos + extra_len - copy)));
+            arg_len = (uint32) (pos + extra_len - copy);
+            array_push(&args, xmemdup(copy, arg_len + 1));
 ignore:
             continue;
         }
@@ -247,15 +251,15 @@ usage(FILE *stream) {
 }
 
 char *
-xmemdup(char *string, size_t n) {
+xmemdup(char *string, uint32 n) {
     char *p;
 
-    if ((p = malloc(n + 1)) == NULL) {
-        error("Error allocating %zu bytes.\n", n + 1);
+    if ((p = malloc(n)) == NULL) {
+        error("Error allocating %zu bytes.\n", n);
         exit(EXIT_FAILURE);
     }
 
-    memcpy(p, string, n + 1);
+    memcpy(p, string, n);
     return p;
 }
 
@@ -268,16 +272,16 @@ compile_regex(Regex *regex) {
     return;
 }
 
-int32
+uint32
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
-    int32 start = pmatch.rm_so;
-    int32 end = pmatch.rm_eo;
-    int32 diff = end - start;
-    int32 number;
+    uint32 start = (uint32) pmatch.rm_so;
+    uint32 end = (uint32) pmatch.rm_eo;
+    uint32 diff = end - start;
+    uint32 number;
 
     memcpy(number_buffer, string + start, (size_t) diff);
-    number = atoi(number_buffer);
+    number = (uint32) atoi(number_buffer);
     return number;
 }
 
