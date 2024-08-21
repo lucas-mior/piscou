@@ -30,7 +30,9 @@
 
 #include "config.h"
 
-#define LENGTH(X) (int) (sizeof (X) / sizeof (*X))
+typedef int32_t int32;
+
+#define LENGTH(X) (int32) (sizeof (X) / sizeof (*X))
 
 #define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
     !regexec(&R.regex, S, LENGTH(PMATCHES), PMATCHES, 0)
@@ -40,8 +42,8 @@
 
 typedef struct Array {
     char *array[MAX_ARGS];
-    int len;
-    int unused;
+    int32 len;
+    int32 unused;
 } Array;
 
 typedef struct Regex {
@@ -50,10 +52,10 @@ typedef struct Regex {
 } Regex;
 
 static inline char *xmemdup(char *string, size_t n);
-static inline int get_extra_number(char *, regmatch_t);
+static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *);
 static inline void compile_regex(Regex *);
-static inline void parse_command_run(char * const *, int, char **);
+static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 
@@ -88,7 +90,7 @@ int main(int argc, char **argv) {
         file_mime = "text/plain";
     }
 
-    for (int i = 0; i < LENGTH(rules); i += 1) {
+    for (int32 i = 0; i < LENGTH(rules); i += 1) {
         char *mime = rules[i].match[0];
         char *path = rules[i].match[1];
 
@@ -116,7 +118,7 @@ int main(int argc, char **argv) {
 
     if (!found) {
         char error_message[512];
-        int n = snprintf(error_message, sizeof (error_message),
+        int32 n = snprintf(error_message, sizeof (error_message),
                          "No previewer set for file:\n\n"
                          "%s:\n    %s\n", basename(argv[1]), file_mime);
         write(STDERR_FILENO, error_message, (size_t) n);
@@ -126,7 +128,7 @@ int main(int argc, char **argv) {
 }
 
 void
-parse_command_run(char * const *command, int argc, char **argv) {
+parse_command_run(char * const *command, int32 argc, char **argv) {
     Array args = {0};
     Regex regex_filename;
     Regex regex_extras;
@@ -140,7 +142,7 @@ parse_command_run(char * const *command, int argc, char **argv) {
     compile_regex(&regex_extras);
     compile_regex(&regex_extras_more);
 
-    for (int i = 0; command[i]; i += 1) {
+    for (int32 i = 0; command[i]; i += 1) {
         char *argument = command[i];
         regmatch_t pmatch[MAX_EXTRAS + 1];
 
@@ -149,7 +151,7 @@ parse_command_run(char * const *command, int argc, char **argv) {
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras, argument, pmatch)) {
-            int extra_index = get_extra_number(argument, pmatch[1]);
+            int32 extra_index = get_extra_number(argument, pmatch[1]);
 
             if ((extra_index + 2) >= argc) {
                 error("Extra argument %d not passed to piscou. Ignoring...\n",
@@ -162,14 +164,14 @@ parse_command_run(char * const *command, int argc, char **argv) {
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, pmatch)) {
             char *pos;
             char copy[MAX_ARGUMENT_LENGTH] = {0};
-            int extra_len;
+            int32 extra_len;
             strcpy(copy, argument);
             do {
                 char *extra;
-                int start = pmatch[0].rm_so;
-                int end = pmatch[0].rm_eo;
-                int diff = end - start;
-                int extra_index = get_extra_number(copy, pmatch[1]);
+                int32 start = pmatch[0].rm_so;
+                int32 end = pmatch[0].rm_eo;
+                int32 diff = end - start;
+                int32 extra_index = get_extra_number(copy, pmatch[1]);
 
                 if ((extra_index + 2) >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -178,9 +180,9 @@ parse_command_run(char * const *command, int argc, char **argv) {
                 }
 
                 extra = argv[extra_index + 2];
-                extra_len = (int) strlen(extra);
+                extra_len = (int32) strlen(extra);
                 if (extra_len > diff) {
-                    int left = (int) strlen(copy + end);
+                    int32 left = (int32) strlen(copy + end);
                     if (left >= (MAX_ARGUMENT_LENGTH - (start + extra_len))) {
                         error("Too long argument. Max length is %d.\n",
                               MAX_ARGUMENT_LENGTH);
@@ -201,7 +203,7 @@ ignore:
         array_push(&args, argument);
     }
 #if PISCOU_DEBUG
-    for (int i = 0; i < args.len + 1; i += 1)
+    for (int32 i = 0; i < args.len + 1; i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #else
     execvp(args.array[0], args.array);
@@ -239,13 +241,13 @@ compile_regex(Regex *regex) {
     return;
 }
 
-int
+int32
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
-    int start = pmatch.rm_so;
-    int end = pmatch.rm_eo;
-    int diff = end - start;
-    int number;
+    int32 start = pmatch.rm_so;
+    int32 end = pmatch.rm_eo;
+    int32 diff = end - start;
+    int32 number;
 
     memcpy(number_buffer, string + start, (size_t) diff);
     number = atoi(number_buffer);
@@ -261,7 +263,7 @@ array_push(Array *array, char *string) {
 
 void
 error(char *format, ...) {
-    int n;
+    int32 n;
     va_list args;
     char buffer[BUFSIZ];
 
