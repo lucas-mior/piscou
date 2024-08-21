@@ -187,18 +187,19 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
 
                 extra_len = (uint32) strlen(extra);
                 if (extra_len > diff) {
-                    uint32 left = (uint32) strlen(copy + end);
+                    uint32 left = (uint32) strlen(&copy[end]);
                     if (left >= (MAX_ARGUMENT_LENGTH - (start + extra_len))) {
                         error("Too long argument. Max length is %d.\n",
                               MAX_ARGUMENT_LENGTH);
                         goto ignore;
                     }
-                    memmove(copy + start + extra_len,
-                            copy + end, (size_t) left + 1);
+                    memmove(&copy[start + extra_len],
+                            &copy[end], (size_t) left + 1);
                     end = start + extra_len;
                 }
-                pointer = memmove(copy + start, extra, (size_t) extra_len);
-                memmove(pointer + extra_len, copy + end, strlen(copy + end) + 1);
+                pointer = memcpy(&copy[start], extra, (size_t) extra_len);
+                memmove(pointer + extra_len,
+                        &copy[end], strlen(&copy[end]) + 1);
             }
 
             final_length = (uint32) (pointer + extra_len - copy);
