@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
         }
 
         found = true;
-        parse_command_run(rules[i].command, (uint32) argc, argv);
+        parse_command_run(rules[i].command, (uint32) argc + 2, &argv[2]);
     }
 
     if (!found) {
@@ -158,12 +158,12 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
         if (MATCH_SUBEXPRESSIONS(regex_extras, argument, pmatch)) {
             uint32 extra_index = get_extra_number(argument, pmatch[1]);
 
-            if ((extra_index + 2) >= (uint32) argc) {
+            if (extra_index >= argc) {
                 error("Extra argument %d not passed to piscou. Ignoring...\n",
                       extra_index);
                 goto ignore;
             }
-            array_push(&args, argv[extra_index + 2]);
+            array_push(&args, argv[extra_index]);
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, pmatch)) {
@@ -179,13 +179,13 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
                 uint32 diff = end - start;
                 uint32 extra_index = get_extra_number(copy, pmatch[1]);
 
-                if ((extra_index + 2) >= (uint32) argc) {
+                if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
                           " Ignoring...\n", extra_index);
                     goto ignore;
                 }
 
-                extra = argv[extra_index + 2];
+                extra = argv[extra_index];
                 extra_len = (uint32) strlen(extra);
                 if (extra_len > diff) {
                     uint32 left = (uint32) strlen(copy + end);
