@@ -291,7 +291,7 @@ error(char *format, ...) {
             break;
         case 0:
             for (uint i = 0; i < LENGTH(notifiers); i += 1) {
-                execlp(notifiers[i], notifiers[i], "-u", "critical", 
+                execlp(notifiers[i], notifiers[i], "-u", "critical",
                                      program, buffer, NULL);
             }
             fprintf(stderr, "Error trying to exec dunstify.\n");
