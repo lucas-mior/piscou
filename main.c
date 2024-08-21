@@ -149,14 +149,14 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
 
     for (uint32 i = 0; command[i]; i += 1) {
         char *argument = command[i];
-        regmatch_t pmatch[MAX_EXTRAS + 1];
+        regmatch_t matches[MAX_EXTRAS + 1];
 
         if (MATCH_REGEX_SIMPLE(regex_filename, argument)) {
             array_push(&args, filename);
             continue;
         }
-        if (MATCH_SUBEXPRESSIONS(regex_extras, argument, pmatch)) {
-            uint32 extra_index = get_extra_number(argument, pmatch[1]);
+        if (MATCH_SUBEXPRESSIONS(regex_extras, argument, matches)) {
+            uint32 extra_index = get_extra_number(argument, matches[1]);
 
             if (extra_index >= argc) {
                 error("Extra argument %d not passed to piscou. Ignoring...\n",
@@ -166,7 +166,7 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
             array_push(&args, argv[extra_index]);
             continue;
         }
-        if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, pmatch)) {
+        if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, matches)) {
             char *pos;
             char copy[MAX_ARGUMENT_LENGTH] = {0};
             uint32 extra_len;
@@ -174,10 +174,10 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
             strcpy(copy, argument);
             do {
                 char *extra;
-                uint32 start = (uint32) pmatch[0].rm_so;
-                uint32 end = (uint32) pmatch[0].rm_eo;
+                uint32 start = (uint32) matches[0].rm_so;
+                uint32 end = (uint32) matches[0].rm_eo;
                 uint32 diff = end - start;
-                uint32 extra_index = get_extra_number(copy, pmatch[1]);
+                uint32 extra_index = get_extra_number(copy, matches[1]);
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -200,7 +200,7 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
                 }
                 pos = memmove(copy + start, extra, (size_t) extra_len);
                 memmove(pos + extra_len, copy + end, strlen(copy + end) + 1);
-            } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pos, pmatch));
+            } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pos, matches));
 
             arg_len = (uint32) (pos + extra_len - copy);
             array_push(&args, xmemdup(copy, arg_len + 1));
