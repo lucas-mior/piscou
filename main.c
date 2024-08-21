@@ -168,16 +168,15 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
-            char copy[MAX_ARGUMENT_LENGTH] = {0};
-            uint32 extra_len = 0;
+            char assembled[MAX_ARGUMENT_LENGTH] = {0};
+            uint32 extra_length = 0;
             uint32 final_length;
-            strcpy(copy, argument);
+            strcpy(assembled, argument);
             while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
                 uint32 start = (uint32) matches[0].rm_so;
                 uint32 end = (uint32) matches[0].rm_eo;
-                uint32 diff = end - start;
-                int32 extra_index = get_extra_number(copy, matches[1]);
-                char *extra = argv[extra_index];
+                uint32 place_holder_length = end - start;
+                int32 extra_index = get_extra_number(assembled, matches[1]);
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -185,25 +184,27 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                     goto ignore;
                 }
 
-                extra_len = (uint32) strlen(extra);
-                if (extra_len > diff) {
-                    uint32 left = (uint32) strlen(&copy[end]);
-                    if (left >= (MAX_ARGUMENT_LENGTH - (start + extra_len))) {
+                extra_length = (uint32) strlen(argv[extra_index]);
+                if (extra_length > place_holder_length) {
+                    uint32 left = (uint32) strlen(&assembled[end]);
+                    if (left >= (MAX_ARGUMENT_LENGTH - start - extra_length)) {
                         error("Too long argument. Max length is %d.\n",
                               MAX_ARGUMENT_LENGTH);
                         goto ignore;
                     }
-                    memmove(&copy[start + extra_len],
-                            &copy[end], (size_t) left + 1);
-                    end = start + extra_len;
+                    memmove(&assembled[start + extra_length],
+                            &assembled[end], (size_t) left + 1);
+                    end = start + extra_length;
+                } else {
+                    memmove(&assembled[start + extra_length],
+                            &assembled[end], strlen(&assembled[end]) + 1);
                 }
-                pointer = memcpy(&copy[start], extra, (size_t) extra_len);
-                memmove(pointer + extra_len,
-                        &copy[end], strlen(&copy[end]) + 1);
+                pointer = memcpy(&assembled[start],
+                                 argv[extra_index], (size_t) extra_length);
             }
 
-            final_length = (uint32) (pointer + extra_len - copy);
-            array_push(&args, xmemdup(copy, final_length + 1));
+            final_length = (uint32) (pointer - &assembled[0] + extra_length);
+            array_push(&args, xmemdup(assembled, final_length + 1));
             continue;
         }
         array_push(&args, argument);
