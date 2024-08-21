@@ -26,6 +26,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "config.h"
 
@@ -60,6 +61,7 @@ static char *filename;
 static char *program;
 
 int main(int argc, char **argv) {
+    char buffer[PATH_MAX];
     magic_t magic;
     const char *file_mime = NULL;
     bool found = false;
@@ -68,9 +70,7 @@ int main(int argc, char **argv) {
     if (argc <= 1)
         usage(stderr);
 
-
-
-    if ((filename = realpath(argv[1], NULL))) {
+    if ((filename = realpath(argv[1], buffer))) {
         if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
             error("Error in magic_open(MAGIC_MIME_TYPE):%s\n", strerror(errno));
             exit(EXIT_FAILURE);
