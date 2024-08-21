@@ -149,7 +149,6 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
 
     for (uint32 i = 0; command[i]; i += 1) {
         char *argument = command[i];
-        char *pointer = argument;
         regmatch_t matches[MAX_EXTRAS + 1];
 
         if (MATCH_REGEX_SIMPLE(regex_filename, argument)) {
@@ -167,16 +166,18 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             array_push(&args, argv[extra_index]);
             continue;
         }
-        if (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
+        if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, matches)) {
             char assembled[MAX_ARGUMENT_LENGTH] = {0};
+            char *pointer = &assembled[0];
             uint32 extra_length = 0;
             uint32 final_length;
             strcpy(assembled, argument);
             while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
                 uint32 start = (uint32) matches[0].rm_so;
                 uint32 end = (uint32) matches[0].rm_eo;
-                uint32 place_holder_length = end - start;
-                int32 extra_index = get_extra_number(assembled, matches[1]);
+                uint32 left = (uint32) strlen(&pointer[end]) + 1;
+                int32 extra_index = get_extra_number(pointer, matches[1]);
+                int32 total_length;
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -185,25 +186,22 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 }
 
                 extra_length = (uint32) strlen(argv[extra_index]);
-                if (extra_length > place_holder_length) {
-                    uint32 left = (uint32) strlen(&assembled[end]) + 1;
-                    if ((left + start + extra_length) >= MAX_ARGUMENT_LENGTH) {
-                        error("Too long argument. Max length is %d.\n",
-                              MAX_ARGUMENT_LENGTH);
-                        goto ignore;
-                    }
-                    memmove(&assembled[start + extra_length],
-                            &assembled[end], (size_t) left);
-                } else {
-                    memmove(&assembled[start + extra_length],
-                            &assembled[end], strlen(&assembled[end]) + 1);
+                total_length = pointer - &assembled[0] + extra_length + left;
+                if (total_length >= MAX_ARGUMENT_LENGTH) {
+                    error("Too long argument. Max length is %d.\n",
+                          MAX_ARGUMENT_LENGTH);
+                    goto ignore;
                 }
-                pointer = memcpy(&assembled[start],
-                                 argv[extra_index], (size_t) extra_length);
+
+                memmove(&pointer[start + extra_length],
+                        &pointer[end], (size_t) left);
+                memcpy(&pointer[start],
+                       argv[extra_index], (size_t) extra_length);
+                pointer += (extra_length + start);
             }
 
-            final_length = (uint32) (pointer - &assembled[0] + extra_length);
-            array_push(&args, xmemdup(assembled, final_length + 1));
+            final_length = (uint32) (pointer - &assembled[0]);
+            array_push(&args, xmemdup(assembled, final_length));
             continue;
         }
         array_push(&args, argument);
