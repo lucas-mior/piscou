@@ -25,7 +25,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <limits.h>
 
 #include "config.h"
@@ -68,11 +71,35 @@ int main(int argc, char **argv) {
     const char *file_mime = NULL;
     bool found = false;
     program = basename(argv[0]);
+    int fd;
+    size_t map_size;
+    char *filemap;
 
     if (argc <= 1)
         usage(stderr);
 
     if ((filename = realpath(argv[1], buffer))) {
+        if ((fd = open(filename, O_RDONLY)) < 0) {
+            error("Error opening file for reading: %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+
+        {
+            struct stat lines_stat;
+            if (fstat(fd, &lines_stat) < 0) {
+                error("Error getting file information: %s\n", strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+            map_size = lines_stat.st_size;
+            if (map_size <= 0) {
+                error("map_size: %zu\n", map_size);
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        filemap = mmap(NULL, map_size,
+                       PROT_READ | PROT_WRITE, MAP_PRIVATE,
+                       fd, 0);
         if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
             error("Error in magic_open(MAGIC_MIME_TYPE):%s\n", strerror(errno));
             exit(EXIT_FAILURE);
@@ -81,7 +108,7 @@ int main(int argc, char **argv) {
             error("Error in magic_load(magic):%s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        if ((file_mime = magic_file(magic, filename)) == NULL) {
+        if ((file_mime = magic_buffer(magic, filemap, map_size)) == NULL) {
             magic_close(magic);
             file_mime = "text/plain";
         }
