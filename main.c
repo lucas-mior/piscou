@@ -57,10 +57,10 @@ typedef struct Regex {
 } Regex;
 
 static inline char *xmemdup(char *string, uint32 n);
-static inline uint32 get_extra_number(char *, regmatch_t);
+static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *);
 static inline void compile_regex(Regex *);
-static inline void parse_command_run(char * const *, uint32, char **);
+static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
         }
 
         found = true;
-        parse_command_run(rules[i].command, (uint32) argc - 2, &argv[2]);
+        parse_command_run(rules[i].command, argc - 2, &argv[2]);
     }
 
     if (!found) {
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 }
 
 void
-parse_command_run(char * const *command, uint32 argc, char **argv) {
+parse_command_run(char * const *command, int32 argc, char **argv) {
     Array args = {0};
     Regex regex_filename;
     Regex regex_extras;
@@ -157,7 +157,7 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras, argument, matches)) {
-            uint32 extra_index = get_extra_number(argument, matches[1]);
+            int32 extra_index = get_extra_number(argument, matches[1]);
 
             if (extra_index >= argc) {
                 error("Extra argument %d not passed to piscou. Ignoring...\n",
@@ -177,7 +177,7 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
                 uint32 start = (uint32) matches[0].rm_so;
                 uint32 end = (uint32) matches[0].rm_eo;
                 uint32 diff = end - start;
-                uint32 extra_index = get_extra_number(copy, matches[1]);
+                int32 extra_index = get_extra_number(copy, matches[1]);
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -249,16 +249,16 @@ compile_regex(Regex *regex) {
     return;
 }
 
-uint32
+int32
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
     uint32 start = (uint32) pmatch.rm_so;
     uint32 end = (uint32) pmatch.rm_eo;
     uint32 diff = end - start;
-    uint32 number;
+    int32 number;
 
     memcpy(number_buffer, string + start, (size_t) diff);
-    number = (uint32) atoi(number_buffer);
+    number = atoi(number_buffer);
     return number;
 }
 
