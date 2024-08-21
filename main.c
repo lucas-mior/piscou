@@ -173,11 +173,11 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             uint32 final_length;
             strcpy(copy, argument);
             while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
-                char *extra;
                 uint32 start = (uint32) matches[0].rm_so;
                 uint32 end = (uint32) matches[0].rm_eo;
                 uint32 diff = end - start;
                 int32 extra_index = get_extra_number(copy, matches[1]);
+                char *extra = argv[extra_index];
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -185,7 +185,6 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                     goto ignore;
                 }
 
-                extra = argv[extra_index];
                 extra_len = (uint32) strlen(extra);
                 if (extra_len > diff) {
                     uint32 left = (uint32) strlen(copy + end);
