@@ -194,7 +194,6 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                     }
                     memmove(&assembled[start + extra_length],
                             &assembled[end], (size_t) left + 1);
-                    end = start + extra_length;
                 } else {
                     memmove(&assembled[start + extra_length],
                             &assembled[end], strlen(&assembled[end]) + 1);
