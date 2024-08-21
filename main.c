@@ -170,7 +170,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             uint32 extra_length = 0;
             uint32 final_length;
             strcpy(assembled, argument);
-            while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
+            do {
                 uint32 start = (uint32) matches[0].rm_so;
                 uint32 end = (uint32) matches[0].rm_eo;
                 uint32 left = (uint32) strlen(&pointer[end]) + 1;
@@ -196,7 +196,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 memcpy(&pointer[start],
                        argv[extra_index], (size_t) extra_length);
                 pointer += (extra_length + start);
-            }
+            } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
             final_length = (uint32) (pointer - &assembled[0]);
             array_push(&args, xmemdup(assembled, final_length));
