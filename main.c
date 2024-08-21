@@ -187,7 +187,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 extra_length = (uint32) strlen(argv[extra_index]);
                 if (extra_length > place_holder_length) {
                     uint32 left = (uint32) strlen(&assembled[end]);
-                    if (left >= (MAX_ARGUMENT_LENGTH - start - extra_length)) {
+                    if ((left + start + extra_length) >= MAX_ARGUMENT_LENGTH) {
                         error("Too long argument. Max length is %d.\n",
                               MAX_ARGUMENT_LENGTH);
                         goto ignore;
