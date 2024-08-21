@@ -86,10 +86,8 @@ int main(int argc, char **argv) {
             error("Error in magic_load(magic):%s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        if ((file_mime = magic_file(magic, filename)) == NULL) {
-            magic_close(magic);
+        if ((file_mime = magic_file(magic, filename)) == NULL)
             file_mime = "text/plain";
-        }
     } else {
         filename = argv[1];
         file_mime = "text/plain";
