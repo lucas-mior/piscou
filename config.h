@@ -2,7 +2,7 @@
 
 #define MAX_ARGS 16
 #define MAX_EXTRAS 10
-#define MAX_ARGUMENT_LENGTH 256
+#define MAX_ARGUMENT_LENGTH 30
 #define REGEX_FILENAME "%piscou-filename%"
 #define REGEX_EXTRAS "^%piscou-extra([0-9])%$"
 #define REGEX_EXTRAS_MORE "%piscou-extra([0-9])%"

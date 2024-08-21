@@ -186,14 +186,14 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
 
                 extra_length = (uint32) strlen(argv[extra_index]);
                 if (extra_length > place_holder_length) {
-                    uint32 left = (uint32) strlen(&assembled[end]);
+                    uint32 left = (uint32) strlen(&assembled[end]) + 1;
                     if ((left + start + extra_length) >= MAX_ARGUMENT_LENGTH) {
                         error("Too long argument. Max length is %d.\n",
                               MAX_ARGUMENT_LENGTH);
                         goto ignore;
                     }
                     memmove(&assembled[start + extra_length],
-                            &assembled[end], (size_t) left + 1);
+                            &assembled[end], (size_t) left);
                 } else {
                     memmove(&assembled[start + extra_length],
                             &assembled[end], strlen(&assembled[end]) + 1);
