@@ -58,7 +58,7 @@ static inline char *xmemdup(char *string, size_t n);
 static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *);
 static inline void compile_regex(Regex *);
-static inline void parse_command_run(char * const *, int32, char **);
+static inline void parse_command_run(char * const *, int32, char **, void *, int32);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
         }
 
         found = true;
-        parse_command_run(rules[i].command, argc, argv);
+        parse_command_run(rules[i].command, argc, argv, filemap, map_size);
     }
 
     if (!found) {
@@ -155,16 +155,21 @@ int main(int argc, char **argv) {
 }
 
 void
-parse_command_run(char * const *command, int32 argc, char **argv) {
+parse_command_run(char * const *command, int32 argc, char **argv,
+                  void *bytes, int32 number_bytes) {
     Array args = {0};
     Regex regex_filename;
+    Regex regex_bytes;
     Regex regex_extras;
     Regex regex_extras_more;
+    bool send_bytes = false;
 
+    regex_bytes.string = REGEX_BYTES;
     regex_filename.string = REGEX_FILENAME;
     regex_extras.string = REGEX_EXTRAS;
     regex_extras_more.string = REGEX_EXTRAS_MORE;
 
+    compile_regex(&regex_bytes);
     compile_regex(&regex_filename);
     compile_regex(&regex_extras);
     compile_regex(&regex_extras_more);
@@ -173,6 +178,11 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
         char *argument = command[i];
         regmatch_t pmatch[MAX_EXTRAS + 1];
 
+        if (MATCH_REGEX_SIMPLE(regex_bytes, argument)) {
+            array_push(&args, "/dev/stdin");
+            send_bytes = true;
+            continue;
+        }
         if (MATCH_REGEX_SIMPLE(regex_filename, argument)) {
             array_push(&args, filename);
             continue;
@@ -229,11 +239,31 @@ ignore:
         }
         array_push(&args, argument);
     }
-#if PISCOU_DEBUG
+#if 1
     for (int32 i = 0; i < args.len + 1; i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
-#else
-    execvp(args.array[0], args.array);
+    if (send_bytes) {
+        int pipefd[2];
+        if (pipe(pipefd) < 0) {
+            error("Error creating pipe: %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        switch (fork()) {
+        case -1:
+            error("Error forking: %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        case 0:
+            close(pipefd[0]);
+            dup2(pipefd[1], STDOUT_FILENO);
+            close(pipefd[1]);
+            execvp(args.array[0], args.array);
+            exit(EXIT_FAILURE);
+        default:
+            close(pipefd[1]);
+        }
+    } else {
+        execvp(args.array[0], args.array);
+    }
     error("Error executing %s: %s\n", args.array[0], strerror(errno));
 #endif
     return;
