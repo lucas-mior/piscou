@@ -170,7 +170,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
             char copy[MAX_ARGUMENT_LENGTH] = {0};
             uint32 extra_len = 0;
-            uint32 arg_len;
+            uint32 final_length;
             strcpy(copy, argument);
             while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches)) {
                 char *extra;
@@ -202,8 +202,8 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 memmove(pointer + extra_len, copy + end, strlen(copy + end) + 1);
             }
 
-            arg_len = (uint32) (pointer + extra_len - copy);
-            array_push(&args, xmemdup(copy, arg_len + 1));
+            final_length = (uint32) (pointer + extra_len - copy);
+            array_push(&args, xmemdup(copy, final_length + 1));
             continue;
         }
         array_push(&args, argument);
