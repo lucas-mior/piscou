@@ -50,7 +50,6 @@ typedef struct Regex {
 
 static inline char *xmemdup(char *string, size_t n);
 static inline int get_extra_number(char *, regmatch_t);
-static inline char *get_mime(char *);
 static inline void array_push(Array *, char *);
 static inline void compile_regex(Regex *);
 static inline void parse_command_run(char * const *, int, char **);
@@ -61,19 +60,29 @@ static char *filename;
 static char *program;
 
 int main(int argc, char **argv) {
-    char buffer[256];
-    char *file_mime = NULL;
+    magic_t magic;
+    const char *file_mime = NULL;
     bool found = false;
     program = basename(argv[0]);
 
     if (argc <= 1)
         usage(stderr);
 
+
+
     if ((filename = realpath(argv[1], NULL))) {
-        if (get_mime(filename) == NULL)
+        if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
+            error("Error in magic_open(MAGIC_MIME_TYPE):%s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        if (magic_load(magic, NULL) != 0) {
+            error("Error in magic_load(magic):%s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        if ((file_mime = magic_file(magic, filename)) == NULL) {
+            magic_close(magic);
             file_mime = "text/plain";
-        else
-            file_mime = buffer;
+        }
     } else {
         filename = argv[1];
         file_mime = "text/plain";
@@ -199,28 +208,6 @@ ignore:
     error("Error executing %s: %s\n", args.array[0], strerror(errno));
 #endif
     return;
-}
-
-char *
-get_mime(char *file) {
-    do {
-        magic_t magic;
-        const char *mime;
-        if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
-            break;
-        }
-        if (magic_load(magic, NULL) != 0) {
-            magic_close(magic);
-            break;
-        }
-        if ((mime = magic_file(magic, file)) == NULL) {
-            magic_close(magic);
-            break;
-        }
-        return (char *) mime;
-    } while (0);
-
-    return NULL;
 }
 
 void
