@@ -146,8 +146,8 @@ int main(int argc, char **argv) {
     if (!found) {
         char error_message[512];
         int32 n = snprintf(error_message, sizeof (error_message),
-                         "No previewer set for file:\n\n"
-                         "%s:\n    %s\n", basename(argv[1]), file_mime);
+                           "No previewer set for file:\n\n"
+                           "%s:\n    %s\n", basename(argv[1]), file_mime);
         write(STDERR_FILENO, error_message, (size_t) n);
         write(STDOUT_FILENO, error_message, (size_t) n);
     }
