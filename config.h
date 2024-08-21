@@ -3,7 +3,6 @@
 #define MAX_ARGS 16
 #define MAX_EXTRAS 10
 #define MAX_ARGUMENT_LENGTH 256
-#define REGEX_BYTES "%piscou-bytes%"
 #define REGEX_FILENAME "%piscou-filename%"
 #define REGEX_EXTRAS "^%piscou-extra([0-9])%$"
 #define REGEX_EXTRAS_MORE "%piscou-extra([0-9])%"
@@ -53,5 +52,5 @@ static const Rule rules[] = {
 {{"video/.*",                NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"appl[^/]+/x-matroska",    NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"appl[^/]+/x-kicad-.*",    NULL}, {"kicad.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
-{{"text/.+",                 NULL}, {"bat", "-p", "--pager=never", "--color=always", "%piscou-bytes%"}},
+{{"text/.+",                 NULL}, {"bat", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},
 };
