@@ -50,7 +50,7 @@ typedef struct Regex {
 
 static inline char *xmemdup(char *string, size_t n);
 static inline int get_extra_number(char *, regmatch_t);
-static inline int get_mime(char *, char *);
+static inline char *get_mime(char *);
 static inline void array_push(Array *, char *);
 static inline void compile_regex(Regex *);
 static inline void parse_command_run(char * const *, int, char **);
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
         usage(stderr);
 
     if ((filename = realpath(argv[1], NULL))) {
-        if (get_mime(buffer, filename) < 0)
+        if (get_mime(filename) == NULL)
             file_mime = "text/plain";
         else
             file_mime = buffer;
@@ -201,8 +201,8 @@ ignore:
     return;
 }
 
-int
-get_mime(char *buffer, char *file) {
+char *
+get_mime(char *file) {
     do {
         magic_t magic;
         const char *mime;
@@ -217,11 +217,10 @@ get_mime(char *buffer, char *file) {
             magic_close(magic);
             break;
         }
-        strcpy(buffer, mime);
-        return 0;
+        return (char *) mime;
     } while (0);
 
-    return -1;
+    return NULL;
 }
 
 void
