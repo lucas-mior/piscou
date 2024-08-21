@@ -37,7 +37,7 @@
 typedef int32_t int32;
 typedef uint32_t uint32;
 
-#define LENGTH(X) (int32) (sizeof (X) / sizeof (*X))
+#define LENGTH(X) (uint32) (sizeof (X) / sizeof (*X))
 
 #define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
     !regexec(&R.regex, S, LENGTH(PMATCHES), PMATCHES, 0)
@@ -47,8 +47,8 @@ typedef uint32_t uint32;
 
 typedef struct Array {
     char *array[MAX_ARGS];
-    int32 len;
-    int32 unused;
+    uint32 len;
+    uint32 unused;
 } Array;
 
 typedef struct Regex {
@@ -60,7 +60,7 @@ static inline char *xmemdup(char *string, uint32 n);
 static inline uint32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *);
 static inline void compile_regex(Regex *);
-static inline void parse_command_run(char * const *, int32, char **);
+static inline void parse_command_run(char * const *, uint32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 
@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
         file_mime = "text/plain";
     }
 
-    for (int32 i = 0; i < LENGTH(rules); i += 1) {
+    for (uint32 i = 0; i < LENGTH(rules); i += 1) {
         char *mime = rules[i].match[0];
         char *path = rules[i].match[1];
 
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
         }
 
         found = true;
-        parse_command_run(rules[i].command, argc, argv);
+        parse_command_run(rules[i].command, (uint32) argc, argv);
     }
 
     if (!found) {
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
 }
 
 void
-parse_command_run(char * const *command, int32 argc, char **argv) {
+parse_command_run(char * const *command, uint32 argc, char **argv) {
     Array args = {0};
     Regex regex_filename;
     Regex regex_extras;
@@ -171,7 +171,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
     compile_regex(&regex_extras);
     compile_regex(&regex_extras_more);
 
-    for (int32 i = 0; command[i]; i += 1) {
+    for (uint32 i = 0; command[i]; i += 1) {
         char *argument = command[i];
         regmatch_t pmatch[MAX_EXTRAS + 1];
 
@@ -234,7 +234,7 @@ ignore:
         array_push(&args, argument);
     }
 #if PISCOU_DEBUG
-    for (int32 i = 0; i < args.len + 1; i += 1)
+    for (uint32 i = 0; i < args.len + 1; i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #else
     execvp(args.array[0], args.array);
