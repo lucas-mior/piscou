@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
         }
 
         found = true;
-        parse_command_run(rules[i].command, (uint32) argc + 2, &argv[2]);
+        parse_command_run(rules[i].command, (uint32) argc - 2, &argv[2]);
     }
 
     if (!found) {
@@ -204,10 +204,11 @@ parse_command_run(char * const *command, uint32 argc, char **argv) {
 
             arg_len = (uint32) (pointer + extra_len - copy);
             array_push(&args, xmemdup(copy, arg_len + 1));
-ignore:
             continue;
         }
         array_push(&args, argument);
+ignore:
+        continue;
     }
 #if PISCOU_DEBUG
     for (uint32 i = 0; i < args.len + 1; i += 1)
