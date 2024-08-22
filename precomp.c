@@ -18,6 +18,7 @@ main(void) {
         if (regex->string)
             compile_regex(regex);
     }
-
+    FILE *file = fopen("regexes.bin", "w");
+    fwrite(regexes, 1, sizeof (regexes), file);
     exit(EXIT_SUCCESS);
 }
