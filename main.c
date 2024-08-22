@@ -15,35 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
-#include <libgen.h>
-#include <magic.h>
-#include <regex.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdint.h>
-#include <sys/wait.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <limits.h>
-
+#include "piscou.h"
 #include "config.h"
-
-typedef int32_t int32;
-typedef uint32_t uint32;
-
-#define LENGTH(X) (uint32) (sizeof (X) / sizeof (*X))
-
-#define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
-    !regexec(&R.regex, S, LENGTH(PMATCHES), PMATCHES, 0)
-
-#define MATCH_REGEX_SIMPLE(R, S) \
-    !regexec(&R.regex, S, 0, NULL, 0)
 
 typedef struct Array {
     char *array[MAX_ARGS];
@@ -51,10 +24,6 @@ typedef struct Array {
     uint32 unused;
 } Array;
 
-typedef struct Regex {
-    regex_t regex;
-    char *string;
-} Regex;
 
 static inline char *xmemdup(char *string, uint32 n);
 static inline int32 get_extra_number(char *, regmatch_t);
