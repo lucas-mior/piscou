@@ -28,7 +28,6 @@ typedef struct Array {
 static inline char *xmemdup(char *string, uint32 n);
 static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *);
-static inline void compile_regex(Regex *);
 static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
@@ -204,15 +203,6 @@ xmemdup(char *string, uint32 n) {
 
     memcpy(p, string, n);
     return p;
-}
-
-void
-compile_regex(Regex *regex) {
-    if (regcomp(&regex->regex, regex->string, REG_EXTENDED)) {
-        error("Could not compile regex %s.\n", regex->string);
-        exit(EXIT_FAILURE);
-    }
-    return;
 }
 
 int32
