@@ -25,6 +25,7 @@ static const Rule rules[] = {
 {{NULL,      ".+\\.csv"          }, {"csv.sh", "%piscou-filename%"}},
 {{NULL,      ".+\\.kicad_pro$"   }, {"kicad.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"inode/directory",         NULL}, {"ls", "-1A", "--color", "%piscou-filename%"}},
+{{"inode/x-empty",           NULL}, {"/usr/bin/cat", "-A", "%piscou-filename%"}},
 {{"ms(word|-exce|-powe)",    NULL}, {"printf", "💩💩💩💩💩💩💩💩💩\n%s\n💩💩💩💩💩💩💩💩💩", "%piscou-filename%"}},
 {{"opendoc.+spreadsheet",    NULL}, {"ods.sh", "%piscou-filename%"}},
 {{"officed.+spreadsheet",    NULL}, {"xlsx.sh", "%piscou-filename%"}},
