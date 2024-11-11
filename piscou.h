@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <threads.h>
 
 typedef int32_t int32;
 typedef uint32_t uint32;

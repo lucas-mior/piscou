@@ -24,6 +24,9 @@ typedef struct Array {
     uint32 unused;
 } Array;
 
+static mtx_t lock;
+
+#define MAX_THREADS 16
 
 static inline char *xmemdup(char *string, uint32 n);
 static inline int32 get_extra_number(char *, regmatch_t);
@@ -35,12 +38,28 @@ static void usage(FILE *) __attribute__((noreturn));
 static char *filename;
 static char *program;
 
+static long available_threads;
+static int32 nthreads;
+static bool found = false;
+
+typedef struct Slice {
+    int32 imin;
+    int32 imax;
+    int argc;
+    char **argv;
+} Slice;
+
+static int check_rule(void *arg);
+static const char *file_mime = NULL;
+
 int main(int argc, char **argv) {
     char buffer[PATH_MAX];
     magic_t magic;
-    const char *file_mime = NULL;
-    bool found = false;
     program = basename(argv[0]);
+
+    thrd_t threads[MAX_THREADS];
+    Slice slices[MAX_THREADS];
+    int32 range;
 
     if (argc <= 1)
         usage(stderr);
@@ -61,7 +80,51 @@ int main(int argc, char **argv) {
         file_mime = "text/plain";
     }
 
-    for (uint32 i = 0; i < LENGTH(rules); i += 1) {
+    available_threads = sysconf(_SC_NPROCESSORS_ONLN);
+
+    if (available_threads <= 0)
+        nthreads = 1;
+    else if (nthreads > MAX_THREADS)
+        nthreads = MAX_THREADS;
+    else
+        nthreads = available_threads;
+
+    range = LENGTH(rules) / nthreads;
+
+    for (int32 i = 0; i < (nthreads - 1); i += 1) {
+        slices[i].imin = i*range;
+        slices[i].imax = (i + 1)*range;
+        slices[i].argc = argc - 2;
+        slices[i].argv = &argv[2];
+        thrd_create(&threads[i], check_rule, (void *) &slices[i]);
+    }{
+        int32 i = nthreads - 1;
+        slices[i].imin = i*range;
+        slices[i].imax = LENGTH(rules);
+        slices[i].argc = argc - 2;
+        slices[i].argv = &argv[2];
+        thrd_create(&threads[i], check_rule, (void *) &slices[i]);
+    }
+
+    for (int32 i = 0; i < nthreads; i += 1)
+        thrd_join(threads[i], NULL);
+
+    if (!found) {
+        char error_message[512];
+        int32 n = snprintf(error_message, sizeof (error_message),
+                           "No previewer set for file:\n\n"
+                           "%s:\n    %s\n", basename(argv[1]), file_mime);
+        write(STDERR_FILENO, error_message, (size_t) n);
+        write(STDOUT_FILENO, error_message, (size_t) n);
+    }
+    exit(EXIT_SUCCESS);
+}
+
+int
+check_rule(void *arg) {
+    Slice *slice = arg;
+
+    for (int32 i = slice->imin; i < slice->imax; i += 1) {
         char *mime = rules[i].match[0];
         char *path = rules[i].match[1];
 
@@ -83,19 +146,13 @@ int main(int argc, char **argv) {
                 continue;
         }
 
+        mtx_lock(&lock);
         found = true;
-        parse_command_run(rules[i].command, argc - 2, &argv[2]);
+        parse_command_run(rules[i].command, slice->argc, slice->argv);
+        mtx_unlock(&lock);
     }
-
-    if (!found) {
-        char error_message[512];
-        int32 n = snprintf(error_message, sizeof (error_message),
-                           "No previewer set for file:\n\n"
-                           "%s:\n    %s\n", basename(argv[1]), file_mime);
-        write(STDERR_FILENO, error_message, (size_t) n);
-        write(STDOUT_FILENO, error_message, (size_t) n);
-    }
-    exit(EXIT_SUCCESS);
+    
+    thrd_exit(0);
 }
 
 void
