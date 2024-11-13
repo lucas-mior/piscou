@@ -35,6 +35,7 @@ static const Rule rules[] = {
 {{"appl.+/pdf",           NULL}, {"pdf.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"appl.+/csv",           NULL}, {"csv.sh", "%piscou-filename%"}},
 {{"appl.+/json",          NULL}, {"head", "-n", "40", "%piscou-filename%"}},
+{{"appl.+/js",            NULL}, {"bat",  "%piscou-filename%"}},
 {{"appl.+/.*execu.+",     NULL}, {"objdump", "-T", "%piscou-filename%", "%piscou-extra0%"}},
 {{"appl.+/x-objec.+",     NULL}, {"objdump", "-t", "%piscou-filename%", "%piscou-extra0%"}},
 {{"appl.+/x-sharedlib",   NULL}, {"objdump", "-T", "%piscou-filename%", "%piscou-extra0%"}},
