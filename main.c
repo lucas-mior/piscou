@@ -20,12 +20,12 @@
 
 typedef struct Array {
     char *array[MAX_ARGS];
-    uint32 len;
-    uint32 unused;
+    int32 len;
+    int32 unused;
 } Array;
 
 
-static inline char *xmemdup(char *string, uint32 n);
+static inline char *xmemdup(char *string, int32 n);
 static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *);
 static inline void parse_command_run(char * const *, int32, char **);
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
         file_mime = "text/plain";
     }
 
-    for (uint32 i = 0; i < LENGTH(rules); i += 1) {
+    for (int32 i = 0; i < LENGTH(rules); i += 1) {
         char *mime = rules[i].match[0];
         char *path = rules[i].match[1];
 
@@ -113,7 +113,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
     compile_regex(&regex_extras);
     compile_regex(&regex_extras_more);
 
-    for (uint32 i = 0; command[i]; i += 1) {
+    for (int32 i = 0; command[i]; i += 1) {
         char *argument = command[i];
         regmatch_t matches[MAX_EXTRAS + 1];
 
@@ -135,15 +135,15 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, matches)) {
             char assembled[MAX_ARGUMENT_LENGTH] = {0};
             char *pointer = &assembled[0];
-            uint32 extra_length = 0;
-            uint32 final_length;
+            int32 extra_length = 0;
+            int32 final_length;
             strcpy(assembled, argument);
             do {
-                uint32 start = (uint32) matches[0].rm_so;
-                uint32 end = (uint32) matches[0].rm_eo;
-                uint32 left = (uint32) strlen(&pointer[end]) + 1;
+                int32 start = matches[0].rm_so;
+                int32 end = matches[0].rm_eo;
+                int32 left = strlen(&pointer[end]) + 1;
                 int32 extra_index = get_extra_number(pointer, matches[1]);
-                uint32 total_length;
+                int32 total_length;
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -151,8 +151,8 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                     goto ignore;
                 }
 
-                extra_length = (uint32) strlen(argv[extra_index]);
-                total_length = (uint32) (pointer - &assembled[0])
+                extra_length = (int32) strlen(argv[extra_index]);
+                total_length = (int32) (pointer - &assembled[0])
                                + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
                     error("Too long argument. Max length is %d.\n",
@@ -167,7 +167,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 pointer += (extra_length + start);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
-            final_length = (uint32) (pointer - &assembled[0]);
+            final_length = (int32) (pointer - &assembled[0]);
             array_push(&args, xmemdup(assembled, final_length));
             continue;
         }
@@ -176,7 +176,7 @@ ignore:
         continue;
     }
 #if PISCOU_DEBUG
-    for (uint32 i = 0; i < args.len + 1; i += 1)
+    for (int32 i = 0; i < args.len + 1; i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #else
     execvp(args.array[0], args.array);
@@ -193,7 +193,7 @@ usage(FILE *stream) {
 }
 
 char *
-xmemdup(char *string, uint32 n) {
+xmemdup(char *string, int32 n) {
     char *p;
 
     if ((p = malloc(n)) == NULL) {
@@ -208,9 +208,9 @@ xmemdup(char *string, uint32 n) {
 int32
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
-    uint32 start = (uint32) pmatch.rm_so;
-    uint32 end = (uint32) pmatch.rm_eo;
-    uint32 diff = end - start;
+    int32 start = (int32) pmatch.rm_so;
+    int32 end = (int32) pmatch.rm_eo;
+    int32 diff = end - start;
     int32 number;
 
     memcpy(number_buffer, string + start, (size_t) diff);
@@ -250,7 +250,7 @@ error(char *format, ...) {
             fprintf(stderr, "Error forking: %s\n", strerror(errno));
             break;
         case 0:
-            for (uint i = 0; i < LENGTH(notifiers); i += 1) {
+            for (int32 i = 0; i < LENGTH(notifiers); i += 1) {
                 execlp(notifiers[i], notifiers[i], "-u", "critical",
                                      program, buffer, NULL);
             }

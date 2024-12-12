@@ -21,7 +21,7 @@
 typedef int32_t int32;
 typedef uint32_t uint32;
 
-#define LENGTH(X) (uint32) (sizeof (X) / sizeof (*X))
+#define LENGTH(X) (int32) (sizeof (X) / sizeof (*X))
 
 #define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
     !regexec(&R.regex, S, LENGTH(PMATCHES), PMATCHES, 0)
