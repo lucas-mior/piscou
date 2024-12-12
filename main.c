@@ -208,8 +208,8 @@ xmemdup(char *string, int32 n) {
 int32
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
-    int32 start = (int32) pmatch.rm_so;
-    int32 end = (int32) pmatch.rm_eo;
+    int32 start = pmatch.rm_so;
+    int32 end = pmatch.rm_eo;
     int32 diff = end - start;
     int32 number;
 
