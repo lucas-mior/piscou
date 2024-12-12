@@ -34,7 +34,7 @@ typedef struct Regex {
     char *string;
 } Regex;
 
-void
+static void
 compile_regex(Regex *regex) {
     if (regcomp(&regex->regex, regex->string, REG_EXTENDED)) {
         fprintf(stderr, "Could not compile regex %s.\n", regex->string);

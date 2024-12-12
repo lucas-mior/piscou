@@ -54,7 +54,7 @@ static const Rule rules[] = {
 {{"image/.*dwg",          NULL}, {"stat", "%piscou-filename%"}},
 {{"image/.*xml",          NULL}, {"head", "-n", "40", "%piscou-filename%"}},
 {{"image/.*",             NULL}, {"stiv_draw", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
-{{"image/.*",             NULL}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%__%piscou-extra1%__%piscou-extra2%__%piscou-extra3%"}},
+{{"image/.*",             NULL}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
 {{"audio/.*",             NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"video/.*",             NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"appl[^/]+/x-matroska", NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},

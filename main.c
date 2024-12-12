@@ -141,7 +141,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             do {
                 int32 start = matches[0].rm_so;
                 int32 end = matches[0].rm_eo;
-                int32 left = strlen(&pointer[end]) + 1;
+                int32 left = (int32) strlen(&pointer[end]) + 1;
                 int32 extra_index = get_extra_number(pointer, matches[1]);
                 int32 total_length;
 
@@ -196,12 +196,12 @@ char *
 xmemdup(char *string, int32 n) {
     char *p;
 
-    if ((p = malloc(n)) == NULL) {
+    if ((p = malloc((size_t)n)) == NULL) {
         error("Error allocating %zu bytes.\n", n);
         exit(EXIT_FAILURE);
     }
 
-    memcpy(p, string, n);
+    memcpy(p, string, (size_t)n);
     return p;
 }
 
