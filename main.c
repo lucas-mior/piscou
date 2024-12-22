@@ -139,11 +139,12 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             int32 final_length;
             strcpy(assembled, argument);
             do {
+                char *argv_passed;
+                int32 total_length;
                 int32 start = matches[0].rm_so;
                 int32 end = matches[0].rm_eo;
                 int32 left = (int32) strlen(&pointer[end]) + 1;
                 int32 extra_index = get_extra_number(pointer, matches[1]);
-                int32 total_length;
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -151,7 +152,8 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                     goto ignore;
                 }
 
-                extra_length = (int32) strlen(argv[extra_index]);
+                argv_passed = argv[extra_index];
+                extra_length = (int32) strlen(argv_passed);
                 total_length = (int32) (pointer - &assembled[0])
                                + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
@@ -163,7 +165,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 memmove(&pointer[start + extra_length],
                         &pointer[end], (size_t) left);
                 memcpy(&pointer[start],
-                       argv[extra_index], (size_t) extra_length);
+                       argv_passed, (size_t) extra_length);
                 pointer += (extra_length + start);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
