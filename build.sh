@@ -22,13 +22,17 @@ CFLAGS="$CFLAGS -Wno-disabled-macro-expansion -Wno-unused-parameter "
 CFLAGS="$CFLAGS -Wno-unused-variable "
 
 echo "target=$target"
-if [ "$target" = "debug" ]; then
-    CFLAGS="$CFLAGS -g -fsanitize=undefined "
-    CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=1"
-else
-    CFLAGS="$CFLAGS -O2 -flto "
-    CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=0"
-fi
+case "$target" in
+    "debug")
+        CFLAGS="$CFLAGS -g -fsanitize=undefined "
+        CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=1" ;;
+    "benchmark")
+        CFLAGS="$CFLAGS -O2 -flto "
+        CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1" ;;
+    *)
+        CFLAGS="$CFLAGS -O2 -flto "
+        CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=0" ;;
+esac
 
 case "$target" in
     "uninstall")

@@ -178,7 +178,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
 ignore:
         continue;
     }
-#if 1
+#if defined(PISCOU_BENCHMARK) || defined(PISCOU_DEBUG)
     for (int32 i = 0; i < args.len + 1; i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #else
