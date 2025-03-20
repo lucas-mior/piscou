@@ -161,7 +161,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
                     error("Too long argument. Max length is %d.\n",
                           MAX_ARGUMENT_LENGTH);
-                    goto ignore;
+                    exit(EXIT_FAILURE);
                 }
 
                 memmove(&pointer[start + extra_length],
