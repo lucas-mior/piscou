@@ -247,7 +247,7 @@ error(char *format, ...) {
     buffer[n] = '\0';
     write(STDERR_FILENO, buffer, (size_t)n);
 
-#ifdef DEBUGGING
+#ifdef PISCOU_DEBUG
     switch (fork()) {
         char *notifiers[2] = { "dunstify", "notify-send" };
         case -1:
