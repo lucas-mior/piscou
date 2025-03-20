@@ -109,11 +109,11 @@ int main(int argc, char **argv) {
 
     if (!found) {
         char error_message[512];
-        int32 n = snprintf(error_message, sizeof (error_message),
+        int32 n = snprintf(error_message, sizeof(error_message),
                            "No previewer set for file:\n\n"
                            "%s:\n    %s\n", basename(argv[1]), file_mime);
-        write(STDERR_FILENO, error_message, (size_t) n);
-        write(STDOUT_FILENO, error_message, (size_t) n);
+        write(STDERR_FILENO, error_message, (size_t)n);
+        write(STDOUT_FILENO, error_message, (size_t)n);
     }
     exit(EXIT_SUCCESS);
 }
@@ -152,7 +152,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 int32 total_length;
                 int32 start = matches[0].rm_so;
                 int32 end = matches[0].rm_eo;
-                int32 left = (int32) strlen(&pointer[end]) + 1;
+                int32 left = (int32)strlen(&pointer[end]) + 1;
                 int32 extra_index = get_extra_number(pointer, matches[1]);
 
                 if (extra_index >= argc) {
@@ -162,8 +162,8 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 }
 
                 argv_passed = argv[extra_index];
-                extra_length = (int32) strlen(argv_passed);
-                total_length = (int32) (pointer - args.arena_pos)
+                extra_length = (int32)strlen(argv_passed);
+                total_length = (int32)(pointer - args.arena_pos)
                                + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
                     error("Too long argument. Max length is %d.\n",
@@ -172,13 +172,13 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 }
 
                 memmove(&pointer[start + extra_length],
-                        &pointer[end], (size_t) left);
+                        &pointer[end], (size_t)left);
                 memcpy(&pointer[start],
-                       argv_passed, (size_t) extra_length);
+                       argv_passed, (size_t)extra_length);
                 pointer += (extra_length + start);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
-            final_length = (int32) (pointer - args.arena_pos);
+            final_length = (int32)(pointer - args.arena_pos);
             array_push(&args, NULL, final_length);
             continue;
         }
@@ -212,7 +212,7 @@ get_extra_number(char *string, regmatch_t pmatch) {
     int32 diff = end - start;
     int32 number;
 
-    memcpy(number_buffer, string + start, (size_t) diff);
+    memcpy(number_buffer, string + start, (size_t)diff);
     number = atoi(number_buffer);
     return number;
 }
@@ -236,7 +236,7 @@ error(char *format, ...) {
     char buffer[BUFSIZ];
 
     va_start(args, format);
-    n = vsnprintf(buffer, sizeof (buffer) - 1, format, args);
+    n = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
     if (n < 0) {
@@ -245,7 +245,7 @@ error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    write(STDERR_FILENO, buffer, (size_t) n);
+    write(STDERR_FILENO, buffer, (size_t)n);
 
 #ifdef DEBUGGING
     switch (fork()) {
