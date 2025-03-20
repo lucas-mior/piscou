@@ -39,12 +39,21 @@ static Regex regex_filename;
 static Regex regex_extras;
 static Regex regex_extras_more;
 
+int32
+compile_regexes(void *unused) {
+    compile_regex(&regex_filename);
+    compile_regex(&regex_extras);
+    compile_regex(&regex_extras_more);
+    thrd_exit(0);
+}
+
 int main(int argc, char **argv) {
     char buffer[PATH_MAX];
     magic_t magic;
     const char *file_mime = NULL;
     bool found = false;
     program = basename(argv[0]);
+    thrd_t regex_thread;
 
     if (argc <= 1)
         usage(stderr);
@@ -53,9 +62,7 @@ int main(int argc, char **argv) {
     regex_extras.string = REGEX_EXTRAS;
     regex_extras_more.string = REGEX_EXTRAS_MORE;
 
-    compile_regex(&regex_filename);
-    compile_regex(&regex_extras);
-    compile_regex(&regex_extras_more);
+    thrd_create(&regex_thread, compile_regexes, NULL);
 
     if ((filename = realpath(argv[1], buffer))) {
         if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
@@ -96,6 +103,7 @@ int main(int argc, char **argv) {
         }
 
         found = true;
+        thrd_join(regex_thread, NULL);
         parse_command_run(rules[i].command, argc - 2, &argv[2]);
     }
 
