@@ -136,11 +136,10 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, matches)) {
-            char assembled[MAX_ARGUMENT_LENGTH] = {0};
-            char *pointer = &assembled[0];
+            char *pointer = args.arena_pos;
             int32 extra_length = 0;
             int32 final_length;
-            strcpy(assembled, argument);
+            strcpy(pointer, argument);
             do {
                 char *argv_passed;
                 int32 total_length;
@@ -157,7 +156,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
 
                 argv_passed = argv[extra_index];
                 extra_length = (int32) strlen(argv_passed);
-                total_length = (int32) (pointer - &assembled[0])
+                total_length = (int32) (pointer - args.arena_pos)
                                + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
                     error("Too long argument. Max length is %d.\n",
@@ -172,8 +171,8 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                 pointer += (extra_length + start);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
-            final_length = (int32) (pointer - &assembled[0]);
-            array_push(&args, assembled, final_length);
+            final_length = (int32) (pointer - args.arena_pos);
+            array_push(&args, NULL, final_length);
             continue;
         }
         array_push(&args, argument, 0);
@@ -213,10 +212,9 @@ get_extra_number(char *string, regmatch_t pmatch) {
 
 void
 array_push(Array *array, char *string, int32 length) {
-    if (length == 0) {
+    if (string) {
         array->array[array->len] = string;
     } else {
-        memcpy(array->arena_pos, string, length);
         array->array[array->len] = array->arena_pos;
         array->arena_pos += length;
     }
