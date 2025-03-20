@@ -19,10 +19,11 @@
 #include "config.h"
 
 typedef struct Array {
+    char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
     char *array[MAX_ARGS];
     char *arena_pos;
-    char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
     int32 len;
+    int32 unused;
 } Array;
 
 
