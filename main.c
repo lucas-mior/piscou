@@ -181,6 +181,7 @@ ignore:
     for (int32 i = 0; i < args.len + 1; i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #else
+    assert(args.array[0]);
     execvp(args.array[0], args.array);
     error("Error executing %s: %s\n", args.array[0], strerror(errno));
 #endif

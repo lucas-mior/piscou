@@ -1,6 +1,7 @@
 #ifndef PISCOU_H
 #define PISCOU_H
 
+#include <assert.h>
 #include <errno.h>
 #include <libgen.h>
 #include <magic.h>
