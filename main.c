@@ -199,6 +199,7 @@ usage(FILE *stream) {
 int32
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
+
     int32 start = pmatch.rm_so;
     int32 end = pmatch.rm_eo;
     int32 diff = end - start;
