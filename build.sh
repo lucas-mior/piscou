@@ -27,7 +27,7 @@ case "$target" in
         CFLAGS="$CFLAGS -g -fsanitize=undefined "
         CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=1" ;;
     "benchmark")
-        CFLAGS="$CFLAGS -O2 -flto "
+        CFLAGS="$CFLAGS -g -O2 -flto "
         CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1" ;;
     *)
         CFLAGS="$CFLAGS -O2 -flto "
@@ -46,7 +46,7 @@ case "$target" in
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
-    "build"|"debug")
+    "build"|"debug"|"benchmark")
         ctags --kinds-C=+l ./*.h ./*.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         set -x
