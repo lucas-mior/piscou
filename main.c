@@ -20,14 +20,14 @@
 
 typedef struct Array {
     char *array[MAX_ARGS];
+    char *arena_pos;
+    char arena[4000];
     int32 len;
-    int32 unused;
 } Array;
 
 
-static inline char *xmemdup(char *string, int32 n);
 static inline int32 get_extra_number(char *, regmatch_t);
-static inline void array_push(Array *, char *);
+static inline void array_push(Array *, char *, int32);
 static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
@@ -118,7 +118,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
         regmatch_t matches[MAX_EXTRAS + 1];
 
         if (MATCH_REGEX_SIMPLE(regex_filename, argument)) {
-            array_push(&args, filename);
+            array_push(&args, filename, 0);
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras, argument, matches)) {
@@ -129,7 +129,7 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
                       extra_index);
                 goto ignore;
             }
-            array_push(&args, argv[extra_index]);
+            array_push(&args, argv[extra_index], 0);
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, matches)) {
@@ -170,10 +170,10 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
             final_length = (int32) (pointer - &assembled[0]);
-            array_push(&args, xmemdup(assembled, final_length));
+            array_push(&args, assembled, final_length);
             continue;
         }
-        array_push(&args, argument);
+        array_push(&args, argument, 0);
 ignore:
         continue;
     }
@@ -195,19 +195,6 @@ usage(FILE *stream) {
     exit(stream != stdout);
 }
 
-char *
-xmemdup(char *string, int32 n) {
-    char *p;
-
-    if ((p = malloc((size_t)n)) == NULL) {
-        error("Error allocating %zu bytes.\n", n);
-        exit(EXIT_FAILURE);
-    }
-
-    memcpy(p, string, (size_t)n);
-    return p;
-}
-
 int32
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
@@ -222,8 +209,14 @@ get_extra_number(char *string, regmatch_t pmatch) {
 }
 
 void
-array_push(Array *array, char *string) {
-    array->array[array->len] = string;
+array_push(Array *array, char *string, int32 length) {
+    if (length == 0) {
+        array->array[array->len] = string;
+    } else {
+        memcpy(array->arena_pos, string, length);
+        array->array[array->len] = array->arena_pos;
+        array->arena_pos += length;
+    }
     array->len += 1;
     return;
 }
