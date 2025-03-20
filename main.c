@@ -35,6 +35,9 @@ static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
 static char *program;
+static Regex regex_filename;
+static Regex regex_extras;
+static Regex regex_extras_more;
 
 int main(int argc, char **argv) {
     char buffer[PATH_MAX];
@@ -45,6 +48,14 @@ int main(int argc, char **argv) {
 
     if (argc <= 1)
         usage(stderr);
+
+    regex_filename.string = REGEX_FILENAME;
+    regex_extras.string = REGEX_EXTRAS;
+    regex_extras_more.string = REGEX_EXTRAS_MORE;
+
+    compile_regex(&regex_filename);
+    compile_regex(&regex_extras);
+    compile_regex(&regex_extras_more);
 
     if ((filename = realpath(argv[1], buffer))) {
         if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
@@ -102,19 +113,7 @@ int main(int argc, char **argv) {
 void
 parse_command_run(char * const *command, int32 argc, char **argv) {
     Array args = {0};
-    Regex regex_filename;
-    Regex regex_extras;
-    Regex regex_extras_more;
-
     args.arena_pos = args.arena;
-
-    regex_filename.string = REGEX_FILENAME;
-    regex_extras.string = REGEX_EXTRAS;
-    regex_extras_more.string = REGEX_EXTRAS_MORE;
-
-    compile_regex(&regex_filename);
-    compile_regex(&regex_extras);
-    compile_regex(&regex_extras_more);
 
     for (int32 i = 0; command[i]; i += 1) {
         char *argument = command[i];
