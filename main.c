@@ -21,7 +21,7 @@
 typedef struct Array {
     char *array[MAX_ARGS];
     char *arena_pos;
-    char arena[4000];
+    char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
     int32 len;
 } Array;
 
@@ -104,6 +104,8 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
     Regex regex_filename;
     Regex regex_extras;
     Regex regex_extras_more;
+
+    args.arena_pos = args.arena;
 
     regex_filename.string = REGEX_FILENAME;
     regex_extras.string = REGEX_EXTRAS;
