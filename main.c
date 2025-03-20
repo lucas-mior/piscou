@@ -59,11 +59,12 @@ int main(int argc, char **argv) {
 
     if ((filename = realpath(argv[1], buffer))) {
         if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
-            error("Error in magic_open(MAGIC_MIME_TYPE):%s\n", strerror(errno));
+            error("Error in magic_open(MAGIC_MIME_TYPE): %s.\n",
+                  strerror(errno));
             exit(EXIT_FAILURE);
         }
         if (magic_load(magic, NULL) != 0) {
-            error("Error in magic_load(magic):%s\n", strerror(errno));
+            error("Error in magic_load(magic): %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
         if ((file_mime = magic_file(magic, filename)) == NULL)
