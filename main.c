@@ -253,10 +253,10 @@ error(char *format, ...) {
                                      program, buffer, NULL);
             }
             fprintf(stderr, "Error trying to exec dunstify.\n");
+            exit(EXIT_FAILURE);
             break;
         default:
             break;
     }
-    exit(EXIT_FAILURE);
 #endif
 }
