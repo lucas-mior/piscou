@@ -225,6 +225,7 @@ array_push(Array *array, char *string, int32 length) {
 
 void
 error(char *format, ...) {
+    char *notifiers[2] = { "dunstify", "notify-send" };
     int32 n;
     va_list args;
     char buffer[BUFSIZ];
@@ -243,7 +244,6 @@ error(char *format, ...) {
 
 #ifdef PISCOU_DEBUG
     switch (fork()) {
-        char *notifiers[2] = { "dunstify", "notify-send" };
         case -1:
             fprintf(stderr, "Error forking: %s\n", strerror(errno));
             break;
