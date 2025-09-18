@@ -243,7 +243,7 @@ void array_string(char *buffer, int32 size,
     }{
         int32 i = array_length - 1;
         int32 space = size - n;
-        int32 m = snprintf(buffer + n, (ulong)space, "%s%s", array[i], sep);
+        int32 m = snprintf(buffer + n, (ulong)space, "%s", array[i]);
         if (m <= 0) {
             error("Error in snprintf().\n");
             exit(EXIT_FAILURE);
