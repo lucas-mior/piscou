@@ -182,11 +182,29 @@ ignore:
 #if defined(PISCOU_BENCHMARK) || defined(PISCOU_DEBUG)
     for (int32 i = 0; i < args.len + 1; i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
-#else
+#endif
     assert(args.array[0]);
     execvp(args.array[0], args.array);
-    error("Error executing %s: %s\n", args.array[0], strerror(errno));
-#endif
+    {
+        char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
+        int32 n = 0;
+        for (int32 i = 0; i < args.len; i += 1) {
+            int32 space = (int32)sizeof(full_command) - n;
+            int32 m;
+
+            m = snprintf(full_command + n, space, "%s ", args.array[i]);
+            if (m <= 0) {
+                error("Error in snprintf().\n");
+                exit(EXIT_FAILURE);
+            }
+            if (m > space) {
+                error("Error printing full command, not enough space.\n");
+                exit(EXIT_FAILURE);
+            }
+            n += m;
+        }
+        error("Error executing %s:\n%s\n", full_command, strerror(errno));
+    }
     return;
 }
 
