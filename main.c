@@ -26,12 +26,12 @@ typedef struct Array {
     int32 unused;
 } Array;
 
-
 static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *, int32);
 static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
+static void array_string(char *, int32, char *, char **, int32);
 
 static char *filename;
 static char *program;
@@ -187,25 +187,43 @@ ignore:
     execvp(args.array[0], args.array);
     {
         char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
-        int32 n = 0;
-        for (int32 i = 0; i < args.len; i += 1) {
-            int32 space = (int32)sizeof(full_command) - n;
-            int32 m;
-
-            m = snprintf(full_command + n, space, "%s ", args.array[i]);
-            if (m <= 0) {
-                error("Error in snprintf().\n");
-                exit(EXIT_FAILURE);
-            }
-            if (m > space) {
-                error("Error printing full command, not enough space.\n");
-                exit(EXIT_FAILURE);
-            }
-            n += m;
-        }
+        ARRAY_STRING(full_command, " ", args.array, args.len);
         error("Error executing %s:\n%s\n", full_command, strerror(errno));
     }
     return;
+}
+
+void array_string(char *buffer, int32 size,
+                  char *sep, char **array, int32 array_length) {
+    int32 n = 0;
+    int32 m = 0;
+    int32 space = 0;
+
+    for (int32 i = 0; i < (array_length-1); i += 1) {
+        int32 space = size - n;
+        int32 m = snprintf(buffer + n, space, "%s%s", array[i], sep);
+        if (m <= 0) {
+            error("Error in snprintf().\n");
+            exit(EXIT_FAILURE);
+        }
+        if (m > space) {
+            error("Error printing full command, not enough space.\n");
+            exit(EXIT_FAILURE);
+        }
+        n += m;
+    }{
+        int32 space = size - n;
+        int32 m = snprintf(buffer + n, space,
+                           "%s%s", array[array_length-1], sep);
+        if (m <= 0) {
+            error("Error in snprintf().\n");
+            exit(EXIT_FAILURE);
+        }
+        if (m > space) {
+            error("Error printing full command, not enough space.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
 void
