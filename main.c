@@ -31,8 +31,7 @@ static inline void array_push(Array *, char *, int32);
 static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
-static void array_string_str(char *, int32, char *, char **, int32);
-static void array_string_int(char *, int32, char *, int *, int32);
+static void array_string(char *, int32, char *, char *, char **, int32);
 
 static char *filename;
 static char *program;
@@ -194,15 +193,42 @@ ignore:
     return;
 }
 
-void array_string_int(char *buffer, int32 size,
-                      char *sep, int *array, int32 array_length) {
-    return;
+void *
+snprintf2(char *buffer, size_t size, char *format, ...) {
+    int n;
+    va_list args;
+
+    va_start(args, format);
+    n = vsnprintf(buffer, size, format, args);
+    va_end(args);
+
+    if (size <= 8) {
+        error("%s: wrong buffer size = %zu.\n", __func__, size);
+        exit(EXIT_FAILURE);
+    }
+    if (n >= (int)size) {
+        va_list args2;
+        buffer = malloc((size_t)n + 1);
+        va_start(args, format);
+        va_copy(args2, args);
+        n = vsnprintf(buffer, (size_t)n + 1, format, args);
+        va_end(args);
+    }
+    if (n <= 0) {
+        error("Error in snprintf.\n");
+        exit(EXIT_FAILURE);
+    }
+    return buffer;
 }
-void array_string_str(char *buffer, int32 size,
-                      char *sep, char **array, int32 array_length) {
+
+void array_string(char *buffer, int32 size,
+                  char *sep, char *formatter, char **array, int32 array_length) {
+    char format_string[256];
     int32 n = 0;
     int32 m = 0;
     int32 space = 0;
+    SNPRINTF(format_string, "%s%%s", formatter);
+    printf("format_string=%s\n", format_string);
 
     for (int32 i = 0; i < (array_length-1); i += 1) {
         int32 space = size - n;

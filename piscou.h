@@ -22,12 +22,14 @@
 typedef int32_t int32;
 typedef uint32_t uint32;
 
+#define SNPRINTF(BUFFER, FORMAT, ...) \
+    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 #define LENGTH(X) (int32)(sizeof (X) / sizeof (*X))
 #define ARRAY_STRING(BUFFER, SEP, ARRAY, ARRAY_LENGTH) \
     _Generic((ARRAY), \
-        int *: array_string_int, \
-        char **: array_string_str \
-    )(BUFFER, sizeof(BUFFER), SEP, ARRAY, ARRAY_LENGTH)
+        int *: array_string(BUFFER, sizeof(BUFFER), SEP, "%d", ARRAY, ARRAY_LENGTH), \
+        char **: array_string(BUFFER, sizeof(BUFFER), SEP, "%s", ARRAY, ARRAY_LENGTH) \
+    )
 
 
 #define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
