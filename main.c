@@ -32,6 +32,7 @@ static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 static void array_string(char *, int32, char *, char *, char **, int32);
+void *snprintf2(char *, size_t, char *, ...);
 
 static char *filename;
 static char *program;
@@ -225,14 +226,11 @@ void array_string(char *buffer, int32 size,
                   char *sep, char *formatter, char **array, int32 array_length) {
     char format_string[256];
     int32 n = 0;
-    int32 m = 0;
-    int32 space = 0;
     SNPRINTF(format_string, "%s%%s", formatter);
-    printf("format_string=%s\n", format_string);
 
     for (int32 i = 0; i < (array_length-1); i += 1) {
         int32 space = size - n;
-        int32 m = snprintf(buffer + n, space, "%s%s", array[i], sep);
+        int32 m = snprintf(buffer + n, (ulong)space, "%s%s", array[i], sep);
         if (m <= 0) {
             error("Error in snprintf().\n");
             exit(EXIT_FAILURE);
@@ -243,9 +241,9 @@ void array_string(char *buffer, int32 size,
         }
         n += m;
     }{
+        int32 i = array_length - 1;
         int32 space = size - n;
-        int32 m = snprintf(buffer + n, space,
-                           "%s%s", array[array_length-1], sep);
+        int32 m = snprintf(buffer + n, (ulong)space, "%s%s", array[i], sep);
         if (m <= 0) {
             error("Error in snprintf().\n");
             exit(EXIT_FAILURE);
@@ -321,7 +319,6 @@ error(char *format, ...) {
             }
             fprintf(stderr, "Error trying to exec dunstify.\n");
             exit(EXIT_FAILURE);
-            break;
         default:
             break;
     }
