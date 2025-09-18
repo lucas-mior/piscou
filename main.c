@@ -307,6 +307,8 @@ error(char *format, ...) {
 
     buffer[n] = '\0';
     write(STDERR_FILENO, buffer, (size_t)n);
+    fsync(STDERR_FILENO);
+    fsync(STDOUT_FILENO);
 
 #ifdef PISCOU_DEBUG
     switch (fork()) {
