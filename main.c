@@ -31,7 +31,8 @@ static inline void array_push(Array *, char *, int32);
 static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
-static void array_string(char *, int32, char *, char **, int32);
+static void array_string_str(char *, int32, char *, char **, int32);
+static void array_string_int(char *, int32, char *, int *, int32);
 
 static char *filename;
 static char *program;
@@ -193,8 +194,12 @@ ignore:
     return;
 }
 
-void array_string(char *buffer, int32 size,
-                  char *sep, char **array, int32 array_length) {
+void array_string_int(char *buffer, int32 size,
+                      char *sep, int *array, int32 array_length) {
+    return;
+}
+void array_string_str(char *buffer, int32 size,
+                      char *sep, char **array, int32 array_length) {
     int32 n = 0;
     int32 m = 0;
     int32 space = 0;
