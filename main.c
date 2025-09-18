@@ -223,7 +223,8 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
 }
 
 void array_string(char *buffer, int32 size,
-                  char *sep, char *formatter, char **array, int32 array_length) {
+                  char *sep, char *formatter,
+                  char **array, int32 array_length) {
     char format_string[256];
     int32 n = 0;
     SNPRINTF(format_string, "%s%%s", formatter);
