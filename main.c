@@ -304,6 +304,10 @@ error(char *format, ...) {
         fprintf(stderr, "Error in vsnprintf()\n");
         exit(EXIT_FAILURE);
     }
+    if (n > sizeof(buffer)) {
+        fprintf(stderr, "Error in vsnprintf: buffer is not large enough.\n");
+        exit(EXIT_FAILURE);
+    }
 
     buffer[n] = '\0';
     write(STDERR_FILENO, buffer, (size_t)n);
