@@ -304,7 +304,7 @@ error(char *format, ...) {
         fprintf(stderr, "Error in vsnprintf()\n");
         exit(EXIT_FAILURE);
     }
-    if (n > sizeof(buffer)) {
+    if (n > (int32)sizeof(buffer)) {
         fprintf(stderr, "Error in vsnprintf: buffer is not large enough.\n");
         exit(EXIT_FAILURE);
     }
