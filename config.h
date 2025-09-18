@@ -59,7 +59,7 @@ static const Rule rules[] = {
 {{"video/.*",             NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"appl[^/]+/x-matroska", NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"appl[^/]+/x-kicad-.*", NULL}, {"kicad.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
-{{"text/.+",              NULL}, {"b2t", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},
+{{"text/.+",              NULL}, {"bat", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},
 };
 
 #endif
