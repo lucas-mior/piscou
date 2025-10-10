@@ -250,7 +250,7 @@ void array_string(char *buffer, int32 size,
             exit(EXIT_FAILURE);
         }
         if (m > space) {
-            error("Error printing full command, not enough space.\n");
+            error("Error printing array, not enough space.\n");
             exit(EXIT_FAILURE);
         }
     }
