@@ -254,6 +254,7 @@ void array_string(char *buffer, int32 size,
             exit(EXIT_FAILURE);
         }
     }
+    return;
 }
 
 void
