@@ -19,7 +19,8 @@ fi
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE"
 CFLAGS="$CFLAGS -Wextra -Wall "
 CFLAGS="$CFLAGS -Wno-disabled-macro-expansion -Wno-unused-parameter "
-CFLAGS="$CFLAGS -Wno-unused-variable "
+CFLAGS="$CFLAGS -Wno-unused-variable -Wno-unused-function"
+CFLAGS="$CFLAGS -Wno-c11-extensions -Wno-constant-logical-operand"
 
 echo "target=$target"
 case "$target" in

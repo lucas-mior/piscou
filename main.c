@@ -17,6 +17,7 @@
 
 #include "piscou.h"
 #include "config.h"
+#include "util.c"
 
 typedef struct Array {
     char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
@@ -32,7 +33,6 @@ static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 static void array_string(char *, int32, char *, char *, char **, int32);
-static int snprintf2(char *, size_t, char *, ...);
 
 static char *filename;
 static char *program;
@@ -102,14 +102,12 @@ int main(int argc, char **argv) {
     }
 
     if (!found) {
-        char error_message[512];
-        int32 n = snprintf(error_message, sizeof(error_message),
-                           "No previewer set for file:\n\n"
-                           "%s:\n    %s\n", basename(argv[1]), file_mime);
-        write(STDERR_FILENO, error_message, (size_t)n);
-        write(STDOUT_FILENO, error_message, (size_t)n);
+        error("No previewer set for file:\n\n"
+              "%s:\n    %s\n", basename(argv[1]), file_mime);
+        exit(EXIT_FAILURE);
     }
-    exit(EXIT_SUCCESS);
+    error("Every previewer failed.\n");
+    exit(EXIT_FAILURE);
 }
 
 void
@@ -181,69 +179,14 @@ ignore:
         continue;
     }
 #if defined(PISCOU_BENCHMARK) || defined(PISCOU_DEBUG)
-    for (int32 i = 0; i < args.len + 1; i += 1)
+    for (int32 i = 0; i < (args.len + 1); i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #endif
     execvp(args.array[0], args.array);
     {
         char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
-        ARRAY_STRING(full_command, " ", args.array, args.len);
-        error("Error executing %s:\n%s\n", full_command, strerror(errno));
-    }
-    return;
-}
-
-int
-snprintf2(char *buffer, size_t size, char *format, ...) {
-    int n;
-    va_list args;
-
-    va_start(args, format);
-    n = vsnprintf(buffer, size, format, args);
-    va_end(args);
-
-    if (n <= 0) {
-        error("Error in snprintf.\n");
-        exit(EXIT_FAILURE);
-    }
-    if (n >= (int)size) {
-        error("Error in snprintf.\n");
-        exit(EXIT_FAILURE);
-    }
-    return n;
-}
-
-void array_string(char *buffer, int32 size,
-                  char *sep, char *formatter,
-                  char **array, int32 array_length) {
-    char format_string[16];
-    int32 n = 0;
-    SNPRINTF(format_string, "%s%%s", formatter);
-
-    for (int32 i = 0; i < (array_length-1); i += 1) {
-        int32 space = size - n;
-        int32 m = snprintf(buffer + n, (ulong)space, "%s%s", array[i], sep);
-        if (m <= 0) {
-            error("Error in snprintf().\n");
-            exit(EXIT_FAILURE);
-        }
-        if (m > space) {
-            error("Error printing full command, not enough space.\n");
-            exit(EXIT_FAILURE);
-        }
-        n += m;
-    }{
-        int32 i = array_length - 1;
-        int32 space = size - n;
-        int32 m = snprintf(buffer + n, (ulong)space, "%s", array[i]);
-        if (m <= 0) {
-            error("Error in snprintf().\n");
-            exit(EXIT_FAILURE);
-        }
-        if (m > space) {
-            error("Error printing array, not enough space.\n");
-            exit(EXIT_FAILURE);
-        }
+        ARRAY_STRING(full_command, " ", args.array, args.len + 1);
+        error("Error executing\n%s\n%s\n", full_command, strerror(errno));
     }
     return;
 }
@@ -279,46 +222,4 @@ array_push(Array *array, char *string, int32 length) {
     }
     array->len += 1;
     return;
-}
-
-void
-error(char *format, ...) {
-    char *notifiers[2] = { "dunstify", "notify-send" };
-    int32 n;
-    va_list args;
-    char buffer[BUFSIZ];
-
-    va_start(args, format);
-    n = vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
-
-    if (n < 0) {
-        fprintf(stderr, "Error in vsnprintf()\n");
-        exit(EXIT_FAILURE);
-    }
-    if (n >= (int32)sizeof(buffer)) {
-        fprintf(stderr, "Error in vsnprintf: buffer is not large enough.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    write(STDERR_FILENO, buffer, (size_t)n);
-    fsync(STDERR_FILENO);
-    fsync(STDOUT_FILENO);
-
-#ifdef PISCOU_DEBUG
-    switch (fork()) {
-        case -1:
-            fprintf(stderr, "Error forking: %s\n", strerror(errno));
-            break;
-        case 0:
-            for (int32 i = 0; i < LENGTH(notifiers); i += 1) {
-                execlp(notifiers[i], notifiers[i], "-u", "critical",
-                                     program, buffer, NULL);
-            }
-            fprintf(stderr, "Error trying to exec dunstify.\n");
-            exit(EXIT_FAILURE);
-        default:
-            break;
-    }
-#endif
 }
