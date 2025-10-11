@@ -32,7 +32,7 @@ static inline void parse_command_run(char * const *, int32, char **);
 static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
 static void array_string(char *, int32, char *, char *, char **, int32);
-void *snprintf2(char *, size_t, char *, ...);
+static int snprintf2(char *, size_t, char *, ...);
 
 static char *filename;
 static char *program;
@@ -193,7 +193,7 @@ ignore:
     return;
 }
 
-void *
+int
 snprintf2(char *buffer, size_t size, char *format, ...) {
     int n;
     va_list args;
@@ -202,23 +202,15 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
     n = vsnprintf(buffer, size, format, args);
     va_end(args);
 
-    if (size <= 8) {
-        error("%s: wrong buffer size = %zu.\n", __func__, size);
-        exit(EXIT_FAILURE);
-    }
-    if (n >= (int)size) {
-        va_list args2;
-        buffer = malloc((size_t)n + 1);
-        va_start(args, format);
-        va_copy(args2, args);
-        n = vsnprintf(buffer, (size_t)n + 1, format, args);
-        va_end(args);
-    }
     if (n <= 0) {
         error("Error in snprintf.\n");
         exit(EXIT_FAILURE);
     }
-    return buffer;
+    if (n >= (int)size) {
+        error("Error in snprintf.\n");
+        exit(EXIT_FAILURE);
+    }
+    return n;
 }
 
 void array_string(char *buffer, int32 size,
