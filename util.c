@@ -46,6 +46,17 @@
 #define SNPRINTF(BUFFER, FORMAT, ...) \
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 #endif
+#ifndef ARRAY_STRING
+#define ARRAY_STRING(BUFFER, SEP, ARRAY, LENGTH) \
+  _Generic((ARRAY), \
+    int *: array_string(BUFFER, sizeof(BUFFER), SEP, "%d", ARRAY, LENGTH), \
+    float *: array_string(BUFFER, sizeof(BUFFER), SEP, "%f", ARRAY, LENGTH), \
+    double *: array_string(BUFFER, sizeof(BUFFER), SEP, "%f", ARRAY, LENGTH), \
+    char **: array_string(BUFFER, sizeof(BUFFER), SEP, "%s", ARRAY, LENGTH) \
+  )
+#endif
+
+
 
 #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
   #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2MB
