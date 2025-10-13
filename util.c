@@ -278,7 +278,7 @@ util_command(const int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < argc - 1; ++i)
+    for (int i = 0; i < argc - 1; i += 1)
         len += strlen(argv[i]) + 3;
     cmdline = xmalloc(len);
 
@@ -374,7 +374,7 @@ void array_string(char *buffer, int32 size,
     int32 n = 0;
     SNPRINTF(format_string, "%s%%s", formatter);
 
-    for (int32 i = 0; i < (array_length-1); i += 1) {
+    for (int32 i = 0; i < (array_length - 1); i += 1) {
         int32 space = size - n;
         int32 m = snprintf(buffer + n, (ulong)space, "%s%s", array[i], sep);
         if (m <= 0) {
@@ -615,16 +615,19 @@ itoa(long num, char *str) {
     }
 
     do {
-        str[i++] = num % 10 + '0';
+        str[i] = num % 10 + '0';
+        i += 1;
         num /= 10;
     } while (num > 0);
 
-    if (negative)
-        str[i++] = '-';
+    if (negative) {
+        str[i] = '-';
+        i += 1;
+    }
 
     str[i] = '\0';
 
-    for (int j = 0; j < i / 2; j++) {
+    for (int j = 0; j < i / 2; j += 1) {
         char temp = str[j];
         str[j] = str[i - j - 1];
         str[i - j - 1] = temp;
