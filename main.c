@@ -104,9 +104,9 @@ int main(int argc, char **argv) {
     if (!found) {
         error("No previewer set for file:\n\n"
               "%s:\n    %s\n", basename(argv[1]), file_mime);
-        exit(EXIT_FAILURE);
+    } else {
+        error("Every previewer failed.\n");
     }
-    error("Every previewer failed.\n");
     exit(EXIT_FAILURE);
 }
 
