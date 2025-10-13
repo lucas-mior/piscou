@@ -12,6 +12,7 @@ program="piscou"
 LDFLAGS="$LDFLAGS $(pkg-config libmagic --libs)"
 
 CC=${CC:-cc}
+CC=clang
 if [ $CC = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything "
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "

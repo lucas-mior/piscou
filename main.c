@@ -182,6 +182,10 @@ ignore:
     for (int32 i = 0; i < (args.len + 1); i += 1)
         printf("args.array[%d] = %s\n", i, args.array[i]);
 #endif
+    if (args.array[0] == NULL) {
+        error("Invalid command.\n");
+        exit(EXIT_FAILURE);
+    }
     execvp(args.array[0], args.array);
     {
         char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
