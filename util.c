@@ -272,7 +272,7 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
         exit(EXIT_FAILURE);
     }
     if (n >= (int)size) {
-        error("%s: wrong buffer size = %zu.\n", __func__, size);
+        error("Error in snprintf: Buffer is too small.\n");
         exit(EXIT_FAILURE);
     }
     return n;
