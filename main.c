@@ -30,9 +30,7 @@ typedef struct Array {
 static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *, int32);
 static inline void parse_command_run(char * const *, int32, char **);
-static void error(char *, ...);
 static void usage(FILE *) __attribute__((noreturn));
-static void array_string(char *, int32, char *, char *, char **, int32);
 
 static char *filename;
 static char *program;
