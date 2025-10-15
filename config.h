@@ -45,6 +45,7 @@ static const Rule rules[] = {
 {{"appl.+/gzip",          NULL}, {"tar", "tf", "%piscou-filename%"}},
 {{"appl.+/x-7z-.+",       NULL}, {"7z", "l", "%piscou-filename%"}},
 {{"appl.+/x-subrip",      NULL}, {"/usr/bin/cat", "%piscou-filename%"}},
+{{"appl.+/mbox",          NULL}, {"bat", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},
 // {{NULL,             ".+\\.ff$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
 // {{NULL,            ".+\\.gif$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
 // {{NULL,           ".+\\.webp$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
