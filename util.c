@@ -396,7 +396,7 @@ void array_string(char *buffer, int32 size,
             error("Error in snprintf().\n");
             fatal(EXIT_FAILURE);
         }
-        if (m > space) {
+        if (m >= space) {
             error("Error printing array, not enough space.\n");
             fatal(EXIT_FAILURE);
         }
@@ -409,7 +409,7 @@ void array_string(char *buffer, int32 size,
             error("Error in snprintf().\n");
             fatal(EXIT_FAILURE);
         }
-        if (m > space) {
+        if (m >= space) {
             error("Error printing array, not enough space.\n");
             fatal(EXIT_FAILURE);
         }
