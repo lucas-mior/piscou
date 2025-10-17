@@ -397,7 +397,7 @@ void array_string(char *buffer, int32 size,
             fatal(EXIT_FAILURE);
         }
         if (m > space) {
-            error("Error printing full command, not enough space.\n");
+            error("Error printing array, not enough space.\n");
             fatal(EXIT_FAILURE);
         }
         n += m;
@@ -410,7 +410,7 @@ void array_string(char *buffer, int32 size,
             fatal(EXIT_FAILURE);
         }
         if (m > space) {
-            error("Error printing full command, not enough space.\n");
+            error("Error printing array, not enough space.\n");
             fatal(EXIT_FAILURE);
         }
     }
@@ -444,6 +444,7 @@ error(char *format, ...) {
 void
 fatal(int status) {
 #ifdef DEBUGGING
+    (void) status;
     abort();
 #else
     exit(status);
