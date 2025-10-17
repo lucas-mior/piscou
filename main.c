@@ -29,7 +29,7 @@ typedef struct Array {
 
 static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *, int32);
-static inline void parse_command_run(char * const *, int32, char **);
+static inline void parse_command_run(char *const *, int32, char **);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
@@ -38,15 +38,17 @@ static Regex regex_filename;
 static Regex regex_extras;
 static Regex regex_extras_more;
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv) {
     char buffer[PATH_MAX];
     magic_t magic;
     const char *file_mime = NULL;
     bool found = false;
     program = basename(argv[0]);
 
-    if (argc <= 1)
+    if (argc <= 1) {
         usage(stderr);
+    }
 
     regex_filename.string = REGEX_FILENAME;
     regex_extras.string = REGEX_EXTRAS;
@@ -66,8 +68,9 @@ int main(int argc, char **argv) {
             error("Error in magic_load(magic): %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        if ((file_mime = magic_file(magic, filename)) == NULL)
+        if ((file_mime = magic_file(magic, filename)) == NULL) {
             file_mime = "text/plain";
+        }
     } else {
         filename = argv[1];
         file_mime = "text/plain";
@@ -77,22 +80,25 @@ int main(int argc, char **argv) {
         char *mime = rules[i].match[0];
         char *path = rules[i].match[1];
 
-        if ((mime == NULL) && (path == NULL))
+        if ((mime == NULL) && (path == NULL)) {
             continue;
+        }
 
         if (mime) {
             Regex regex_config;
             regex_config.string = mime;
             compile_regex(&regex_config);
-            if (!MATCH_REGEX_SIMPLE(regex_config, file_mime))
+            if (!MATCH_REGEX_SIMPLE(regex_config, file_mime)) {
                 continue;
+            }
         }
         if (path) {
             Regex regex_config;
             regex_config.string = path;
             compile_regex(&regex_config);
-            if (!MATCH_REGEX_SIMPLE(regex_config, filename))
+            if (!MATCH_REGEX_SIMPLE(regex_config, filename)) {
                 continue;
+            }
         }
 
         found = true;
@@ -101,7 +107,8 @@ int main(int argc, char **argv) {
 
     if (!found) {
         error("No previewer set for file:\n\n"
-              "%s:\n    %s\n", basename(argv[1]), file_mime);
+              "%s:\n    %s\n",
+              basename(argv[1]), file_mime);
     } else {
         error("Every previewer failed.\n");
     }
@@ -109,7 +116,7 @@ int main(int argc, char **argv) {
 }
 
 void
-parse_command_run(char * const *command, int32 argc, char **argv) {
+parse_command_run(char *const *command, int32 argc, char **argv) {
     Array args = {0};
     args.arena_pos = args.arena;
 
@@ -147,24 +154,24 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
-                          " Ignoring...\n", extra_index);
+                          " Ignoring...\n",
+                          extra_index);
                     goto ignore;
                 }
 
                 argv_passed = argv[extra_index];
                 extra_length = (int32)strlen(argv_passed);
-                total_length = (int32)(pointer - args.arena_pos)
-                               + extra_length + left;
+                total_length
+                    = (int32)(pointer - args.arena_pos) + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
                     error("Too long argument. Max length is %d.\n",
                           MAX_ARGUMENT_LENGTH);
                     exit(EXIT_FAILURE);
                 }
 
-                memmove(&pointer[start + extra_length],
-                        &pointer[end], (size_t)left);
-                memcpy(&pointer[start],
-                       argv_passed, (size_t)extra_length);
+                memmove(&pointer[start + extra_length], &pointer[end],
+                        (size_t)left);
+                memcpy(&pointer[start], argv_passed, (size_t)extra_length);
                 pointer += (extra_length + start);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
@@ -173,12 +180,13 @@ parse_command_run(char * const *command, int32 argc, char **argv) {
             continue;
         }
         array_push(&args, argument, 0);
-ignore:
+    ignore:
         continue;
     }
 #if defined(PISCOU_BENCHMARK) || defined(PISCOU_DEBUG)
-    for (int32 i = 0; i < (args.len + 1); i += 1)
+    for (int32 i = 0; i < (args.len + 1); i += 1) {
         printf("args.array[%d] = %s\n", i, args.array[i]);
+    }
 #endif
     if (args.array[0] == NULL) {
         error("Invalid command.\n");
