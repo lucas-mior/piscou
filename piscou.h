@@ -40,6 +40,13 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
+#if !defined(PISCOU_DEBUG)
+  #define PISCOU_DEBUG 0
+#endif
+#if !defined(PISCOU_BENCHMARK)
+  #define PISCOU_BENCHMARK 0
+#endif
+
 #define SNPRINTF(BUFFER, FORMAT, ...) \
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 #define LENGTH(X) (int32)(sizeof(X) / sizeof(*X))
