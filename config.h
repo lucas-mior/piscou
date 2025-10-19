@@ -46,9 +46,9 @@ static const Rule rules[] = {
 {{"appl.+/x-7z-.+",       NULL}, {"7z", "l", "%piscou-filename%"}},
 {{"appl.+/x-subrip",      NULL}, {"/usr/bin/cat", "%piscou-filename%"}},
 {{"appl.+/mbox",          NULL}, {"bat", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},
-// {{NULL,             ".+\\.ff$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
-// {{NULL,            ".+\\.gif$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
-// {{NULL,           ".+\\.webp$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
+{{NULL,             ".+\\.ff$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
+{{NULL,            ".+\\.gif$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
+{{NULL,           ".+\\.webp$"}, {"chafa", "%piscou-filename%", "-s", "%piscou-extra0%x%piscou-extra1%"}},
 {{NULL,              "\\.hdr$"}, {"hdr.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{NULL,          ".+\\.[1-9]$"}, {"man", "%piscou-filename%"}},
 {{NULL,           ".+\\.sent$"}, {"/usr/bin/cat", "%piscou-filename%"}},
@@ -60,7 +60,7 @@ static const Rule rules[] = {
 {{"video/.*",             NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"appl[^/]+/x-matroska", NULL}, {"vid.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
 {{"appl[^/]+/x-kicad-.*", NULL}, {"kicad.sh", "%piscou-filename%", "%piscou-extra0%", "%piscou-extra1%", "%piscou-extra2%", "%piscou-extra3%"}},
-{{"text/.+",              NULL}, {"bat2", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},
+{{"text/.+",              NULL}, {"bat", "-p", "--pager=never", "--color=always", "%piscou-filename%"}},
 };
 
 #endif
