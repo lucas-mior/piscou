@@ -58,10 +58,12 @@
 #define DEBUGGING 0
 #endif
 
+#ifndef FLAGS_HUGE_PAGES
 #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
 #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
 #else
 #define FLAGS_HUGE_PAGES 0
+#endif
 #endif
 
 #if !defined(MAP_POPULATE)
