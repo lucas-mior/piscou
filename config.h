@@ -1,4 +1,4 @@
-#ifndef CONFIG_H
+#if !defined(CONFIG_H)
 #define CONFIG_H
 
 #include <stdlib.h>

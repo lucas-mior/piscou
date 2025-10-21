@@ -1,4 +1,4 @@
-#ifndef PISCOU_H
+#if !defined(PISCOU_H)
 #define PISCOU_H
 
 #include <assert.h>
@@ -19,7 +19,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 
-#ifndef INTEGERS
+#if !defined(INTEGERS)
 #define INTEGERS
 typedef unsigned char uchar;
 typedef unsigned short ushort;
