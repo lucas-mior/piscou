@@ -71,4 +71,6 @@ compile_regex(Regex *regex) {
     return;
 }
 
+static char *program;
+
 #endif

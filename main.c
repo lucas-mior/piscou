@@ -33,7 +33,6 @@ static inline void parse_command_run(char *const *, int32, char **);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
-static char *program;
 static Regex regex_filename;
 static Regex regex_extras;
 static Regex regex_extras_more;
