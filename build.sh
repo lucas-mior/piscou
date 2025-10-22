@@ -27,36 +27,36 @@ fi
 
 echo "target=$target"
 case "$target" in
-    "debug")
-        CFLAGS="$CFLAGS -g -fsanitize=undefined "
-        CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=1" ;;
-    "benchmark")
-        CFLAGS="$CFLAGS -g -O2 -flto "
-        CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1" ;;
-    *)
-        CFLAGS="$CFLAGS -O2 -flto "
-        CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=0" ;;
+"debug")
+    CFLAGS="$CFLAGS -g -fsanitize=undefined "
+    CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=1" ;;
+"benchmark")
+    CFLAGS="$CFLAGS -g -O2 -flto "
+    CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1" ;;
+*)
+    CFLAGS="$CFLAGS -O2 -flto "
+    CPPFLAGS="$CPPFLAGS -DPISCOU_DEBUG=0" ;;
 esac
 
 case "$target" in
-    "uninstall")
-        set -x
-        rm -f ${DESTDIR}${PREFIX}/bin/${program}
-        rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
-        ;;
-    "install")
-        [ ! -f $program ] && $0 build
-        set -x
-        install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
-        install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
-        ;;
-    "build"|"debug"|"benchmark")
-        ctags --kinds-C=+l ./*.h ./*.c 2> /dev/null || true
-        vtags.sed tags > .tags.vim 2> /dev/null || true
-        set -x
-        $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
-        ;;
-    *)
-        echo "usage: $0 [ uninstall / install / build / debug ]"
-        ;;
+"uninstall")
+    set -x
+    rm -f ${DESTDIR}${PREFIX}/bin/${program}
+    rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
+    ;;
+"install")
+    [ ! -f $program ] && $0 build
+    set -x
+    install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
+    install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
+    ;;
+"build"|"debug"|"benchmark")
+    ctags --kinds-C=+l ./*.h ./*.c 2> /dev/null || true
+    vtags.sed tags > .tags.vim 2> /dev/null || true
+    set -x
+    $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
+    ;;
+*)
+    echo "usage: $0 [ uninstall / install / build / debug ]"
+    ;;
 esac
