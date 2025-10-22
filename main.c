@@ -194,7 +194,7 @@ parse_command_run(char *const *command, int32 argc, char **argv) {
     execvp(args.array[0], args.array);
     {
         char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
-        ARRAY_STRING(full_command, " ", args.array, args.len + 1);
+        STRING_FROM_STRINGS(full_command, " ", args.array, args.len + 1);
         error("Error executing\n%s\n%s\n", full_command, strerror(errno));
     }
     return;
