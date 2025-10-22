@@ -52,7 +52,7 @@ case "$target" in
     ;;
 "build"|"debug"|"benchmark")
     ctags --kinds-C=+l ./*.h ./*.c 2> /dev/null || true
-    vtags.sed tags > .tags.vim 2> /dev/null || true
+    vtags.sed tags > .tags.vim     2> /dev/null || true
     set -x
     $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
     ;;
