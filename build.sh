@@ -2,6 +2,9 @@
 
 # shellcheck disable=SC2086
 
+alias trace_on='set -x'
+alias trace_off='{ set +x; } 2>/dev/null'
+
 target="${1:-build}"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -40,20 +43,22 @@ esac
 
 case "$target" in
 "uninstall")
-    set -x
+    trace_on
     rm -f ${DESTDIR}${PREFIX}/bin/${program}
     rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
     ;;
 "install")
-    [ ! -f $program ] && $0 build
-    set -x
+    if [ ! -f $program ]; then
+        $0 build
+    fi
+    trace_on
     install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
     install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
     ;;
 "build"|"debug"|"benchmark")
+    trace_on
     ctags --kinds-C=+l ./*.h ./*.c 2> /dev/null || true
     vtags.sed tags > .tags.vim     2> /dev/null || true
-    set -x
     $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
     ;;
 *)
