@@ -28,7 +28,7 @@ if [ $CC = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
 fi
 
-echo "target=$target"
+echo "$0 $target ..."
 case "$target" in
 "debug")
     CFLAGS="$CFLAGS -g -fsanitize=undefined "
