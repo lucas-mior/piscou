@@ -6,11 +6,6 @@ benchmark
 # perf
 # valgrind
 check
-cross x86-windows-gnu
-cross x86_64-windows-gnu
-cross aarch64-windows-gnu
-cross x86_64-macos
-cross aarch64-macos
 cross aarch64-linux-gnu
 cross aarch64-linux-musl
 cross riscv32-linux-musl
