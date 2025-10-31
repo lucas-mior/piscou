@@ -187,7 +187,7 @@ case "$target" in
     start=$(date +%s.%N)
     # do some stuff here
     n=100
-    for i in $(seq $n); do
+    for _ in $(seq $n); do
         $dir/$exe $0
     done > /dev/null
     dur=$(echo "$(date +%s.%N) - $start" | bc)
