@@ -204,7 +204,7 @@ case "$target" in
     trace_on
     for f in *; do
         valgrind $vg_flags $dir/piscou "$f"
-    done
+    done > /dev/null
     trace_off
     exit
     ;;
