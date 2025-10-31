@@ -186,11 +186,14 @@ case "$target" in
 "benchmark") 
     start=$(date +%s.%N)
     # do some stuff here
-    for i in $(seq 10); do
+    n=100
+    for i in $(seq $n); do
         $dir/$exe $0
     done > /dev/null
     dur=$(echo "$(date +%s.%N) - $start" | bc)
-    echo "dur=$dur"
+    per_run="$(echo "($dur/$n)*1000" | bc -l \
+        | sed -E 's/(\.[0-9][0-9][0-9])[0-9]+$/\1/')"
+    echo "dur=${dur}s = ${per_run}ms per execution"
     rm $dir/$exe
     exit
     ;;
