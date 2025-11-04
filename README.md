@@ -12,7 +12,7 @@ $ sudo ./build.sh install
 
 ## Usage
 ```
-piscou %piscou-filename% [%piscou-extra0% %piscou-extra1% ...]
+piscou #piscou-file# [#piscou-0# #piscou-1# ...]
 ```
 
 Note that you can pass up to 9 arguments to the program after the filename.

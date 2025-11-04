@@ -201,8 +201,8 @@ parse_command_run(char *const *command, int32 argc, char **argv) {
 
 void
 usage(FILE *stream) {
-    fprintf(stream, "usage: piscou %%piscou-filename%%"
-                    " [ %%piscou-extra0%% %%piscou-extra1%% ... ]\n");
+    fprintf(stream, "usage: piscou #piscou-file#"
+                    " [ #piscou-0# #piscou-1# ... ]\n");
     exit(stream != stdout);
 }
 
