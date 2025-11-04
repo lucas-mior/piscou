@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <libgen.h>
+#include <pthread.h>
 #include <limits.h>
 #include <sys/stat.h>
 
@@ -789,7 +790,7 @@ send_signal(const char *executable, const int32 signal_number) {
                       signal_number, executable, pid, strerror(errno));
             } else {
                 if (DEBUGGING) {
-                    error("Sended signal %d to program %s (pid %d): %s.\n",
+                    error("Sended signal %d to program %s (pid %d).\n",
                           signal_number, executable, pid);
                 }
             }
