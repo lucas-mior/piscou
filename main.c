@@ -23,13 +23,13 @@ typedef struct Array {
     char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
     char *array[MAX_ARGS];
     char *arena_pos;
-    int32 len;
-    int32 unused;
+    int64 len;
+    int64 unused;
 } Array;
 
-static inline int32 get_extra_number(char *, regmatch_t);
-static inline void array_push(Array *, char *, int32);
-static inline void parse_command_run(char *const *, int32, char **);
+static inline int64 get_extra_number(char *, regmatch_t);
+static inline void array_push(Array *, char *, int64);
+static inline void parse_command_run(char *const *, int64, char **);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
@@ -75,7 +75,7 @@ main(int argc, char **argv) {
         file_mime = "text/plain";
     }
 
-    for (int32 i = 0; i < LENGTH(rules); i += 1) {
+    for (int64 i = 0; i < LENGTH(rules); i += 1) {
         char *mime = rules[i].match[0];
         char *path = rules[i].match[1];
 
@@ -114,11 +114,11 @@ main(int argc, char **argv) {
 }
 
 void
-parse_command_run(char *const *command, int32 argc, char **argv) {
+parse_command_run(char *const *command, int64 argc, char **argv) {
     Array args = {0};
     args.arena_pos = args.arena;
 
-    for (int32 i = 0; command[i]; i += 1) {
+    for (int64 i = 0; command[i]; i += 1) {
         char *argument = command[i];
         regmatch_t matches[MAX_EXTRAS + 1];
 
@@ -127,7 +127,7 @@ parse_command_run(char *const *command, int32 argc, char **argv) {
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras, argument, matches)) {
-            int32 extra_index = get_extra_number(argument, matches[1]);
+            int64 extra_index = get_extra_number(argument, matches[1]);
 
             if (extra_index >= argc) {
                 error("Extra argument %d not passed to piscou. Ignoring...\n",
@@ -139,16 +139,16 @@ parse_command_run(char *const *command, int32 argc, char **argv) {
         }
         if (MATCH_SUBEXPRESSIONS(regex_extras_more, argument, matches)) {
             char *pointer = args.arena_pos;
-            int32 extra_length = 0;
-            int32 final_length;
+            int64 extra_length = 0;
+            int64 final_length;
             strcpy(pointer, argument);
             do {
                 char *argv_passed;
-                int32 total_length;
-                int32 start = matches[0].rm_so;
-                int32 end = matches[0].rm_eo;
-                int32 left = (int32)strlen(&pointer[end]) + 1;
-                int32 extra_index = get_extra_number(pointer, matches[1]);
+                int64 total_length;
+                int64 start = matches[0].rm_so;
+                int64 end = matches[0].rm_eo;
+                int64 left = (int64)strlen64(&pointer[end]) + 1;
+                int64 extra_index = get_extra_number(pointer, matches[1]);
 
                 if (extra_index >= argc) {
                     error("Extra argument %d not passed to piscou."
@@ -158,9 +158,9 @@ parse_command_run(char *const *command, int32 argc, char **argv) {
                 }
 
                 argv_passed = argv[extra_index];
-                extra_length = (int32)strlen(argv_passed);
+                extra_length = (int64)strlen64(argv_passed);
                 total_length
-                    = (int32)(pointer - args.arena_pos) + extra_length + left;
+                    = (int64)(pointer - args.arena_pos) + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
                     error("Too long argument. Max length is %d.\n",
                           MAX_ARGUMENT_LENGTH);
@@ -173,7 +173,7 @@ parse_command_run(char *const *command, int32 argc, char **argv) {
                 pointer += (extra_length + start);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
-            final_length = (int32)(pointer - args.arena_pos);
+            final_length = (int64)(pointer - args.arena_pos);
             array_push(&args, NULL, final_length);
             continue;
         }
@@ -206,14 +206,14 @@ usage(FILE *stream) {
     exit(stream != stdout);
 }
 
-int32
+int64
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
 
-    int32 start = pmatch.rm_so;
-    int32 end = pmatch.rm_eo;
-    int32 diff = end - start;
-    int32 number;
+    int64 start = pmatch.rm_so;
+    int64 end = pmatch.rm_eo;
+    int64 diff = end - start;
+    int64 number;
 
     memcpy(number_buffer, string + start, (size_t)diff);
     number = atoi(number_buffer);
@@ -221,7 +221,7 @@ get_extra_number(char *string, regmatch_t pmatch) {
 }
 
 void
-array_push(Array *array, char *string, int32 length) {
+array_push(Array *array, char *string, int64 length) {
     if (string) {
         array->array[array->len] = string;
     } else {
