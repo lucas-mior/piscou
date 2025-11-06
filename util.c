@@ -90,9 +90,9 @@ static char *program;
 #define SIZEOF(X) (int64)sizeof(X)
 
 #if !defined(SIZEKB)
-#define SIZEKB(X) ((size_t)(X)*1024ul)
-#define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
-#define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
+#define SIZEKB(X) ((int64)(X)*1024l)
+#define SIZEMB(X) ((int64)(X)*1024l*1024l)
+#define SIZEGB(X) ((int64)(X)*1024l*1024l*1024l)
 #endif
 
 #if !defined(LENGTH)
@@ -128,7 +128,7 @@ static char *program;
         int8: PRINT_VAR_EVAL("%d", variable),                                  \
         int16: PRINT_VAR_EVAL("%d", variable),                                 \
         int32: PRINT_VAR_EVAL("%d", variable),                                 \
-        int64: PRINT_VAR_EVAL("%ld", variable),                                \
+        int64: PRINT_VAR_EVAL("%lld", (long long)variable),                                \
         uint8: PRINT_VAR_EVAL("%u", variable),                                 \
         uint16: PRINT_VAR_EVAL("%u", variable),                                \
         uint32: PRINT_VAR_EVAL("%u", variable),                                \
@@ -186,18 +186,11 @@ typedef ssize_t isize;
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
-static void *xmmap_commit(size_t *);
-static void xmunmap(void *, size_t);
-static void *xcalloc(const size_t, const size_t);
-static void *xmalloc(int64);
-static void *xrealloc(void *, const int64);
 static void *util_memdup(const void *, const usize);
 static char *xstrdup(char *);
 static int32 snprintf2(char *, size_t, char *, ...);
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
-static void string_from_strings(char *, int32, char *, char **, int32);
-static int32 util_copy_file(const char *, const char *);
 static int32 util_string_int32(int32 *, const char *);
 static int util_command(const int, char **);
 static uint32 util_nthreads(void);
@@ -208,7 +201,41 @@ static void send_signal(const char *, const int);
 static char *itoa2(long, char *);
 static long atoi2(char *);
 static size_t util_page_size = 0;
-char *basename2(char *);
+
+#if OS_WINDOWS
+static void *
+memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
+    uchar *h = haystack;
+    uchar *n = needle;
+    uchar *end = h + hay_len;
+    uchar *limit = end - needle_len + 1;
+
+    if (needle_len == 0) {
+        return haystack;
+    }
+    if ((haystack == NULL) || (needle == NULL)) {
+        return NULL;
+    }
+    if (hay_len < needle_len) {
+        return NULL;
+    }
+
+    while (h < limit) {
+        uchar *p;
+
+        if ((p = memchr(h, n[0], (size_t)(limit - h))) == NULL) {
+            return NULL;
+        }
+
+        if (memcmp(p, n, needle_len) == 0) {
+            return (void *)p;
+        }
+        h = p + 1;
+    }
+
+    return NULL;
+}
+#endif
 
 #if OS_WINDOWS
 uint32
@@ -229,7 +256,7 @@ util_nthreads(void) {
 #define basename basename2
 #endif
 
-char *
+static char *
 basename2(char *path) {
     int64 left = (int64)strlen(path);
     char *fslash = NULL;
@@ -261,8 +288,8 @@ basename2(char *path) {
 }
 
 #if OS_UNIX
-void *
-xmmap_commit(size_t *size) {
+static void *
+xmmap_commit(int64 *size) {
     void *p;
 
     if (util_page_size == 0) {
@@ -276,18 +303,18 @@ xmmap_commit(size_t *size) {
 
     do {
         if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
-            p = mmap(NULL, *size, PROT_READ | PROT_WRITE,
+            p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
                      MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE
                          | FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
-                *size = UTIL_ALIGN(*size, SIZEMB(2));
+                *size = (int64)UTIL_ALIGN((size_t)size, (size_t)SIZEMB(2));
                 break;
             }
         }
-        p = mmap(NULL, *size, PROT_READ | PROT_WRITE,
+        p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
                  MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
-        *size = UTIL_ALIGN(*size, util_page_size);
+        *size = (int64)UTIL_ALIGN((size_t)*size, util_page_size);
     } while (0);
     if (p == MAP_FAILED) {
         error("Error in mmap(%zu): %s.\n", *size, strerror(errno));
@@ -295,16 +322,16 @@ xmmap_commit(size_t *size) {
     }
     return p;
 }
-void
-xmunmap(void *p, size_t size) {
-    if (munmap(p, size) < 0) {
-        error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
+static void
+xmunmap(void *p, int64 size) {
+    if (munmap(p, (size_t)size) < 0) {
+        error("Error in munmap(%p, %lld): %s.\n", p, size, strerror(errno));
     }
     return;
 }
 #else
-void *
-xmmap_commit(size_t *size) {
+static void *
+xmmap_commit(int64 *size) {
     void *p;
 
     if (util_page_size == 0) {
@@ -317,15 +344,16 @@ xmmap_commit(size_t *size) {
         }
     }
 
-    p = VirtualAlloc(NULL, *size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE,
+                     PAGE_READWRITE);
     if (p == NULL) {
-        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n", *size,
+        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n", (long long)*size,
                 GetLastError());
         fatal(EXIT_FAILURE);
     }
     return p;
 }
-void
+static void
 xmunmap(void *p, size_t size) {
     (void)size;
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
@@ -335,7 +363,7 @@ xmunmap(void *p, size_t size) {
 }
 #endif
 
-void *
+static void *
 xmalloc(int64 size) {
     void *p;
     if (size <= 0) {
@@ -343,18 +371,18 @@ xmalloc(int64 size) {
         fatal(EXIT_FAILURE);
     }
     if ((p = malloc((size_t)size)) == NULL) {
-        error("Failed to allocate %zu bytes.\n", size);
+        error("Failed to allocate %lld bytes.\n", (long long)size);
         fatal(EXIT_FAILURE);
     }
     return p;
 }
 
-void *
+static void *
 xrealloc(void *old, const int64 size) {
     void *p;
     uint64 old_save = (uint64)old;
     if (size <= 0) {
-        error("Error in xmalloc: invalid size = %ld.\n", size);
+        error("Error in xmalloc: invalid size = %lld.\n", (long long)size);
         fatal(EXIT_FAILURE);
     }
     if ((p = realloc(old, (usize)size)) == NULL) {
@@ -364,7 +392,7 @@ xrealloc(void *old, const int64 size) {
     return p;
 }
 
-void *
+static void *
 xcalloc(const size_t nmemb, const size_t size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
@@ -458,24 +486,35 @@ util_command(const int argc, char **argv) {
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
+    int64 len = (int64)strlen(argv[0]);
+    char *argv0_windows;
+    char *exe = ".exe";
+    int64 exe_len = (int64)(strlen(exe));
 
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
         fatal(EXIT_FAILURE);
     }
 
+    if (memmem(argv[0], (size_t)len + 1, exe, (size_t)exe_len + 1) == NULL) {
+        argv0_windows = xmalloc(len + exe_len + 1);
+        memcpy(argv0_windows, argv[0], (size_t)len);
+        memcpy(argv0_windows + len, exe, (size_t)exe_len + 1);
+        argv[0] = argv0_windows;
+    }
+
     for (int i = 0; i < argc - 1; i += 1) {
-        int64 len = (int64)strlen(argv[i]);
-        if ((j + len) >= (int64)sizeof(cmdline)) {
+        int64 len2 = (int64)strlen(argv[i]);
+        if ((j + len2) >= (int64)sizeof(cmdline)) {
             error("Command line is too long.\n");
             fatal(EXIT_FAILURE);
         }
 
         cmdline[j] = '"';
-        memcpy(&cmdline[j + 1], argv[i], len);
-        cmdline[j + len + 1] = '"';
-        cmdline[j + len + 2] = ' ';
-        j += len + 3;
+        memcpy(&cmdline[j + 1], argv[i], (size_t)len2);
+        cmdline[j + len2 + 1] = '"';
+        cmdline[j + len2 + 2] = ' ';
+        j += len2 + 3;
     }
     cmdline[j - 1] = '\0';
 
@@ -488,22 +527,40 @@ util_command(const int argc, char **argv) {
         BOOL success;
         STARTUPINFO startup_info = {0};
         startup_info.cb = sizeof(startup_info);
-
         success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL, NULL,
                                  &startup_info, &proc_info);
         if (!success) {
-            error("Error running '%s': %d\n", cmdline, GetLastError());
+            DWORD err = GetLastError();
+            error("Error running '%s': %d.\n", cmdline, err);
+            if (err == ERROR_PATH_NOT_FOUND) {
+                error("Path not found.\n");
+            }
             return -1;
         }
     }
 
-    WaitForSingleObject(proc_info.hProcess, INFINITE);
+    if (WaitForSingleObject(proc_info.hProcess, INFINITE) != WAIT_OBJECT_0) {
+        CloseHandle(proc_info.hThread);
+        CloseHandle(proc_info.hProcess);
+        return -1;
+    }
 
-    GetExitCodeProcess(proc_info.hProcess, &exit_code);
+    if (!GetExitCodeProcess(proc_info.hProcess, &exit_code)) {
+        CloseHandle(proc_info.hThread);
+        CloseHandle(proc_info.hProcess);
+        return -1;
+    }
 
-    CloseHandle(proc_info.hProcess);
-    CloseHandle(proc_info.hThread);
-    return 0;
+    if (!CloseHandle(proc_info.hThread)) {
+        CloseHandle(proc_info.hProcess);
+        return -1;
+    }
+
+    if (!CloseHandle(proc_info.hProcess)) {
+        return -1;
+    }
+
+    return (int)exit_code;
 }
 #else
 int
@@ -540,7 +597,7 @@ util_command(const int argc, char **argv) {
 }
 #endif
 
-void
+static void
 string_from_strings(char *buffer, int32 size, char *sep, char **array,
                     int32 array_length) {
     int32 n = 0;
@@ -578,7 +635,7 @@ void
 error(char *format, ...) {
     char buffer[BUFSIZ];
     va_list args;
-    int32 n;
+    int64 n;
 
     va_start(args, format);
     n = vsnprintf(buffer, sizeof(buffer), format, args);
@@ -590,7 +647,7 @@ error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    write(STDERR_FILENO, buffer, (size_t)n);
+    write(STDERR_FILENO, buffer, (uint32)n);
 #if OS_UNIX
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
@@ -613,7 +670,7 @@ util_segv_handler(int32 unused) {
     char *message = "Memory error. Please send a bug report.\n";
     (void)unused;
 
-    (void)write(STDERR_FILENO, message, strlen(message));
+    write(STDERR_FILENO, message, (uint32)strlen(message));
     for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i], notifiers[i], "-u", "critical", program, message,
                NULL);
@@ -656,7 +713,7 @@ util_die_notify(char *program_name, const char *format, ...) {
     }
 
     buffer[n] = '\0';
-    (void)write(STDERR_FILENO, buffer, (usize)n + 1);
+    write(STDERR_FILENO, buffer, (uint32)n + 1);
     for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i], notifiers[i], "-u", "critical", program_name,
                buffer, NULL);
@@ -676,8 +733,8 @@ util_memdup(const void *source, const usize size) {
 }
 
 #if OS_UNIX
-int32
-util_copy_file(const char *destination, const char *source) {
+static int32
+util_copy_file_sync(const char *destination, const char *source) {
     int32 source_fd;
     int32 destination_fd;
     char buffer[BUFSIZ];
@@ -725,6 +782,28 @@ util_copy_file(const char *destination, const char *source) {
     close(destination_fd);
     return 0;
 }
+
+static int32
+util_copy_file_async(const char *destination, const char *source,
+                     int *dest_fd) {
+    int32 source_fd;
+
+    if ((source_fd = open(source, O_RDONLY)) < 0) {
+        error("Error opening %s for reading: %s.\n", source, strerror(errno));
+        return -1;
+    }
+
+    if ((*dest_fd
+         = open(destination, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR))
+        < 0) {
+        error("Error opening %s for writing: %s.\n", destination,
+              strerror(errno));
+        close(source_fd);
+        return -1;
+    }
+
+    return source_fd;
+}
 #endif
 
 #if OS_LINUX
@@ -733,6 +812,7 @@ void
 send_signal(const char *executable, const int32 signal_number) {
     DIR *processes;
     struct dirent *process;
+    int64 len = (int64)strlen(executable);
 
     if ((processes = opendir("/proc")) == NULL) {
         error("Error opening /proc: %s\n", strerror(errno));
@@ -747,44 +827,25 @@ send_signal(const char *executable, const int32 signal_number) {
         ssize_t r;
 
         if (process->d_type != DT_DIR) {
-            if (DEBUGGING) {
-                error("Error: %s is not directory.\n", process->d_name);
-            }
             continue;
         }
         if ((pid = atoi(process->d_name)) <= 0) {
-            if (DEBUGGING) {
-                error("Error: atoi(%s) <= 0.\n", process->d_name);
-            }
             continue;
         }
 
         SNPRINTF(buffer, "/proc/%s/cmdline", process->d_name);
 
         if ((cmdline = open(buffer, O_RDONLY)) < 0) {
-            if (errno != ENOENT || DEBUGGING) {
-                error("Error opening %s: %s.\n", buffer, strerror(errno));
-            }
-            if (errno != ENOENT) {
-                fatal(EXIT_FAILURE);
-            }
             continue;
         }
 
         errno = 0;
         if ((r = read(cmdline, command, sizeof(command))) <= 0) {
-            if (DEBUGGING) {
-                error("Error reading from %s", buffer);
-                if (r < 0) {
-                    error(": %s", strerror(errno));
-                }
-                error(".\n");
-            }
             (void)r;
             close(cmdline);
             continue;
         }
-        if (!strcmp(command, executable)) {
+        if (memmem(command, (size_t)r, executable, (size_t)len)) {
             if (kill(pid, signal_number) < 0) {
                 error("Error sending signal %d to program %s (pid %d): %s.\n",
                       signal_number, executable, pid, strerror(errno));
