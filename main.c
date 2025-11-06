@@ -147,7 +147,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
                 int64 total_length;
                 int64 start = matches[0].rm_so;
                 int64 end = matches[0].rm_eo;
-                int64 left = (int64)strlen64(&pointer[end]) + 1;
+                int64 left = strlen64(&pointer[end]) + 1;
                 int64 extra_index = get_extra_number(pointer, matches[1]);
 
                 if (extra_index >= argc) {
@@ -158,7 +158,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
                 }
 
                 argv_passed = argv[extra_index];
-                extra_length = (int64)strlen64(argv_passed);
+                extra_length = strlen64(argv_passed);
                 total_length
                     = (int64)(pointer - args.arena_pos) + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
