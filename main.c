@@ -23,8 +23,8 @@ typedef struct Array {
     char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
     char *array[MAX_ARGS];
     char *arena_pos;
-    int64 len;
-    int64 unused;
+    int32 len;
+    int32 unused;
 } Array;
 
 static inline int64 get_extra_number(char *, regmatch_t);
