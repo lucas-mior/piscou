@@ -167,9 +167,8 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
                     exit(EXIT_FAILURE);
                 }
 
-                memmove(&pointer[start + extra_length], &pointer[end],
-                        (size_t)left);
-                memcpy(&pointer[start], argv_passed, (size_t)extra_length);
+                memmove64(&pointer[start + extra_length], &pointer[end], left);
+                memcpy64(&pointer[start], argv_passed, extra_length);
                 pointer += (extra_length + start);
             } while (MATCH_SUBEXPRESSIONS(regex_extras_more, pointer, matches));
 
@@ -215,7 +214,7 @@ get_extra_number(char *string, regmatch_t pmatch) {
     int64 diff = end - start;
     int64 number;
 
-    memcpy(number_buffer, string + start, (size_t)diff);
+    memcpy64(number_buffer, string + start, diff);
     number = atoi(number_buffer);
     return number;
 }
