@@ -951,6 +951,7 @@ send_signal(char *executable, const int32 signal_number) {
         int32 pid;
         int32 cmdline;
         ssize_t r;
+        char *last;
 
         if (process->d_type != DT_DIR) {
             continue;
@@ -971,7 +972,14 @@ send_signal(char *executable, const int32 signal_number) {
             close(cmdline);
             continue;
         }
+
         if (memmem64(command, r, executable, len)) {
+            if ((last = memchr64(command, '\0', r))) {
+                r = last - command;
+                if (!memmem64(command, r, executable, len)) {
+                    continue;
+                }
+            }
             if (kill(pid, signal_number) < 0) {
                 error("Error sending signal %d to program %s (pid %d): %s.\n",
                       signal_number, executable, pid, strerror(errno));
