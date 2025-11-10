@@ -130,8 +130,8 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
             int64 extra_index = get_extra_number(argument, matches[1]);
 
             if (extra_index >= argc) {
-                error("Extra argument %d not passed to piscou. Ignoring...\n",
-                      extra_index);
+                error("Extra argument %lld not passed to piscou. Ignoring...\n",
+                      (llong)extra_index);
                 goto ignore;
             }
             array_push(&args, argv[extra_index], 0);
@@ -151,9 +151,9 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
                 int64 extra_index = get_extra_number(pointer, matches[1]);
 
                 if (extra_index >= argc) {
-                    error("Extra argument %d not passed to piscou."
+                    error("Extra argument %lld not passed to piscou."
                           " Ignoring...\n",
-                          extra_index);
+                          (llong)extra_index);
                     goto ignore;
                 }
 
