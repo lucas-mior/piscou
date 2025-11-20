@@ -1,5 +1,5 @@
-#if !defined(GENERIC_H)
-#define GENERIC_H
+#if !defined(GENERIC_C)
+#define GENERIC_C
 
 #include <limits.h>
 #include <stdint.h>
@@ -27,8 +27,6 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
-
-void UNSUPPORTED_TYPE_FOR_GENERIC(void);
 
 #define TYPENAME(VAR) \
 _Generic((VAR), \
@@ -105,7 +103,7 @@ static ldouble ldouble_from_voidp(void *x)     { (void)x; return 0.0l; }
 static ldouble ldouble_from_bool(bool x)       { (void)x; return 0.0l; }
 static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
 
-typedef enum Type {
+enum Type {
     TYPE_LDOUBLE,
     TYPE_DOUBLE,
     TYPE_FLOAT,
@@ -123,9 +121,9 @@ typedef enum Type {
     TYPE_VOIDP,
     TYPE_BOOL,
     TYPE_CHAR,
-} Type;
+};
 
-typedef union LongDoubleUnion {
+union Primitive {
   ldouble aldouble;
   double adouble;
   float afloat;
@@ -139,14 +137,14 @@ typedef union LongDoubleUnion {
   uint auint;
   ulong aulong;
   ullong aullong;
-  char *aucharp;
+  char *acharp;
   void *avoidp;
   bool abool;
   char achar;
-} LongDoubleUnion;
+};
 
 static char *
-typename(Type type) {
+typename(enum Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return "ldouble";
     case TYPE_DOUBLE:  return "double";
@@ -170,7 +168,7 @@ typename(Type type) {
 }
 
 static uint
-typebits(Type type) {
+typebits(enum Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return sizeof(ldouble)*CHAR_BIT;
     case TYPE_DOUBLE:  return sizeof(double)*CHAR_BIT;
@@ -194,7 +192,7 @@ typebits(Type type) {
 }
 
 static ldouble
-ldouble_get(LongDoubleUnion var, Type type) {
+ldouble_get(union Primitive var, enum Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return var.aldouble;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
@@ -220,26 +218,26 @@ ldouble_get(LongDoubleUnion var, Type type) {
 #define LDOUBLE_GET(x) \
 _Generic((x), \
   ldouble: ldouble_from_ldouble, \
-  double:  ldouble_from_double, \
-  float:   ldouble_from_float, \
-  schar:   ldouble_from_schar, \
-  short:   ldouble_from_short, \
-  int:     ldouble_from_int, \
-  long:    ldouble_from_long, \
-  llong:   ldouble_from_llong, \
-  uchar:   ldouble_from_uchar, \
-  ushort:  ldouble_from_ushort, \
-  uint:    ldouble_from_uint, \
-  ulong:   ldouble_from_ulong, \
-  ullong:  ldouble_from_ullong, \
-  char *:  ldouble_from_charp, \
-  void *:  ldouble_from_voidp, \
-  bool:    ldouble_from_bool, \
-  char:    ldouble_from_char \
+  double:  ldouble_from_double,  \
+  float:   ldouble_from_float,   \
+  schar:   ldouble_from_schar,   \
+  short:   ldouble_from_short,   \
+  int:     ldouble_from_int,     \
+  long:    ldouble_from_long,    \
+  llong:   ldouble_from_llong,   \
+  uchar:   ldouble_from_uchar,   \
+  ushort:  ldouble_from_ushort,  \
+  uint:    ldouble_from_uint,    \
+  ulong:   ldouble_from_ulong,   \
+  ullong:  ldouble_from_ullong,  \
+  char *:  ldouble_from_charp,   \
+  void *:  ldouble_from_voidp,   \
+  bool:    ldouble_from_bool,    \
+  char:    ldouble_from_char     \
 )(x)
 
 #if defined(__GNUC__) || defined(__clang__)
-#define LDOUBLE_GET2(VAR, TYPE) ldouble_get((LongDoubleUnion)(VAR), TYPE)
+#define LDOUBLE_GET2(VAR, TYPE) ldouble_get((union Primitive)(VAR), TYPE)
 #else
 #define LDOUBLE_GET2(VAR, TYPE) LDOUBLE_GET(VAR)
 #endif
