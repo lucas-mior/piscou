@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2025 Mior, Lucas;
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the*License,
+ * or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #if !defined(GENERIC_C)
 #define GENERIC_C
 
@@ -5,15 +22,28 @@
 #include <float.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #if !defined(error2)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_generic 1
 #elif !defined(TESTING_generic)
 #define TESTING_generic 0
+#endif
+
+#if TESTING_generic
+#define trap(...) raise(SIGILL)
+#elif !defined(trap)
+#if defined(__GNUC__) || defined(__clang__)
+#define trap(...) __builtin_trap()
+#elif defined(_MSC_VER)
+#define trap(...) __debugbreak()
+#else
+#define trap(...) *(volatile int *)0 = 0
+#endif
 #endif
 
 typedef unsigned char uchar;
@@ -95,24 +125,28 @@ _Generic((VARIABLE), \
 )
 
 // clang-format off
-static ldouble ldouble_from_voidp(void* x) {
+static ldouble
+ldouble_from_voidp(void* x) {
     (void)x;
-    *(volatile int *)0 = 0;
+    trap();
     return 0.0l;
 }
-static ldouble ldouble_from_charp(char* x) {
+static ldouble
+ldouble_from_charp(char* x) {
     (void)x;
-    *(volatile int *)0 = 0;
+    trap();
     return 0.0l;
 }
-static ldouble ldouble_from_bool(bool x) {
+static ldouble
+ldouble_from_bool(bool x) {
     (void)x;
-    *(volatile int *)0 = 0;
+    trap();
     return 0.0l;
 }
-static ldouble ldouble_from_char(char x) {
+static ldouble
+ldouble_from_char(char x) {
     (void)x;
-    *(volatile int *)0 = 0;
+    trap();
     return 0.0l;
 }
 static ldouble ldouble_from_schar(schar x)     { return (ldouble)x; }
@@ -196,7 +230,7 @@ union Primitive {
 
 static llong
 typebits(enum Type type) {
-    llong size;
+    llong size = 0;
     union Primitive primitive;
     void **pointer;
 
@@ -224,7 +258,7 @@ typebits(enum Type type) {
     case TYPE_FLOAT:   size = sizeof(float);   break;
     case TYPE_DOUBLE:  size = sizeof(double);  break;
     case TYPE_LDOUBLE: size = sizeof(ldouble); break;
-    default: *(volatile int *)0 = 0; return 0ll;
+    default: trap();
     }
     return size*CHAR_BIT;
 }
@@ -258,10 +292,10 @@ typename(enum Type type) {
 static ldouble
 ldouble_get(union Primitive var, enum Type type) {
     switch (type) {
-    case TYPE_VOIDP:   *(volatile int *)0 = 0; return 0.0l;
-    case TYPE_CHARP:   *(volatile int *)0 = 0; return 0.0l;
-    case TYPE_BOOL:    *(volatile int *)0 = 0; return 0.0l;
-    case TYPE_CHAR:    *(volatile int *)0 = 0; return 0.0l;
+    case TYPE_VOIDP:   trap(); break;
+    case TYPE_CHARP:   trap(); break;
+    case TYPE_BOOL:    trap(); break;
+    case TYPE_CHAR:    trap(); break;
     case TYPE_SCHAR:   return (ldouble)var.aschar;
     case TYPE_SHORT:   return (ldouble)var.ashort;
     case TYPE_INT:     return (ldouble)var.aint;
@@ -275,8 +309,9 @@ ldouble_get(union Primitive var, enum Type type) {
     case TYPE_FLOAT:   return (ldouble)var.afloat;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
     case TYPE_LDOUBLE: return var.aldouble;
-    default:           *(volatile int *)0 = 0; return 0.0l;
+    default:           trap(); break;
     }
+    return 0.0l;
 }
 
 // clang-format on
