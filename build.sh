@@ -2,12 +2,15 @@
 
 # shellcheck disable=SC2086
 
+set -e
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
 . ./targets
 
-dir="$(realpath "$(dirname "$0")")"
+dir="$(readlink -f "$(dirname "$0")")"
+
+cbase="cbase"
 
 target="${1:-build}"
 
@@ -36,6 +39,7 @@ CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
+CPPFLAGS="$CPPFLAGS -I "$dir/$cbase""
 LDFLAGS="$LDFLAGS -lmagic"
 
 OS=$(uname -a)

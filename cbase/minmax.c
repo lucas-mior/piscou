@@ -36,15 +36,15 @@
 #define TESTING_minmax 0
 #endif
 
-#if TESTING_minmax
-#define trap(...) raise(SIGILL)
-#elif !defined(trap)
+#if 1 == TESTING_minmax
+#define TRAP(...) raise(SIGILL)
+#elif !defined(TRAP)
 #if defined(__GNUC__) || defined(__clang__)
-#define trap(...) __builtin_trap()
+#define TRAP(...) __builtin_trap()
 #elif defined(_MSC_VER)
-#define trap(...) __debugbreak()
+#define TRAP(...) __debugbreak()
 #else
-#define trap(...) *(volatile int *)0 = 0
+#define TRAP(...) *(volatile int *)0 = 0
 #endif
 #endif
 
@@ -256,6 +256,25 @@ _Generic((VAR1), \
 
 // clang-format on
 
+#if 0 == TESTING_minmax
+static inline void
+minmax_functions_sink(void) {
+    (void)get_pointer_min;
+    (void)get_pointer_max;
+    (void)get_both_signed_min;
+    (void)get_both_signed_max;
+    (void)get_both_unsigned_min;
+    (void)get_both_unsigned_max;
+    (void)get_signed_unsigned_min;
+    (void)get_signed_unsigned_max;
+    (void)get_unsigned_signed_min;
+    (void)get_unsigned_signed_max;
+    (void)get_ldouble_min;
+    (void)get_ldouble_max;
+    return;
+}
+#endif
+
 #if TESTING_minmax
 
 // Note: NEVER delete lines with // clang-format
@@ -333,4 +352,4 @@ main(void) {
 // clang-format on
 #endif
 
-#endif
+#endif /* MINMAX_C */
