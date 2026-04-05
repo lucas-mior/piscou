@@ -72,18 +72,18 @@ case "$target" in
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DPISCOU_BENCHMARK=1"
     exe="bin/${program}_perf"
     ;;
-"valgrind") 
+"valgrind")
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
 "test")
     CFLAGS="$CFLAGS -g $GNUSOURCE -DDEBUGGING=1"
     ;;
-"check") 
+"check")
     CC=gcc
     CFLAGS="$CFLAGS $GNUSOURCE -fanalyzer"
     ;;
-"build") 
+"build")
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
 *)
@@ -190,7 +190,7 @@ case "$target" in
 esac
 
 case "$target" in
-"benchmark") 
+"benchmark")
     start=$(date +%s.%N)
     # do some stuff here
     n=100
@@ -204,7 +204,7 @@ case "$target" in
     rm $dir/$exe
     exit
     ;;
-"valgrind") 
+"valgrind")
     vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
     vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
 
