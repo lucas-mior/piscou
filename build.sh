@@ -122,6 +122,10 @@ if [ "$target" != "test" ] && [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-c++-keyword"
     CFLAGS="$CFLAGS -Wno-covered-switch-default"
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
+    CFLAGS="$CFLAGS -Wno-cast-qual"
+
+    # TODO: implement safe floating point comparisons
+    CFLAGS="$CFLAGS -Wno-float-equal"
 fi
 
 case "$target" in
