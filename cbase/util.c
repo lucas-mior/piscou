@@ -1034,27 +1034,33 @@ typedef struct UtilCopyFilesAsync {
 static int32
 util_copy_file_async(char *destination, char *source, int *dest_fd) {
     int32 source_fd;
+    int32 fadvise_err;
 
     if ((source_fd = open(source, O_RDONLY)) < 0) {
         error("Error opening %s for reading: %s.\n", source, strerror(errno));
         return -1;
     }
 
-    if ((*dest_fd
-         = open(destination, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR))
-        < 0) {
+    if ((*dest_fd = open(destination,
+                         O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR)) < 0) {
         error("Error opening %s for writing: %s.\n",
               destination, strerror(errno));
         XCLOSE(&source_fd, source);
         return -1;
     }
 
+    if ((fadvise_err = posix_fadvise(source_fd,
+                                     0, 0,
+                                     POSIX_FADV_WILLNEED)) < 0) {
+        error("Error in posix_fadvise(POSIX_FADV_WILLNEED): %s.\n",
+              strerror(fadvise_err));
+    }
+
     return source_fd;
 }
 
-static void *
-util_copy_file_async_thread(void *arg) {
-    UtilCopyFilesAsync *copy_files = arg;
+static void
+util_copy_file_async_parsed(UtilCopyFilesAsync *copy_files) {
     struct pollfd *pipes = copy_files->pipes;
     int *dests = copy_files->dests;
     int32 left = copy_files->nfds;
@@ -1109,6 +1115,13 @@ util_copy_file_async_thread(void *arg) {
         }
     }
     free2(copy_files, sizeof(*copy_files));
+    return;
+}
+
+static void *
+util_copy_file_async_thread(void *arg) {
+    UtilCopyFilesAsync *copy_files = arg;
+    util_copy_file_async_parsed(copy_files);
     pthread_exit(NULL);
     return NULL;
 }
@@ -1498,7 +1511,7 @@ dirname2(char *buffer, char *path, int32 *path_len) {
 }
 
 static void
-print_timings(char *file, int32 line, const char *func,
+print_timings(char *file, int32 line, char *func,
               int64 nitems, struct timespec t0, struct timespec t1) {
     llong seconds = t1.tv_sec - t0.tv_sec;
     llong nanos = t1.tv_nsec - t0.tv_nsec;
@@ -1511,7 +1524,7 @@ print_timings(char *file, int32 line, const char *func,
     return;
 }
 #define PRINT_TIMINGS_3(N, T0, T1) \
-        print_timings(__FILE__, __LINE__, __func__, N, T0, T1)
+        print_timings(__FILE__, __LINE__, (char *)__func__, N, T0, T1)
 #define PRINT_TIMINGS_4(N, T0, T1, NAME) \
         print_timings(__FILE__, __LINE__, NAME, N, T0, T1)
 #define PRINT_TIMINGS(...) SELECT_ON_NUM_ARGS(PRINT_TIMINGS_, __VA_ARGS__)
@@ -1738,8 +1751,8 @@ signal_handler(int signal_number) {
 
 static int
 util_test_qsort_cmp(const void *a, const void *b) {
-    int32 va = *(int32 *)a;
-    int32 vb = *(int32 *)b;
+    int32 va = *(const int32 *)a;
+    int32 vb = *(const int32 *)b;
     if (va < vb) {
         return -1;
     }

@@ -215,19 +215,8 @@ case "$target" in
     trace_off
     exit
     ;;
-"perf")
-    create_temp_files
-
-    cd /tmp/piscou || exit
-    trace_on
-    perf record -b -o $dir/perf.data $dir/$exe main.c
-    cd "$dir"
-    perf annotate $dir/$exe
-    perf report -v perf.data
-    trace_off
-    exit
-    ;;
 "check")
+    CC=gcc CFLAGS="-fanalyzer" ./build.sh
     scan-build --view -analyze-headers --status-bugs ./build.sh
     exit
     ;;
