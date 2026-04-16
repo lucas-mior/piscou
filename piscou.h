@@ -45,10 +45,6 @@ typedef uint64_t uint64;
   #define PISCOU_BENCHMARK 0
 #endif
 
-#define SNPRINTF(BUFFER, FORMAT, ...) \
-    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
-#define LENGTH(X) (int32)(sizeof(X) / sizeof(*X))
-
 #define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
     !regexec(&R.regex, S, LENGTH(PMATCHES), PMATCHES, 0)
 
