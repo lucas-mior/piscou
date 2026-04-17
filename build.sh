@@ -33,9 +33,7 @@ mkdir -p "$(dirname "$exe")"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wextra -Wall"
-CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-unused-macros -Wno-unused-function"
-CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
@@ -123,6 +121,8 @@ if [ "$target" != "test" ] && [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-covered-switch-default"
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
     CFLAGS="$CFLAGS -Wno-cast-qual"
+    CFLAGS="$CFLAGS -Wno-unknown-warning-option"
+    CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 
     # TODO: implement safe floating point comparisons
     CFLAGS="$CFLAGS -Wno-float-equal"
