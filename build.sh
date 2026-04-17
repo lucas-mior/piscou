@@ -121,7 +121,6 @@ if [ "$target" != "test" ] && [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-covered-switch-default"
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
     CFLAGS="$CFLAGS -Wno-cast-qual"
-    CFLAGS="$CFLAGS -Wno-unknown-warning-option"
     CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 
     # TODO: implement safe floating point comparisons
