@@ -54,7 +54,7 @@ static const Rule rules[] = {
 {{NULL,            ".+\\.gif$"}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{NULL,           ".+\\.webp$"}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{"image/.*",             NULL}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{"image/.*",             NULL}, {"chafa", "#piscou-file#", "-s", "#piscou-0#x#piscou-1#"}},
+{{"image/.*",             NULL}, {"chafa", "--animate=false", "#piscou-file#", "-s", "#piscou-0#x#piscou-1#"}},
 {{"audio/.*",             NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{"video/.*",             NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{"appl[^/]+/x-matroska", NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
