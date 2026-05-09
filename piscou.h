@@ -38,8 +38,8 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 #endif
 
-#if !defined(PISCOU_DEBUG)
-  #define PISCOU_DEBUG 0
+#if !defined(DEBUGGING)
+  #define DEBUGGING 0
 #endif
 #if !defined(PISCOU_BENCHMARK)
   #define PISCOU_BENCHMARK 0

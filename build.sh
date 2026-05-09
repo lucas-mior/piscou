@@ -38,7 +38,7 @@ CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 CPPFLAGS="$CPPFLAGS -I "$dir/$cbase""
-LDFLAGS="$LDFLAGS -lmagic"
+LDFLAGS="$LDFLAGS -lmagic -lm"
 
 OS=$(uname -a)
 

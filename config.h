@@ -53,14 +53,15 @@ static const Rule rules[] = {
 {{NULL,           ".+\\.sent$"}, {"/usr/bin/cat", "#piscou-file#"}},
 {{"image/.*dwg",          NULL}, {"stat", "#piscou-file#"}},
 {{"image/.*xml",          NULL}, {"head", "-n", "40", "#piscou-file#"}},
-{{NULL,            ".+\\.gif$"}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{"image/.*",             NULL}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{NULL,            ".+\\.gif$"}, {"chafa", "--polite=on", "--format=sixel", "--animate=false", "#piscou-file#", "-s", "#piscou-0#x#piscol-1"}},
+{{"image/.*",             NULL}, {"chafa", "--polite=on", "--format=sixel", "--animate=false", "#piscou-file#", "-s", "#piscou-0#x#piscol-1"}},
 {{"image/.*",             NULL}, {"chafa", "#piscou-file#", "-s", "#piscou-0#x#piscou-1#"}},
 {{"audio/.*",             NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{"video/.*",             NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{"appl[^/]+/x-matroska", NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{"appl[^/]+/x-kicad-.*", NULL}, {"kicad.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{"appl[^/]+/octet-stream", NULL}, {"xxd", "#piscou-file#"}},
+{{"text/x-tex",      ".+\\.pgf$"}, {"pgf.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{"text/.+",              NULL}, {"bat", "-p", "--pager=never", "--color=always", "#piscou-file#"}},
 };
 
