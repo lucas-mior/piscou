@@ -46,8 +46,6 @@ static const Rule rules[] = {
 {{"appl.+/x-7z-.+",       NULL}, {"7z", "l", "#piscou-file#"}},
 {{"appl.+/x-subrip",      NULL}, {"/usr/bin/cat", "#piscou-file#"}},
 {{"appl.+/mbox",          NULL}, {"bat", "-p", "--pager=never", "--color=always", "#piscou-file#"}},
-{{NULL,             ".+\\.ff$"}, {"chafa", "#piscou-file#", "-s", "#piscou-0#x#piscou-1#"}},
-{{NULL,           ".+\\.webp$"}, {"chafa", "#piscou-file#", "-s", "#piscou-0#x#piscou-1#"}},
 {{NULL,              "\\.hdr$"}, {"hdr.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{NULL,          ".+\\.[1-9]$"}, {"man", "#piscou-file#"}},
 {{NULL,           ".+\\.sent$"}, {"/usr/bin/cat", "#piscou-file#"}},

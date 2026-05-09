@@ -184,6 +184,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
         for (int32 i = 0; i < (args.len + 1); i += 1) {
             printf("args.array[%d] = %s\n", i, args.array[i]);
         }
+        exit(0);
     }
     if (args.array[0] == NULL) {
         error("Invalid command.\n");
