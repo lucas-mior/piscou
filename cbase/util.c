@@ -530,7 +530,7 @@ itoa2(char *str, int32 size, llong num) {
     }
 
     // this is here because of gcc -fanalyzer
-    assert(i < 22);
+    ASSERT(i < 22);
 
     return i;
 }
@@ -842,8 +842,7 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
     if (n >= m) {
         if (RELEASING) {
             m = n + 1;
-            big_buffer = malloc((size_t)m);
-            assert(big_buffer);
+            big_buffer = xmalloc(m);
             n = vsnprintf(big_buffer, (size_t)m, format, args);
             pbuffer = big_buffer;
         } else {

@@ -694,6 +694,7 @@ xstrdup(char *string) {
 }
 
 #if TESTING_memory
+// flags: -lm
 #include <signal.h>
 #include <setjmp.h>
 #include "util.c"
