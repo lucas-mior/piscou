@@ -4,6 +4,10 @@
 
 #include "cbase/util.c"
 
+typedef struct MetaRegex {
+    // to be defined
+} MetaRegex;
+
 #define META_REGEX(...)
 
 int
@@ -13,7 +17,7 @@ main(int argc, char **argv) {
     regex_t compiled_regex;
     int compile_status;
     int match_status;
-    META_REGEX("^[0-9]+$");
+    META_REGEX(regex_meta, "^[0-9]+$");
 
     if (argc < 2) {
         error("usage: regex <string>");
