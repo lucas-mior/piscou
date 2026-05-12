@@ -1,10 +1,10 @@
-// gcc
-
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "util.c"
+#include "cbase/util.c"
+
+#define META_REGEX(...)
 
 int
 main(int argc, char **argv) {
@@ -13,6 +13,7 @@ main(int argc, char **argv) {
     regex_t compiled_regex;
     int compile_status;
     int match_status;
+    META_REGEX("^[0-9]+$");
 
     if (argc < 2) {
         error("usage: regex <string>");
@@ -25,7 +26,7 @@ main(int argc, char **argv) {
         char error_message[256];
         regerror(compile_status, &compiled_regex, error_message, sizeof(error_message));
         error("Regex compilation failed: %s\n", error_message);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
     match_status = regexec(&compiled_regex, input, 0, NULL, 0);
@@ -33,14 +34,14 @@ main(int argc, char **argv) {
 
     if (match_status == 0) {
         printf("Match found in target: '%s'\n", input);
-        return EXIT_SUCCESS;
+        exit(EXIT_SUCCESS);
     }
 
     if (match_status == REG_NOMATCH) {
         printf("No match found in target: '%s'\n", input);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
     error("Regex execution error.\n");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
 }
