@@ -68,7 +68,6 @@ main(int argc, char **argv) {
         usage(stderr);
     }
 
-    /* Compile global substitution regexes */
     if (regcomp(&regex_extras, "^#piscou-([0-9])#$", REG_EXTENDED) != 0 ||
         regcomp(&regex_extras_more, "#piscou-([0-9])#", REG_EXTENDED) != 0) {
         error("Could not compile substitution regexes.\n");
@@ -210,8 +209,10 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
     }
     
     if (!DEBUGGING) {
-        execvp(args.array[0], args.array);
         char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
+
+        execvp(args.array[0], args.array);
+
         STRING_FROM_ARRAY(full_command, " ", args.array, args.len);
         error("Error executing\n%s\n%s\n", full_command, strerror(errno));
     }
