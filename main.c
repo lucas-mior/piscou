@@ -15,9 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "piscou.h"
+#include <magic.h>
+#include <regex.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#include <libgen.h>
+#include <errno.h>
+
 #include "config.h"
 #include "util.c"
+
+#if !defined(DEBUGGING)
+  #define DEBUGGING 0
+#endif
+
+#define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
+    (!regexec(R, S, LENGTH(PMATCHES), PMATCHES, 0))
+
+#define MATCH_REGEX_SIMPLE(R, S) \
+    (!regexec(R, S, 0, NULL, 0))
 
 typedef struct Array {
     char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
