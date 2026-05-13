@@ -13,7 +13,7 @@ typedef struct Rule {
     char *command[MAX_ARGS];
 } Rule;
 
-static const Rule rules[] = {
+static Rule rules[] = {
 /* mimetype                    filename          command */
 {{R(NULL),   R("v[a-z0-9]{1,3}::.") }, {"vfile.sh", "#piscou-file#"}},
 {{R(NULL),   R("g[a-z0-9]{1,3}::.") }, {"gdir.sh", "#piscou-file#"}},
