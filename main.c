@@ -33,9 +33,7 @@ static inline void parse_command_run(char *const *, int64, char **);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
-static int nruns = 100;
 
-#define BENCHMARK 1
 static char *regex_filename = "#piscou-file#";
 static MetaRegex regex_extras = R("^#piscou-([0-9])#$");
 static MetaRegex regex_extras_more = R("#piscou-([0-9])#");
@@ -50,10 +48,6 @@ main(int argc, char **argv) {
 
     if (argc <= 1) {
         usage(stderr);
-    }
-
-    if (nruns-- <= 0) {
-        exit(EXIT_SUCCESS);
     }
 
     if ((filename = realpath(argv[1], buffer))) {
@@ -94,9 +88,6 @@ main(int argc, char **argv) {
         }
 
         found = true;
-        if (BENCHMARK) {
-            continue;
-        }
         parse_command_run(rules[i].command, argc - 2, &argv[2]);
     }
 
@@ -105,9 +96,6 @@ main(int argc, char **argv) {
                file_mime);
     } else {
         error("Every previewer failed.\n");
-    }
-    if (BENCHMARK) {
-        main(argc, argv);
     }
     exit(EXIT_FAILURE);
 }
@@ -179,7 +167,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
     ignore:
         continue;
     }
-    if (BENCHMARK || DEBUGGING) {
+    if (DEBUGGING) {
         for (int32 i = 0; i < (args.len + 1); i += 1) {
             printf("args.array[%d] = %s\n", i, args.array[i]);
         }
@@ -201,8 +189,8 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
 
 void
 usage(FILE *stream) {
-    fprintf(stream, "usage: piscou #piscou-file#"
-                    " [ #piscou-0# #piscou-1# ... ]\n");
+    fprintf(stream,
+            "usage: piscou #piscou-file# [ #piscou-0# #piscou-1# ... ]\n");
     exit(stream != stdout);
 }
 
