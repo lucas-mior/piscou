@@ -59,7 +59,6 @@ CC=${CC:-cc}
 if [ ! -d bin ]; then
     mkdir -p bin
 fi
-$CC $CPPFLAGS -O2 -o bin/meta_preproc meta_regex/meta_preproc.c -lm
 
 case "$target" in
 "debug")
@@ -151,9 +150,7 @@ case "$target" in
     vtags.sed tags > .tags.vim       2> /dev/null || true
     
     mkdir -p gen || true
-    bin/meta_preproc "$main" > gen/main2.c
-    bin/meta_preproc "config.h" > gen/config2.h
-    $CC $CPPFLAGS $CFLAGS -o ${exe} gen/main2.c $LDFLAGS
+    $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
     
     trace_off
     ;;
@@ -161,7 +158,6 @@ esac
 
 case "$target" in
 "check")
-    # check target calls recursively, so meta_preproc is already handled
     scan-build --view -analyze-headers --status-bugs ./build.sh build
     exit
     ;;

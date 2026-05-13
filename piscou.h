@@ -2,15 +2,13 @@
 #define PISCOU_H
 
 #include <magic.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 #include <libgen.h>
 #include <errno.h>
-
-#include "meta_regex/meta_regex.h"
-#include "meta_regex/meta_regex_match.c"
 
 #if !defined(DEBUGGING)
   #define DEBUGGING 0
@@ -20,9 +18,9 @@
 #endif
 
 #define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
-    (meta_regex_match(R, S, LENGTH(PMATCHES), PMATCHES) == 0)
+    (!regexec(R, S, LENGTH(PMATCHES), PMATCHES, 0))
 
 #define MATCH_REGEX_SIMPLE(R, S) \
-    (meta_regex_match(R, S, 0, NULL) == 0)
+    (!regexec(R, S, 0, NULL, 0))
 
 #endif

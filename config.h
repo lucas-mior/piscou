@@ -2,64 +2,63 @@
 #define CONFIG_H
 
 #include <stdlib.h>
-#include "meta_regex/meta_regex.h"
 
 #define MAX_ARGS 16
 #define MAX_EXTRAS 10
 #define MAX_ARGUMENT_LENGTH 256
 
 typedef struct Rule {
-    MetaRegex match[2];
+    char *match[2];
     char *command[MAX_ARGS];
 } Rule;
 
 static Rule rules[] = {
-/* mimetype                    filename          command */
-{{R(NULL),   R("v[a-z0-9]{1,3}::.") }, {"vfile.sh", "#piscou-file#"}},
-{{R(NULL),   R("g[a-z0-9]{1,3}::.") }, {"gdir.sh", "#piscou-file#"}},
-{{R(NULL),   R(".+\\.fen$")         }, {"fen.sh", "#piscou-file#"}},
-{{R(NULL),   R(".+\\.mo$")          }, {"pygmentize", "#piscou-file#"}},
-{{R(NULL),   R(".+\\.blend$")       }, {"blend.sh", "#piscou-file#"}},
-{{R(NULL),   R(".+\\.csv")          }, {"csv.sh", "#piscou-file#"}},
-{{R(NULL),   R(".+\\.kicad_pro$")   }, {"kicad.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("inode/directory"),      R(NULL)}, {"ls", "-1A", "--color", "#piscou-file#"}},
-{{R("inode/x-empty"),        R(NULL)}, {"/usr/bin/cat", "-A", "#piscou-file#"}},
-{{R("ms(word|-exce|-powe)"), R(NULL)}, {"printf", "\n%s\n", "#piscou-file#"}},
-{{R("opendoc.+spreadsheet"), R(NULL)}, {"ods.sh", "#piscou-file#"}},
-{{R("officed.+spreadsheet"), R(NULL)}, {"xlsx.sh", "#piscou-file#"}},
-{{R("office.+word"),         R(NULL)}, {"docx.sh", "#piscou-file#", "#piscou-0#"}},
-{{R("office.+pres"),         R(NULL)}, {"ppt.sh", "#piscou-file#", "#piscou-0#"}},
-{{R("opendocument"),         R(NULL)}, {"odt2txt", "#piscou-file#"}},
-{{R("appl.+/pdf"),           R(NULL)}, {"pdf.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("appl.+/epub.+"),        R(NULL)}, {"epub.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("appl.+/csv"),           R(NULL)}, {"csv.sh", "#piscou-file#"}},
-{{R("appl.+/json"),          R(NULL)}, {"head", "-n", "40", "#piscou-file#"}},
-{{R("appl.+/js"),            R(NULL)}, {"bat",  "#piscou-file#"}},
-{{R("appl.+/javascript"),    R(NULL)}, {"bat",  "#piscou-file#"}},
-{{R("appl.+/.*execu.+"),     R(NULL)}, {"objdump", "-T", "#piscou-file#", "#piscou-0#"}},
-{{R("appl.+/x-objec.+"),     R(NULL)}, {"objdump", "-t", "#piscou-file#", "#piscou-0#"}},
-{{R("appl.+/x-sharedlib"),   R(NULL)}, {"objdump", "-T", "#piscou-file#", "#piscou-0#"}},
-{{R("appl.+/zip"),           R(NULL)}, {"unzip", "-l", "#piscou-file#"}},
-{{R("appl.+/gzip"),          R(NULL)}, {"tar", "tf", "#piscou-file#"}},
-{{R("appl.+/x-7z-.+"),       R(NULL)}, {"7z", "l", "#piscou-file#"}},
-{{R("appl.+/x-subrip"),      R(NULL)}, {"/usr/bin/cat", "#piscou-file#"}},
-{{R("appl.+/mbox"),          R(NULL)}, {"bat", "-p", "--pager=never", "--color=always", "#piscou-file#"}},
-{{R(NULL),               R("\\.hdr$")}, {"hdr.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R(NULL),           R(".+\\.[1-9]$")}, {"man", "#piscou-file#"}},
-{{R(NULL),           R(".+\\.sent$")}, {"/usr/bin/cat", "#piscou-file#"}},
-{{R("image/.*dwg"),          R(NULL)}, {"stat", "#piscou-file#"}},
-{{R("image/.*xml"),          R(NULL)}, {"head", "-n", "40", "#piscou-file#"}},
-{{R(NULL),            R(".+\\.gif$")}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R(NULL),           R(".+\\.webp$")}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("image/.*"),             R(NULL)}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("image/.*"),             R(NULL)}, {"chafa", "#piscou-file#", "--size=#piscou-0#x#piscou-1#"}},
-{{R("audio/.*"),             R(NULL)}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("video/.*"),             R(NULL)}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("appl[^/]+/x-matroska"), R(NULL)}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("appl[^/]+/x-kicad-.*"), R(NULL)}, {"kicad.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("appl[^/]+/octet-stream"), R(NULL)}, {"xxd", "#piscou-file#"}},
-{{R("text/x-tex"),        R(".+\\.pgf$")}, {"pgf.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("text/.+"),              R(NULL)}, {"bat", "-p", "--pager=never", "--color=always", "#piscou-file#"}},
+/* mimetype           filename    command */
+{{NULL,    "v[a-z0-9]{1,3}::."}, {"vfile.sh", "#piscou-file#"}},
+{{NULL,    "g[a-z0-9]{1,3}::."}, {"gdir.sh", "#piscou-file#"}},
+{{NULL,    ".+\\.fen$"        }, {"fen.sh", "#piscou-file#"}},
+{{NULL,    ".+\\.mo$"         }, {"pygmentize", "#piscou-file#"}},
+{{NULL,    ".+\\.blend$"      }, {"blend.sh", "#piscou-file#"}},
+{{NULL,    ".+\\.csv"         }, {"csv.sh", "#piscou-file#"}},
+{{NULL,    ".+\\.kicad_pro$"  }, {"kicad.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"inode/directory",      NULL}, {"ls", "-1A", "--color", "#piscou-file#"}},
+{{"inode/x-empty",        NULL}, {"/usr/bin/cat", "-A", "#piscou-file#"}},
+{{"ms(word|-exce|-powe)", NULL}, {"printf", "\n%s\n", "#piscou-file#"}},
+{{"opendoc.+spreadsheet", NULL}, {"ods.sh", "#piscou-file#"}},
+{{"officed.+spreadsheet", NULL}, {"xlsx.sh", "#piscou-file#"}},
+{{"office.+word",         NULL}, {"docx.sh", "#piscou-file#", "#piscou-0#"}},
+{{"office.+pres",         NULL}, {"ppt.sh", "#piscou-file#", "#piscou-0#"}},
+{{"opendocument",         NULL}, {"odt2txt", "#piscou-file#"}},
+{{"appl.+/pdf",           NULL}, {"pdf.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"appl.+/epub.+",        NULL}, {"epub.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"appl.+/csv",           NULL}, {"csv.sh", "#piscou-file#"}},
+{{"appl.+/json",          NULL}, {"head", "-n", "40", "#piscou-file#"}},
+{{"appl.+/js",            NULL}, {"bat",  "#piscou-file#"}},
+{{"appl.+/javascript",    NULL}, {"bat",  "#piscou-file#"}},
+{{"appl.+/.*execu.+",     NULL}, {"objdump", "-T", "#piscou-file#", "#piscou-0#"}},
+{{"appl.+/x-objec.+",     NULL}, {"objdump", "-t", "#piscou-file#", "#piscou-0#"}},
+{{"appl.+/x-sharedlib",   NULL}, {"objdump", "-T", "#piscou-file#", "#piscou-0#"}},
+{{"appl.+/zip",           NULL}, {"unzip", "-l", "#piscou-file#"}},
+{{"appl.+/gzip",          NULL}, {"tar", "tf", "#piscou-file#"}},
+{{"appl.+/x-7z-.+",       NULL}, {"7z", "l", "#piscou-file#"}},
+{{"appl.+/x-subrip",      NULL}, {"/usr/bin/cat", "#piscou-file#"}},
+{{"appl.+/mbox",          NULL}, {"bat", "-p", "--pager=never", "--color=always", "#piscou-file#"}},
+{{NULL,               "\\.hdr$"}, {"hdr.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{NULL,           ".+\\.[1-9]$"}, {"man", "#piscou-file#"}},
+{{NULL,           ".+\\.sent$"}, {"/usr/bin/cat", "#piscou-file#"}},
+{{"image/.*dwg",          NULL}, {"stat", "#piscou-file#"}},
+{{"image/.*xml",          NULL}, {"head", "-n", "40", "#piscou-file#"}},
+{{NULL,            ".+\\.gif$"}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{NULL,           ".+\\.webp$"}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"image/.*",             NULL}, {"stiv_draw", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"image/.*",             NULL}, {"chafa", "#piscou-file#", "--size=#piscou-0#x#piscou-1#"}},
+{{"audio/.*",             NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"video/.*",             NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"appl[^/]+/x-matroska", NULL}, {"vid.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"appl[^/]+/x-kicad-.*", NULL}, {"kicad.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"appl[^/]+/octet-stream", NULL}, {"xxd", "#piscou-file#"}},
+{{"text/x-tex",    ".+\\.pgf$"}, {"pgf.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{"text/.+",              NULL}, {"bat", "-p", "--pager=never", "--color=always", "#piscou-file#"}},
 };
 
 #endif

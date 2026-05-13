@@ -16,7 +16,7 @@
  */
 
 #include "piscou.h"
-#include "gen/config2.h"
+#include "config.h"
 #include "util.c"
 
 typedef struct Array {
@@ -34,9 +34,9 @@ static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
 
-static char *regex_filename = "#piscou-file#";
-static MetaRegex regex_extras = R("^#piscou-([0-9])#$");
-static MetaRegex regex_extras_more = R("#piscou-([0-9])#");
+static char *regex_filename_str = "#piscou-file#";
+static regex_t regex_extras;
+static regex_t regex_extras_more;
 
 int
 main(int argc, char **argv) {
@@ -50,10 +50,16 @@ main(int argc, char **argv) {
         usage(stderr);
     }
 
+    /* Compile global substitution regexes */
+    if (regcomp(&regex_extras, "^#piscou-([0-9])#$", REG_EXTENDED) != 0 ||
+        regcomp(&regex_extras_more, "#piscou-([0-9])#", REG_EXTENDED) != 0) {
+        error("Could not compile substitution regexes.\n");
+        exit(EXIT_FAILURE);
+    }
+
     if ((filename = realpath(argv[1], buffer))) {
         if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
-            error("Error in magic_open(MAGIC_MIME_TYPE): %s.\n",
-                  strerror(errno));
+            error("Error in magic_open(MAGIC_MIME_TYPE): %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
         if (magic_load(magic, NULL) != 0) {
@@ -69,20 +75,30 @@ main(int argc, char **argv) {
     }
 
     for (int64 i = 0; i < LENGTH(rules); i += 1) {
-        MetaRegex *mime_regex = &rules[i].match[0];
-        MetaRegex *path_regex = &rules[i].match[1];
+        char *mime_pat = rules[i].match[0];
+        char *path_pat = rules[i].match[1];
+        regex_t re;
 
-        if ((mime_regex->string == NULL) && (path_regex->string == NULL)) {
+        if (mime_pat == NULL && path_pat == NULL) {
             continue;
         }
 
-        if (mime_regex->string) {
-            if (!MATCH_REGEX_SIMPLE(mime_regex, (char *)file_mime)) {
+        if (mime_pat) {
+            if (regcomp(&re, mime_pat, REG_EXTENDED | REG_NOSUB) != 0) continue;
+            if (MATCH_REGEX_SIMPLE(&re, (char *)file_mime)) {
+                regfree(&re);
+            } else {
+                regfree(&re);
                 continue;
             }
         }
-        if (path_regex->string) {
-            if (!MATCH_REGEX_SIMPLE(path_regex, filename)) {
+
+        if (path_pat) {
+            if (regcomp(&re, path_pat, REG_EXTENDED | REG_NOSUB) != 0) continue;
+            if (MATCH_REGEX_SIMPLE(&re, filename)) {
+                regfree(&re);
+            } else {
+                regfree(&re);
                 continue;
             }
         }
@@ -91,9 +107,11 @@ main(int argc, char **argv) {
         parse_command_run(rules[i].command, argc - 2, &argv[2]);
     }
 
+    regfree(&regex_extras);
+    regfree(&regex_extras_more);
+
     if (!found) {
-        printf("No previewer set for file:\n\n%s:\n    %s\n", basename(argv[1]),
-               file_mime);
+        printf("No previewer set for file:\n\n%s:\n    %s\n", basename(argv[1]), file_mime);
     } else {
         error("Every previewer failed.\n");
     }
@@ -109,16 +127,14 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
         char *argument = command[i];
         regmatch_t matches[MAX_EXTRAS + 1];
 
-        if (!strcmp(regex_filename, argument)) {
+        if (!strcmp(regex_filename_str, argument)) {
             array_push(&args, filename, 0);
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(&regex_extras, argument, matches)) {
             int64 extra_index = get_extra_number(argument, matches[1]);
-
             if (extra_index >= argc) {
-                error("Extra argument %lld not passed to piscou. Ignoring...\n",
-                      (llong)extra_index);
+                error("Extra argument %lld not passed to piscou. Ignoring...\n", (llong)extra_index);
                 goto ignore;
             }
             array_push(&args, argv[extra_index], 0);
@@ -138,19 +154,15 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
                 int64 extra_index = get_extra_number(pointer, matches[1]);
 
                 if (extra_index >= argc) {
-                    error("Extra argument %lld not passed to piscou."
-                          " Ignoring...\n",
-                          (llong)extra_index);
+                    error("Extra argument %lld not passed to piscou. Ignoring...\n", (llong)extra_index);
                     goto ignore;
                 }
 
                 argv_passed = argv[extra_index];
                 extra_length = strlen32(argv_passed);
-                total_length
-                    = (int64)(pointer - args.arena_pos) + extra_length + left;
+                total_length = (int64)(pointer - args.arena_pos) + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
-                    error("Too long argument. Max length is %d.\n",
-                          MAX_ARGUMENT_LENGTH);
+                    error("Too long argument. Max length is %d.\n", MAX_ARGUMENT_LENGTH);
                     exit(EXIT_FAILURE);
                 }
 
@@ -167,45 +179,41 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
     ignore:
         continue;
     }
+    
     if (DEBUGGING) {
-        for (int32 i = 0; i < (args.len + 1); i += 1) {
+        for (int32 i = 0; i < args.len; i += 1) {
             printf("args.array[%d] = %s\n", i, args.array[i]);
         }
     }
+    
     if (args.array[0] == NULL) {
         error("Invalid command.\n");
         exit(EXIT_FAILURE);
     }
+    
     if (!DEBUGGING) {
         execvp(args.array[0], args.array);
-        {
-            char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
-            STRING_FROM_ARRAY(full_command, " ", args.array, args.len + 1);
-            error("Error executing\n%s\n%s\n", full_command, strerror(errno));
-        }
+        char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
+        STRING_FROM_ARRAY(full_command, " ", args.array, args.len);
+        error("Error executing\n%s\n%s\n", full_command, strerror(errno));
     }
     return;
 }
 
 void
 usage(FILE *stream) {
-    fprintf(stream,
-            "usage: piscou #piscou-file# [ #piscou-0# #piscou-1# ... ]\n");
+    fprintf(stream, "usage: piscou #piscou-file# [ #piscou-0# #piscou-1# ... ]\n");
     exit(stream != stdout);
 }
 
 int64
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
-
     int64 start = pmatch.rm_so;
     int64 end = pmatch.rm_eo;
     int64 diff = end - start;
-    int64 number;
-
     memcpy64(number_buffer, string + start, diff);
-    number = atoi(number_buffer);
-    return number;
+    return (int64)atoi(number_buffer);
 }
 
 void
@@ -217,6 +225,6 @@ array_push(Array *array, char *string, int64 length) {
         array->arena_pos += length;
     }
     array->len += 1;
-    array->array[array->len] = NULL; /* Ensure NULL termination for execvp */
+    array->array[array->len] = NULL;
     return;
 }
