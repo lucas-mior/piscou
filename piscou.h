@@ -1,42 +1,16 @@
 #if !defined(PISCOU_H)
 #define PISCOU_H
 
-#include <assert.h>
-#include <libgen.h>
 #include <magic.h>
-#include <regex.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
-#include <stdint.h>
-#include <sys/wait.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 #include <limits.h>
+#include <libgen.h>
+#include <errno.h>
 
-#if !defined(INTEGERS)
-#define INTEGERS
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ulonglong;
-
-typedef long long llong;
-
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-#endif
+#include "meta_regex/meta_regex.h"
+#include "meta_regex/meta_regex_match.c"
 
 #if !defined(DEBUGGING)
   #define DEBUGGING 0
@@ -46,23 +20,9 @@ typedef uint64_t uint64;
 #endif
 
 #define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
-    !regexec(&R.regex, S, LENGTH(PMATCHES), PMATCHES, 0)
+    (meta_regex_match(R, S, LENGTH(PMATCHES), PMATCHES) == 0)
 
 #define MATCH_REGEX_SIMPLE(R, S) \
-    !regexec(&R.regex, S, 0, NULL, 0)
-
-typedef struct Regex {
-    regex_t regex;
-    char *string;
-} Regex;
-
-static void
-compile_regex(Regex *regex) {
-    if (regcomp(&regex->regex, regex->string, REG_EXTENDED)) {
-        fprintf(stderr, "Could not compile regex %s.\n", regex->string);
-        exit(EXIT_FAILURE);
-    }
-    return;
-}
+    (meta_regex_match(R, S, 0, NULL) == 0)
 
 #endif

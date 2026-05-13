@@ -16,7 +16,7 @@
  */
 
 #include "piscou.h"
-#include "config.h"
+#include "gen/config2.h"
 #include "util.c"
 
 typedef struct Array {
@@ -33,12 +33,12 @@ static inline void parse_command_run(char *const *, int64, char **);
 static void usage(FILE *) __attribute__((noreturn));
 
 static char *filename;
-static Regex regex_filename;
-static Regex regex_extras;
-static Regex regex_extras_more;
 static int nruns = 100;
 
 #define BENCHMARK 1
+static char *regex_filename = "#piscou-file#";
+static MetaRegex regex_extras = R("^#piscou-([0-9])#$");
+static MetaRegex regex_extras_more = R("#piscou-([0-9])#");
 
 int
 main(int argc, char **argv) {
@@ -51,14 +51,6 @@ main(int argc, char **argv) {
     if (argc <= 1) {
         usage(stderr);
     }
-
-    regex_filename.string = REGEX_FILENAME;
-    regex_extras.string = REGEX_EXTRAS;
-    regex_extras_more.string = REGEX_EXTRAS_MORE;
-
-    compile_regex(&regex_filename);
-    compile_regex(&regex_extras);
-    compile_regex(&regex_extras_more);
 
     if (nruns-- <= 0) {
         exit(EXIT_SUCCESS);
@@ -83,26 +75,20 @@ main(int argc, char **argv) {
     }
 
     for (int64 i = 0; i < LENGTH(rules); i += 1) {
-        char *mime = rules[i].match[0];
-        char *path = rules[i].match[1];
+        MetaRegex mime_regex = rules[i].match[0];
+        MetaRegex path_regex = rules[i].match[1];
 
-        if ((mime == NULL) && (path == NULL)) {
+        if ((mime_regex.string == NULL) && (path_regex.string == NULL)) {
             continue;
         }
 
-        if (mime) {
-            Regex regex_config;
-            regex_config.string = mime;
-            compile_regex(&regex_config);
-            if (!MATCH_REGEX_SIMPLE(regex_config, file_mime)) {
+        if (mime_regex.string) {
+            if (!MATCH_REGEX_SIMPLE(mime_regex, (char *)file_mime)) {
                 continue;
             }
         }
-        if (path) {
-            Regex regex_config;
-            regex_config.string = path;
-            compile_regex(&regex_config);
-            if (!MATCH_REGEX_SIMPLE(regex_config, filename)) {
+        if (path_regex.string) {
+            if (!MATCH_REGEX_SIMPLE(path_regex, filename)) {
                 continue;
             }
         }
@@ -135,7 +121,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
         char *argument = command[i];
         regmatch_t matches[MAX_EXTRAS + 1];
 
-        if (MATCH_REGEX_SIMPLE(regex_filename, argument)) {
+        if (!strcmp(regex_filename, argument)) {
             array_push(&args, filename, 0);
             continue;
         }
@@ -197,17 +183,18 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
         for (int32 i = 0; i < (args.len + 1); i += 1) {
             printf("args.array[%d] = %s\n", i, args.array[i]);
         }
-        exit(0);
     }
     if (args.array[0] == NULL) {
         error("Invalid command.\n");
         exit(EXIT_FAILURE);
     }
-    execvp(args.array[0], args.array);
-    {
-        char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
-        STRING_FROM_ARRAY(full_command, " ", args.array, args.len + 1);
-        error("Error executing\n%s\n%s\n", full_command, strerror(errno));
+    if (!DEBUGGING) {
+        execvp(args.array[0], args.array);
+        {
+            char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
+            STRING_FROM_ARRAY(full_command, " ", args.array, args.len + 1);
+            error("Error executing\n%s\n%s\n", full_command, strerror(errno));
+        }
     }
     return;
 }
@@ -242,5 +229,6 @@ array_push(Array *array, char *string, int64 length) {
         array->arena_pos += length;
     }
     array->len += 1;
+    array->array[array->len] = NULL; /* Ensure NULL termination for execvp */
     return;
 }

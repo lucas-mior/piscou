@@ -8,3 +8,5 @@ precomp
 bin
 temp_delete_me
 regex
+meta_regex
+gen/
