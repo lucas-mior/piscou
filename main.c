@@ -24,18 +24,27 @@
 #include <libgen.h>
 #include <errno.h>
 
-#include "config.h"
 #include "util.c"
 
 #if !defined(DEBUGGING)
   #define DEBUGGING 0
 #endif
 
+#include "meta_regex/meta.h"
+#include "meta_regex/meta_match.c"
+#include "gen/config2.h"
+
+#define PISCOU_META_MATCHERS \
+    (MATCHER_BTNFA | MATCHER_TNFA | MATCHER_TDFA | MATCHER_LAZY_DFA \
+     | MATCHER_STATIC_DFA)
+
 #define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
-    (!regexec(R, S, LENGTH(PMATCHES), PMATCHES, 0))
+    (meta_regex_match((R), (uint8 *)(S), strlen32(S), (PMATCHES), \
+                      LENGTH(PMATCHES), PISCOU_META_MATCHERS) == 0)
 
 #define MATCH_REGEX_SIMPLE(R, S) \
-    (!regexec(R, S, 0, NULL, 0))
+    (meta_regex_match((R), (uint8 *)(S), strlen32(S), NULL, 0, \
+                      PISCOU_META_MATCHERS) == 0)
 
 typedef struct Array {
     char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
@@ -53,8 +62,6 @@ static void usage(FILE *) __attribute__((noreturn));
 static char *filename;
 
 static char *regex_filename_str = "#piscou-file#";
-static regex_t regex_extras;
-static regex_t regex_extras_more;
 
 int
 main(int argc, char **argv) {
@@ -66,12 +73,6 @@ main(int argc, char **argv) {
 
     if (argc <= 1) {
         usage(stderr);
-    }
-
-    if (regcomp(&regex_extras, "^#piscou-([0-9])#$", REG_EXTENDED) != 0 ||
-        regcomp(&regex_extras_more, "#piscou-([0-9])#", REG_EXTENDED) != 0) {
-        error("Could not compile substitution regexes.\n");
-        exit(EXIT_FAILURE);
     }
 
     if ((filename = realpath(argv[1], buffer))) {
@@ -92,30 +93,21 @@ main(int argc, char **argv) {
     }
 
     for (int64 i = 0; i < LENGTH(rules); i += 1) {
-        char *mime_pat = rules[i].match[0];
-        char *path_pat = rules[i].match[1];
-        regex_t re;
+        MetaRegex *mime_pat = rules[i].match[0];
+        MetaRegex *path_pat = rules[i].match[1];
 
         if (mime_pat == NULL && path_pat == NULL) {
             continue;
         }
 
         if (mime_pat) {
-            if (regcomp(&re, mime_pat, REG_EXTENDED | REG_NOSUB) != 0) continue;
-            if (MATCH_REGEX_SIMPLE(&re, (char *)file_mime)) {
-                regfree(&re);
-            } else {
-                regfree(&re);
+            if (!MATCH_REGEX_SIMPLE(mime_pat, (char *)file_mime)) {
                 continue;
             }
         }
 
         if (path_pat) {
-            if (regcomp(&re, path_pat, REG_EXTENDED | REG_NOSUB) != 0) continue;
-            if (MATCH_REGEX_SIMPLE(&re, filename)) {
-                regfree(&re);
-            } else {
-                regfree(&re);
+            if (!MATCH_REGEX_SIMPLE(path_pat, filename)) {
                 continue;
             }
         }
@@ -123,9 +115,6 @@ main(int argc, char **argv) {
         found = true;
         parse_command_run(rules[i].command, argc - 2, &argv[2]);
     }
-
-    regfree(&regex_extras);
-    regfree(&regex_extras_more);
 
     if (!found) {
         printf("No previewer set for file:\n\n%s:\n    %s\n", basename(argv[1]), file_mime);
@@ -148,7 +137,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
             array_push(&args, filename, 0);
             continue;
         }
-        if (MATCH_SUBEXPRESSIONS(&regex_extras, argument, matches)) {
+        if (MATCH_SUBEXPRESSIONS(piscou_regex_extras, argument, matches)) {
             int64 extra_index = get_extra_number(argument, matches[1]);
             if (extra_index >= argc) {
                 error("Extra argument %lld not passed to piscou. Ignoring...\n", (llong)extra_index);
@@ -157,7 +146,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
             array_push(&args, argv[extra_index], 0);
             continue;
         }
-        if (MATCH_SUBEXPRESSIONS(&regex_extras_more, argument, matches)) {
+        if (MATCH_SUBEXPRESSIONS(piscou_regex_extras_more, argument, matches)) {
             char *pointer = args.arena_pos;
             int64 extra_length = 0;
             int64 final_length;
@@ -186,7 +175,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
                 memmove64(&pointer[start + extra_length], &pointer[end], left);
                 memcpy64(&pointer[start], argv_passed, extra_length);
                 pointer += (extra_length + start);
-            } while (MATCH_SUBEXPRESSIONS(&regex_extras_more, pointer, matches));
+            } while (MATCH_SUBEXPRESSIONS(piscou_regex_extras_more, pointer, matches));
 
             final_length = (int64)(pointer - args.arena_pos);
             array_push(&args, NULL, final_length);

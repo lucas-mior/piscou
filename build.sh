@@ -54,6 +54,7 @@ option_remove() {
     echo "$1" | sed "s/$2//g"
 }
 
+HOST_CC=${HOST_CC:-cc}
 CC=${CC:-cc}
 
 if [ ! -d bin ]; then
@@ -121,6 +122,7 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-pre-c11-compat"
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
     CFLAGS="$CFLAGS -Wno-c++-keyword"
+    CFLAGS="$CFLAGS -Wno-c++-compat"
     CFLAGS="$CFLAGS -Wno-covered-switch-default"
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
     CFLAGS="$CFLAGS -Wno-cast-qual"
@@ -146,12 +148,24 @@ case "$target" in
     ;;
 *)
     trace_on
-    ctags --kinds-C=+l+d ./*.h ./*.c 2> /dev/null || true
+    ctags --kinds-C=+l+d ./*.h ./*.c meta*.h meta*.c gen/*.h \
+        2> /dev/null || true
     vtags.sed tags > .tags.vim       2> /dev/null || true
-    
+
     mkdir -p gen || true
+
+    PREPROC_CPPFLAGS="$CPPFLAGS"
+    case " $PREPROC_CPPFLAGS " in
+        *" -DDEBUGGING="*) ;;
+        *) PREPROC_CPPFLAGS="$PREPROC_CPPFLAGS -DDEBUGGING=0" ;;
+    esac
+
+    $HOST_CC $PREPROC_CPPFLAGS -std=c11 -O2 \
+        -o bin/meta_preproc meta_regex/meta_preproc_0_main.c -lm
+    ./bin/meta_preproc config.h > gen/config2.h
+
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
-    
+
     trace_off
     ;;
 esac
