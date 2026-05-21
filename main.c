@@ -35,6 +35,7 @@
 #include "gen/config2.h"
 
 #define PISCOU_META_MATCHERS \
+    (enum Matcher) \
     (MATCHER_BTNFA | MATCHER_TNFA | MATCHER_TDFA | MATCHER_LAZY_DFA \
      | MATCHER_STATIC_DFA)
 

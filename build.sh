@@ -128,6 +128,8 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-cast-qual"
     CFLAGS="$CFLAGS -Wno-constant-logical-operand"
     CFLAGS="$CFLAGS -Wno-cast-function-type-strict"
+    CFLAGS="$CFLAGS -Wno-c23-extensions"
+    CFLAGS="$CFLAGS -Wno-padded"
 
     # TODO: implement safe floating point comparisons
     CFLAGS="$CFLAGS -Wno-float-equal"
