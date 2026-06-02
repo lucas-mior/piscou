@@ -50,24 +50,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ullong;
-
-typedef long long llong;
-typedef uintptr_t uintptr;
-
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-
 typedef struct Arena {
     char *name;
     char *begin;
@@ -226,7 +208,7 @@ arena_free(Arena *arena) {
     }
     return true;
 }
-#else
+#elif OS_WINDOWS
 void *
 arena_allocate(int64 *size) {
     void *p;
@@ -242,7 +224,7 @@ arena_allocate(int64 *size) {
     }
 
     if ((p
-         = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE))
+             = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE))
         == NULL) {
         error2("Error in VirtualAlloc(%lld): %lu.\n", (llong)*size,
                GetLastError());
@@ -257,6 +239,20 @@ arena_free(Arena *arena) {
         error2("Error in VirtualFree(%p): %lu.\n", arena, GetLastError());
         return false;
     }
+    return true;
+}
+#else
+void *
+arena_allocate(int64 *size) {
+    void *p;
+    *size = ALIGN_POWER_OF_2(*size, 4096);
+    p = malloc(*size);
+    assert(p);
+    return p;
+}
+bool
+arena_free(Arena *arena) {
+    free(arena);
     return true;
 }
 #endif
