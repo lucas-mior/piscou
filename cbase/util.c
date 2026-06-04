@@ -1600,6 +1600,8 @@ catfile(int where, char *file) {
     return;
 }
 
+#if !OS_WINDOWS
+
 #define XSIGNAL(NAME) [NAME] = #NAME
 static char *signal_names[] = {
     XSIGNAL(SIGABRT),
@@ -1662,6 +1664,8 @@ xkill(pid_t pid, int signum) {
     return;
 }
 
+#endif /* !OS_WINDOWS */
+
 #if OS_UNIX
 static void
 timezone_init(void) {
@@ -1705,7 +1709,7 @@ timezone_init(void) {
 } while (0)
 
 static char *
-read_entire_file(char *path) {
+read_entire_file(char *path, int32 *file_len) {
     FILE *fp;
     int64 len;
     char *data;
@@ -1732,15 +1736,25 @@ read_entire_file(char *path) {
     }
 
     data = xmalloc(len + 1, 0);
-    r = fread64(data, 1, len, fp);
-    if (r != len) {
-        error("Error reading %s: %s.\n", path, strerror(errno));
-        fatal(EXIT_FAILURE);
+    if (len > 0) {
+        r = fread64(data, 1, len, fp);
+        if (r != len) {
+            error("Error reading %s: %s.\n", path, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+    } else {
+        r = 0;
     }
     data[r] = '\0';
     if (fclose(fp)) {
         error("Error closing %s: %s.\n", path, strerror(errno));
     }
+
+    if (r >= MAXOF(*file_len)) {
+        error("Only files up to 2GB are supported.\n");
+        fatal(EXIT_FAILURE);
+    }
+    *file_len = (int32)r;
     return data;
 }
 
@@ -1830,10 +1844,13 @@ sb_printf(StrBuilder *str_builder, char *fmt, ...) {
 
 char *
 sb_steal(StrBuilder *str_builder) {
+    char *out;
+
     if (!str_builder->data) {
         return xstrdup("");
     }
-    char *out = str_builder->data;
+
+    out = str_builder->data;
     str_builder->data = NULL;
     str_builder->len = 0;
     str_builder->cap = 0;
