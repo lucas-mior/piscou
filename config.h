@@ -39,7 +39,6 @@ static Rule rules[] = {
 {{R("appl.+/pdf"),           NULL}, {"pdf.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{R("appl.+/epub.+"),        NULL}, {"epub.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{R("appl.+/csv"),           NULL}, {"csv.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
-{{R("appl.+/json"),          NULL}, {"head", "-n", "40", "#piscou-file#"}},
 {{R("appl.+/js"),            NULL}, {"bat",  "#piscou-file#"}},
 {{R("appl.+/javascript"),    NULL}, {"bat",  "#piscou-file#"}},
 {{R("appl.+/.*execu.+"),     NULL}, {"objdump", "-T", "#piscou-file#", "#piscou-0#"}},
@@ -66,6 +65,8 @@ static Rule rules[] = {
 {{R("appl[^/]+/octet-stream"), NULL}, {"xxd", "#piscou-file#"}},
 {{R("text/x-tex"),    R(".+\\.pgf$")}, {"pgf.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{R("text/.+"),              NULL}, {"bat", "-p", "--pager=never", "--color=always", "#piscou-file#"}},
+{{R("appl.+/json"),          NULL}, {"bat", "-p", "--pager=never", "--color=always", "#piscou-file#"}},
+{{R("appl.+/x-hdf5"),          NULL}, {"hdf5.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 };
 
 #endif
