@@ -31,7 +31,7 @@
   #define DEBUGGING 0
 #endif
 
-#include "meta_regex/meta.h"
+#include "meta_regex/meta_regex.h"
 #include "meta_regex/meta_match.c"
 #include "gen/config2.h"
 

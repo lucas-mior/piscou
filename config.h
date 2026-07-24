@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#include "meta_regex/meta.h"
+#include "meta_regex/meta_regex.h"
 
 #define MAX_ARGS 16
 #define MAX_EXTRAS 10
