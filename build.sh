@@ -62,6 +62,16 @@ if [ ! -d bin ]; then
 fi
 
 case "$target" in
+"check")
+    CC=gcc CFLAGS="-fanalyzer -fdiagnostics-color=never" "$0" build
+    CFLAGS="--analyze -Xanalyzer -analyzer-output=text"
+    CFLAGS="$CFLAGS -Xanalyzer -analyzer-werror"
+    CFLAGS="$CFLAGS -Xanalyzer -analyzer-opt-analyze-headers"
+    CFLAGS="$CFLAGS -Wno-unused-command-line-argument"
+    CFLAGS="$CFLAGS -fno-color-diagnostics"
+    CC=clang CFLAGS="$CFLAGS" "$0" build
+    exit
+    ;;
 "debug")
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
@@ -80,10 +90,6 @@ case "$target" in
 "valgrind")
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
-    ;;
-"check")
-    CC=gcc
-    CFLAGS="$CFLAGS $GNUSOURCE -fanalyzer"
     ;;
 "build")
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
@@ -171,12 +177,5 @@ case "$target" in
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
 
     trace_off
-    ;;
-esac
-
-case "$target" in
-"check")
-    scan-build --view -analyze-headers --status-bugs ./build.sh build
-    exit
     ;;
 esac
