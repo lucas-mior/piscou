@@ -56,7 +56,7 @@ typedef struct Array {
     int32 unused;
 } Array;
 
-static inline int64 get_extra_number(char *, regmatch_t);
+static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *, int64);
 static inline void parse_command_run(char *const *, int64, char **);
 static void usage(FILE *) __attribute__((noreturn));
@@ -142,10 +142,10 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
             continue;
         }
         if (MATCH_SUBEXPRESSIONS(piscou_regex_extras, argument, matches)) {
-            int64 extra_index = get_extra_number(argument, matches[1]);
+            int32 extra_index = get_extra_number(argument, matches[1]);
             if (extra_index >= argc) {
-                error("Extra argument %lld not passed to piscou. Ignoring...\n",
-                      (llong)extra_index);
+                error("Extra argument %d not passed to piscou. Ignoring...\n",
+                      extra_index);
                 goto ignore;
             }
             array_push(&args, argv[extra_index], 0);
@@ -162,11 +162,11 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
                 int64 start = matches[0].rm_so;
                 int64 end = matches[0].rm_eo;
                 int64 left = strlen32(&pointer[end]) + 1;
-                int64 extra_index = get_extra_number(pointer, matches[1]);
+                int32 extra_index = get_extra_number(pointer, matches[1]);
 
                 if (extra_index >= argc) {
-                    error("Extra argument %lld not passed to piscou. Ignoring...\n",
-                          (llong)extra_index);
+                    error("Extra argument %d not passed to piscou. Ignoring...\n",
+                          extra_index);
                     goto ignore;
                 }
 
@@ -224,14 +224,14 @@ usage(FILE *stream) {
     exit(stream != stdout);
 }
 
-int64
+int32
 get_extra_number(char *string, regmatch_t pmatch) {
     char number_buffer[12] = {0};
     int64 start = pmatch.rm_so;
     int64 end = pmatch.rm_eo;
     int64 diff = end - start;
     memcpy64(number_buffer, string + start, diff);
-    return (int64)atoi(number_buffer);
+    return (int32)atoi(number_buffer);
 }
 
 void
