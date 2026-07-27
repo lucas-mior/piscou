@@ -137,7 +137,8 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-c23-extensions"
     CFLAGS="$CFLAGS -Wno-padded"
     CFLAGS="$CFLAGS -Wno-assign-enum"
-    CFLAGS="$CFLAGS -Wno-integer-enum-cast"
+    CFLAGS="$CFLAGS -Wno-implicit-int-enum-cast"
+    CFLAGS="$CFLAGS -Wno-declaration-after-statement"
 
     # TODO: implement safe floating point comparisons
     CFLAGS="$CFLAGS -Wno-float-equal"
