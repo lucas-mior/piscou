@@ -815,6 +815,8 @@ assert_functions_sink(void) {
     (void)assert_file_contains;
     (void)assert_contains;
     (void)assert_not_contains;
+    (void)assert_double_more;
+    (void)assert_double_less;
 
     (void)a_bool_equal;
     (void)a_bool_not_equal;
