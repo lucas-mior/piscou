@@ -123,7 +123,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
         char *argument = command[i];
         regmatch_t matches[MAX_EXTRAS + 1];
 
-        if (!strcmp(regex_filename_str, argument)) {
+        if (strequal(regex_filename_str, argument)) {
             array_push(&args, filename, 0);
             continue;
         }
