@@ -27,7 +27,7 @@ CBASE_API_DECL int32 optional_strlen32(char *);
 CBASE_API_DECL int32 strlen32(char *);
 CBASE_API_DECL void fatal(int32) __attribute__((noreturn));
 CBASE_API_DECL void error_impl(char *, int32, char *, char *, ...)
-    __attribute__((format(printf, 4, 5)));
+    ATTR_PRINTF(4, 5);
 CBASE_API_DECL int memcmp64(void *, void *, int64);
 CBASE_API_DECL void *memmem64(void *, int64, void *, int64);
 CBASE_API_DECL void *memrchr64(void *, int32, int64);
