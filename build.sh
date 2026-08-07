@@ -6,13 +6,17 @@ set -e
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
+target="${1:-build}"
+
+if [ "$target" = "test" ]; then
+    exit
+fi
+
 . ./targets
 
 dir="$(readlink -f "$(dirname "$0")")"
 
 cbase="cbase"
-
-target="${1:-build}"
 
 if ! grep -q "$target" targets; then
     echo "usage: $(basename "$0") <targets>"
