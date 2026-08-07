@@ -68,7 +68,7 @@ printf "\n${0} ${RED}${1} ${2}$RES\n"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
-program=$(basename "$(readlink -f "$(dirname "$0")")")
+program=$(get_program "$0")
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
@@ -79,7 +79,6 @@ CFLAGS="$CFLAGS -Werror"
 CFLAGS="$CFLAGS -Wno-unused-macros"
 CFLAGS="$CFLAGS -Wno-unused-function"
 CFLAGS="$CFLAGS -Wno-unknown-pragmas"
-CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wno-gnu-union-cast"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700"
 CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
