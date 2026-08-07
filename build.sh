@@ -6,22 +6,61 @@ set -e
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
-target="${1:-build}"
-
-if [ "$target" = "test" ]; then
-    exit
-fi
-
-. ./targets
-
-dir="$(readlink -f "$(dirname "$0")")"
+dir=$(dirname "$(readlink -f "$0")")
+cd "$dir" || exit
+script=$(basename "$0")
 
 cbase="cbase"
 
-if ! grep -q "$target" targets; then
-    echo "usage: $(basename "$0") <targets>"
-    cat targets
+if [ -f ./targets ]; then
+    . ./targets
+else
+    targets=$(cat <<'EOF_TARGETS'
+build
+debug
+fast_feedback
+install
+uninstall
+test
+check
+benchmark
+perf
+valgrind
+cross x86_64-linux
+cross aarch64-linux
+cross x86_64-macos
+cross aarch64-macos
+cross x86_64-windows-gnu
+EOF_TARGETS
+)
+fi
+
+target="${1:-build}"
+target_line=$target
+if [ "$target" = "cross" ] && [ -n "${2:-}" ]; then
+    target_line="$target $2"
+fi
+
+target_supported () {
+    wanted=$1
+    printf '%s\n' "$targets" | awk -v wanted="$wanted" '
+        {
+            line = $0
+            sub(/^# /, "", line)
+        }
+        line == wanted { found = 1 }
+        END { exit !found }
+    '
+}
+
+if ! target_supported "$target_line" && ! target_supported "$target"; then
+    echo "usage: $script <targets>"
+    printf '%s\n' "$targets"
     exit 1
+fi
+
+if [ "$target" = "test" ]; then
+    exit
 fi
 
 cross="$2"
@@ -42,8 +81,8 @@ CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wno-gnu-union-cast"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700"
-CPPFLAGS="$CPPFLAGS -I "$dir/$cbase""
-CPPFLAGS="$CPPFLAGS -I "$dir""
+CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
+CPPFLAGS="$CPPFLAGS -I$dir"
 LDFLAGS="$LDFLAGS -lmagic -lm"
 
 OS=$(uname -a)
@@ -149,6 +188,9 @@ if [ "$CC" = "clang" ]; then
 fi
 
 case "$target" in
+"test")
+    exit
+    ;;
 "uninstall")
     trace_on
     rm -f ${DESTDIR}${PREFIX}/bin/${program}
