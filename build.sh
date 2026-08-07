@@ -98,7 +98,15 @@ option_remove() {
 }
 
 HOST_CC=${HOST_CC:-cc}
-CC=${CC:-cc}
+requested_cc=${CC:-}
+case "$target" in
+"debug"|"test"|"fast_feedback")
+    CC="${requested_cc:-tcc}"
+    ;;
+*)
+    CC="${requested_cc:-cc}"
+    ;;
+esac
 
 if [ ! -d bin ]; then
     mkdir -p bin
