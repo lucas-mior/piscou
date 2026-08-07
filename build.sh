@@ -119,7 +119,7 @@ if [ ! -d bin ]; then
 fi
 
 case "$target" in
-"check")
+check)
     CC=gcc CFLAGS="-fanalyzer -fdiagnostics-color=never" "$0" build
     CFLAGS="--analyze -Xanalyzer -analyzer-output=text"
     CFLAGS="$CFLAGS -Xanalyzer -analyzer-werror"
@@ -129,26 +129,26 @@ case "$target" in
     CC=clang CFLAGS="$CFLAGS" "$0" build
     exit
     ;;
-"debug")
+debug)
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     exe="bin/${program}_debug"
     ;;
-"benchmark")
+benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DPISCOU_BENCHMARK=1"
     exe="bin/${program}_benchmark"
     ;;
-"perf")
+perf)
     CFLAGS="$CFLAGS -g3 -Og -flto"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DPISCOU_BENCHMARK=1"
     exe="bin/${program}_perf"
     ;;
-"valgrind")
+valgrind)
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
-"build")
+build)
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
 *)
@@ -162,7 +162,7 @@ if [ "$target" = "cross" ]; then
     CFLAGS=$(option_remove "$CFLAGS" "-D_GNU_SOURCE")
 
     case $cross in
-    "x86_64-macos"|"aarch64-macos")
+    x86_64-macos|aarch64-macos)
         CFLAGS="$CFLAGS -fno-lto"
         LDFLAGS="$LDFLAGS -lpthread"
         ;;
@@ -202,16 +202,16 @@ if [ "$CC" = "clang" ]; then
 fi
 
 case "$target" in
-"test")
+test)
     exit
     ;;
-"uninstall")
+uninstall)
     trace_on
     rm -f ${DESTDIR}${PREFIX}/bin/${program}
     rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
     exit
     ;;
-"install")
+install)
     trace_on
     install -Dm755 bin/${program}   ${DESTDIR}${PREFIX}/bin/${program}
     install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
