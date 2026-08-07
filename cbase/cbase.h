@@ -4,58 +4,6 @@
 #if !defined(CBASE_H)
 #define CBASE_H
 
-#if !defined(TESTING_array)
-#define TESTING_array 0
-#endif
-#if !defined(TESTING_arena)
-#define TESTING_arena 0
-#endif
-#if !defined(TESTING_assert)
-#define TESTING_assert 0
-#endif
-#if !defined(TESTING_command)
-#define TESTING_command 0
-#endif
-#if !defined(TESTING_generic)
-#define TESTING_generic 0
-#endif
-#if !defined(TESTING_hash)
-#define TESTING_hash 0
-#endif
-#if !defined(TESTING_memory)
-#define TESTING_memory 0
-#endif
-#if !defined(TESTING_meta_common)
-#define TESTING_meta_common 0
-#endif
-#if !defined(TESTING_meta_generate)
-#define TESTING_meta_generate 0
-#endif
-#if !defined(TESTING_meta_parse)
-#define TESTING_meta_parse 0
-#endif
-#if !defined(TESTING_meta_tokenize)
-#define TESTING_meta_tokenize 0
-#endif
-#if !defined(TESTING_minmax)
-#define TESTING_minmax 0
-#endif
-#if !defined(TESTING_sort)
-#define TESTING_sort 0
-#endif
-#if !defined(TESTING_utf8)
-#define TESTING_utf8 0
-#endif
-#if !defined(TESTING_threads)
-#define TESTING_threads 0
-#endif
-#if !defined(TESTING_util)
-#define TESTING_util 0
-#endif
-#if !defined(TESTING_xenums)
-#define TESTING_xenums 0
-#endif
-
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
 #endif
@@ -67,6 +15,7 @@
 #include "platform_detection.h"
 #include "primitives.h"
 #include "base_macros.h"
+#include "libc.h"
 
 static char *program = __FILE__;
 static int32 program_len UNUSED;
@@ -83,11 +32,6 @@ CBASE_API_DECL int memcmp64(void *, void *, int64);
 CBASE_API_DECL void *memmem64(void *, int64, void *, int64);
 CBASE_API_DECL void *memrchr64(void *, int32, int64);
 
-#include "libc.h"
-#if defined(ALIGN)
-#undef ALIGN
-#endif
-#define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
 #include "i18n.h"
 #include "memory.h"
 #include "arena.h"
