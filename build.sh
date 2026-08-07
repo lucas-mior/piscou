@@ -98,13 +98,15 @@ option_remove() {
 }
 
 HOST_CC=${HOST_CC:-cc}
-requested_cc=${CC:-}
 case "$target" in
-"debug"|"test"|"fast_feedback")
-    CC="${requested_cc:-tcc}"
+debug|test)
+    CC="${CC:-tcc}"
+    ;;
+fast_feedback)
+    CC="${CC:-clang}"
     ;;
 *)
-    CC="${requested_cc:-cc}"
+    CC="${CC:-cc}"
     ;;
 esac
 
