@@ -40,31 +40,17 @@ if [ "$target" = "cross" ] && [ -n "${2:-}" ]; then
     target_line="$target $2"
 fi
 
-target_supported () {
-    wanted=$1
-    printf '%s\n' "$targets" | awk -v wanted="$wanted" '
-        {
-            line = $0
-            sub(/^# /, "", line)
-        }
-        line == wanted { found = 1 }
-        END { exit !found }
-    '
-}
-
-if ! target_supported "$target_line" && ! target_supported "$target"; then
+if ! target_supported "$targets" "$target_line" \
+        && ! target_supported "$targets" "$target"; then
     echo "usage: $script <targets>"
     printf '%s\n' "$targets"
     exit 1
 fi
 
-if [ "$target" = "test" ]; then
-    exit
-fi
 
 cross="$2"
 
-printf "\n${0} ${RED}${1} ${2}$RES\n"
+printf "\n${script} ${RED}${1:-} ${2:-}$RES\n"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
@@ -72,9 +58,9 @@ program=$(get_program "$0")
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
-CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700"
-CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
 CPPFLAGS="$CPPFLAGS -I$dir"
+CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
+CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
@@ -94,10 +80,6 @@ if echo "$OS" | grep -q "Linux"; then
         GNUSOURCE="-D_GNU_SOURCE"
     fi
 fi
-
-option_remove() {
-    echo "$1" | sed "s/$2//g"
-}
 
 HOST_CC=${HOST_CC:-cc}
 case "$target" in
@@ -221,9 +203,7 @@ install)
     ;;
 *)
     trace_on
-    ctags --kinds-C=+l+d ./*.h ./*.c meta*.h meta*.c gen/*.h \
-        2> /dev/null || true
-    vtags.sed tags > .tags.vim       2> /dev/null || true
+    build_tags . gen
 
     mkdir -p gen || true
 
