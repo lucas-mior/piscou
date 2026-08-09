@@ -80,14 +80,12 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-covered-switch-default"
     CFLAGS="$CFLAGS -Wno-declaration-after-statement"
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
-    # TODO: implement safe floating point comparisons
     CFLAGS="$CFLAGS -Wno-float-equal"
     CFLAGS="$CFLAGS -Wno-format-nonliteral"
     CFLAGS="$CFLAGS -Wno-implicit-int-enum-cast"
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
     CFLAGS="$CFLAGS -Wno-padded"
     CFLAGS="$CFLAGS -Wno-pre-c11-compat"
-    CFLAGS="$CFLAGS -Wno-unknown-pragmas"
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
     CFLAGS="$CFLAGS -Wno-unused-macros"
 fi
