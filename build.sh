@@ -167,6 +167,7 @@ fi
 
 case "$target" in
 test)
+    TEST_EXCLUDE_PATTERN='(^|/)cbase/' test "$2"
     exit
     ;;
 uninstall)
