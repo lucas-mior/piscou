@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
-#include <magic.h>
-#include <regex.h>
-
 #define CBASE_IMPLEMENT
 #include "cbase.h"
+
+#include <magic.h>
+#include <regex.h>
 
 #if !defined(DEBUGGING)
   #define DEBUGGING 0

@@ -61,7 +61,6 @@ CC=$(get_compiler "$target")
 
 CPPFLAGS="$CPPFLAGS -I$dir"
 CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
-CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
@@ -92,14 +91,6 @@ fi
 
 LDFLAGS="$LDFLAGS -lmagic -lm"
 
-OS=$(uname -a)
-
-if echo "$OS" | grep -q "Linux"; then
-    if echo "$OS" | grep -q "GNU"; then
-        GNUSOURCE="-D_GNU_SOURCE"
-    fi
-fi
-
 HOST_CC=${HOST_CC:-cc}
 
 if [ ! -d bin ]; then
@@ -119,25 +110,25 @@ check)
     ;;
 debug)
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     exe="bin/${program}_debug"
     ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DPISCOU_BENCHMARK=1"
+    CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1"
     exe="bin/${program}_benchmark"
     ;;
 perf)
     CFLAGS="$CFLAGS -g3 -Og -flto"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DPISCOU_BENCHMARK=1"
+    CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1"
     exe="bin/${program}_perf"
     ;;
 valgrind)
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 build)
-    CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
 *)
     CFLAGS="$CFLAGS -O2"
@@ -147,7 +138,6 @@ esac
 if [ "$target" = "cross" ]; then
     CC="zig cc"
     CFLAGS="$CFLAGS -target $cross"
-    CFLAGS=$(option_remove "$CFLAGS" "-D_GNU_SOURCE")
 
     case $cross in
     x86_64-macos|aarch64-macos)
