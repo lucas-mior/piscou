@@ -3,12 +3,6 @@
 
 #include <magic.h>
 #include <regex.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <libgen.h>
-#include <errno.h>
 
 #define CBASE_IMPLEMENT
 #include "cbase.h"

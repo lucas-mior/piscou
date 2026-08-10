@@ -1,8 +1,7 @@
 #if !defined(CONFIG_H)
 #define CONFIG_H
 
-#include <stdlib.h>
-
+#include "cbase.h"
 #include "meta_regex/meta_regex.h"
 
 #define MAX_ARGS 16
