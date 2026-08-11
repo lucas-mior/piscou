@@ -39,7 +39,7 @@ typedef struct Array {
 static inline int32 get_extra_number(char *, regmatch_t);
 static inline void array_push(Array *, char *, int64);
 static inline void parse_command_run(char *const *, int64, char **);
-static void usage(FILE *) __attribute__((noreturn));
+static noreturn void usage(FILE *);
 
 static char *filename;
 
