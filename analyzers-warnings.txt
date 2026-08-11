@@ -1,0 +1,146 @@
+
+build.sh [01;38;2;255;000;000mcheck [0;m
+
+build.sh [01;38;2;255;000;000mbuild [0;m
++ build_tags . gen
++ [ 2 -eq 0 ]
++ command_exists ctags
++ command -v ctags
++ find . gen -iname *.[ch] -print0
++ xargs --verbose -0 ctags --kinds-C=+l+d
+ctags '--kinds-C=+l+d' ./cbase/arena.c ./cbase/arena.h ./cbase/array.c ./cbase/assertions.c ./cbase/cbase.c ./cbase/clamp.h ./cbase/command.c ./cbase/generic.c ./cbase/hash.c ./cbase/i18n.h ./cbase/libc.h ./cbase/memory.h ./cbase/meta_common.c ./cbase/meta_generate.c ./cbase/meta.h ./cbase/meta_parse.c ./cbase/meta_tokenize.c ./cbase/minmax.c ./cbase/platform_detection.h ./cbase/primitives.h ./cbase/rapidhash.h ./cbase/rw_function.h ./cbase/sfa.h ./cbase/sort.c ./cbase/utf8.c ./cbase/util.c ./cbase/xenums.c ./cbase/try_include.h ./cbase/assertions.h ./cbase/base_macros.h ./cbase/cbase.h ./cbase/memory.c ./cbase/threads.c ./gen/config2.h ./config.h ./main.c gen/config2.h
++ [ -f tags ]
++ command_exists vtags.sed
++ command -v vtags.sed
++ vtags.sed tags
++ uniq
++ sort
++ mkdir -p gen
++ PREPROC_CPPFLAGS= -I/home/lucas/.local/src/piscou -I/home/lucas/.local/src/piscou/cbase
++ PREPROC_CPPFLAGS= -I/home/lucas/.local/src/piscou -I/home/lucas/.local/src/piscou/cbase -DDEBUGGING=0
++ cc -I/home/lucas/.local/src/piscou -I/home/lucas/.local/src/piscou/cbase -DDEBUGGING=0 -std=c11 -O2 -o bin/meta_preproc meta_regex/meta_preproc_0_main.c -lm
++ ./bin/meta_preproc config.h
+regex [0;34m"^#piscou-([0-9])#$"[0m created 12 states.
+regex [0;34m"#piscou-([0-9])#"[0m created 12 states.
+regex [0;34m"v[a-z0-9]{1,3}::."[0m created 9 states.
+regex [0;34m"g[a-z0-9]{1,3}::."[0m created 9 states.
+regex [0;34m".+\\.fen$"[0m created 7 states.
+regex [0;34m".+\\.mo$"[0m created 6 states.
+regex [0;34m".+\\.blend$"[0m created 9 states.
+regex [0;34m".+\\.csv"[0m created 7 states.
+regex [0;34m".+\\.dot"[0m created 7 states.
+regex [0;34m".+\\.kicad_pro$"[0m created 13 states.
+regex [0;34m".+\\.sed$"[0m created 7 states.
+regex [0;34m"inode/directory"[0m created 17 states.
+regex [0;34m"inode/x-empty"[0m created 15 states.
+regex [0;34m"ms(word|-exce|-powe)"[0m created 17 states.
+regex [0;34m"opendoc.+spreadsheet"[0m created 21 states.
+regex [0;34m"officed.+spreadsheet"[0m created 21 states.
+regex [0;34m"office.+word"[0m created 13 states.
+regex [0;34m"office.+pres"[0m created 13 states.
+regex [0;34m"opendocument"[0m created 14 states.
+regex [0;34m"appl.+/pdf"[0m created 11 states.
+regex [0;34m"appl.+/epub.+"[0m created 17 states.
+regex [0;34m"appl.+/csv"[0m created 11 states.
+regex [0;34m"appl.+/js"[0m created 10 states.
+regex [0;34m"appl.+/javascript"[0m created 18 states.
+regex [0;34m"appl.+/.*execu.+"[0m created 19 states.
+regex [0;34m"appl.+/x-objec.+"[0m created 23 states.
+regex [0;34m"appl.+/x-sharedlib"[0m created 19 states.
+regex [0;34m"appl.+/zip"[0m created 11 states.
+regex [0;34m"appl.+/gzip"[0m created 12 states.
+regex [0;34m"appl.+/x-7z-.+"[0m created 19 states.
+regex [0;34m"appl.+/x-subrip"[0m created 16 states.
+regex [0;34m"appl.+/mbox"[0m created 12 states.
+regex [0;34m"\\.hdr$"[0m created 6 states.
+regex [0;34m".+\\.[1-9]$"[0m created 5 states.
+regex [0;34m".+\\.sent$"[0m created 8 states.
+regex [0;34m"image/.*dwg"[0m created 12 states.
+regex [0;34m"image/.*xml"[0m created 12 states.
+regex [0;34m".+\\.gif$"[0m created 7 states.
+regex [0;34m".+\\.webp$"[0m created 8 states.
+regex [0;34m"image/.*"[0m created 9 states.
+regex [0;34m"image/.*"[0m created 9 states.
+regex [0;34m"audio/.*"[0m created 9 states.
+regex [0;34m"video/.*"[0m created 9 states.
+regex [0;34m"appl[^/]+/x-matroska"[0m created 18 states.
+regex [0;34m"appl[^/]+/x-kicad-.*"[0m created 17 states.
+regex [0;34m"appl[^/]+/octet-stream"[0m created 20 states.
+regex [0;34m"text/x-tex"[0m created 12 states.
+regex [0;34m".+\\.pgf$"[0m created 7 states.
+regex [0;34m"text/.+"[0m created 8 states.
+regex [0;34m"appl.+/json"[0m created 12 states.
+regex [0;34m"appl.+/x-hdf5"[0m created 14 states.
++ gcc -I/home/lucas/.local/src/piscou -I/home/lucas/.local/src/piscou/cbase -fanalyzer -fdiagnostics-color=never -std=c11 -Wfatal-errors -Wextra -Wall -Werror=all -Werror=extra -Werror -Wno-unused-function -O2 -flto -march=native -ftree-vectorize -o bin/piscou main.c -lmagic -lm -lpthread
+
+build.sh [01;38;2;255;000;000mbuild [0;m
++ build_tags . gen
++ [ 2 -eq 0 ]
++ command_exists ctags
++ command -v ctags
++ find . gen -iname *.[ch] -print0
++ xargs --verbose -0 ctags --kinds-C=+l+d
+ctags '--kinds-C=+l+d' ./cbase/arena.c ./cbase/arena.h ./cbase/array.c ./cbase/assertions.c ./cbase/cbase.c ./cbase/clamp.h ./cbase/command.c ./cbase/generic.c ./cbase/hash.c ./cbase/i18n.h ./cbase/libc.h ./cbase/memory.h ./cbase/meta_common.c ./cbase/meta_generate.c ./cbase/meta.h ./cbase/meta_parse.c ./cbase/meta_tokenize.c ./cbase/minmax.c ./cbase/platform_detection.h ./cbase/primitives.h ./cbase/rapidhash.h ./cbase/rw_function.h ./cbase/sfa.h ./cbase/sort.c ./cbase/utf8.c ./cbase/util.c ./cbase/xenums.c ./cbase/try_include.h ./cbase/assertions.h ./cbase/base_macros.h ./cbase/cbase.h ./cbase/memory.c ./cbase/threads.c ./gen/config2.h ./config.h ./main.c gen/config2.h
++ [ -f tags ]
++ command_exists vtags.sed
++ command -v vtags.sed
++ sort
++ vtags.sed tags
++ uniq
++ mkdir -p gen
++ PREPROC_CPPFLAGS= -I/home/lucas/.local/src/piscou -I/home/lucas/.local/src/piscou/cbase
++ PREPROC_CPPFLAGS= -I/home/lucas/.local/src/piscou -I/home/lucas/.local/src/piscou/cbase -DDEBUGGING=0
++ cc -I/home/lucas/.local/src/piscou -I/home/lucas/.local/src/piscou/cbase -DDEBUGGING=0 -std=c11 -O2 -o bin/meta_preproc meta_regex/meta_preproc_0_main.c -lm
++ ./bin/meta_preproc config.h
+regex [0;34m"^#piscou-([0-9])#$"[0m created 12 states.
+regex [0;34m"#piscou-([0-9])#"[0m created 12 states.
+regex [0;34m"v[a-z0-9]{1,3}::."[0m created 9 states.
+regex [0;34m"g[a-z0-9]{1,3}::."[0m created 9 states.
+regex [0;34m".+\\.fen$"[0m created 7 states.
+regex [0;34m".+\\.mo$"[0m created 6 states.
+regex [0;34m".+\\.blend$"[0m created 9 states.
+regex [0;34m".+\\.csv"[0m created 7 states.
+regex [0;34m".+\\.dot"[0m created 7 states.
+regex [0;34m".+\\.kicad_pro$"[0m created 13 states.
+regex [0;34m".+\\.sed$"[0m created 7 states.
+regex [0;34m"inode/directory"[0m created 17 states.
+regex [0;34m"inode/x-empty"[0m created 15 states.
+regex [0;34m"ms(word|-exce|-powe)"[0m created 17 states.
+regex [0;34m"opendoc.+spreadsheet"[0m created 21 states.
+regex [0;34m"officed.+spreadsheet"[0m created 21 states.
+regex [0;34m"office.+word"[0m created 13 states.
+regex [0;34m"office.+pres"[0m created 13 states.
+regex [0;34m"opendocument"[0m created 14 states.
+regex [0;34m"appl.+/pdf"[0m created 11 states.
+regex [0;34m"appl.+/epub.+"[0m created 17 states.
+regex [0;34m"appl.+/csv"[0m created 11 states.
+regex [0;34m"appl.+/js"[0m created 10 states.
+regex [0;34m"appl.+/javascript"[0m created 18 states.
+regex [0;34m"appl.+/.*execu.+"[0m created 19 states.
+regex [0;34m"appl.+/x-objec.+"[0m created 23 states.
+regex [0;34m"appl.+/x-sharedlib"[0m created 19 states.
+regex [0;34m"appl.+/zip"[0m created 11 states.
+regex [0;34m"appl.+/gzip"[0m created 12 states.
+regex [0;34m"appl.+/x-7z-.+"[0m created 19 states.
+regex [0;34m"appl.+/x-subrip"[0m created 16 states.
+regex [0;34m"appl.+/mbox"[0m created 12 states.
+regex [0;34m"\\.hdr$"[0m created 6 states.
+regex [0;34m".+\\.[1-9]$"[0m created 5 states.
+regex [0;34m".+\\.sent$"[0m created 8 states.
+regex [0;34m"image/.*dwg"[0m created 12 states.
+regex [0;34m"image/.*xml"[0m created 12 states.
+regex [0;34m".+\\.gif$"[0m created 7 states.
+regex [0;34m".+\\.webp$"[0m created 8 states.
+regex [0;34m"image/.*"[0m created 9 states.
+regex [0;34m"image/.*"[0m created 9 states.
+regex [0;34m"audio/.*"[0m created 9 states.
+regex [0;34m"video/.*"[0m created 9 states.
+regex [0;34m"appl[^/]+/x-matroska"[0m created 18 states.
+regex [0;34m"appl[^/]+/x-kicad-.*"[0m created 17 states.
+regex [0;34m"appl[^/]+/octet-stream"[0m created 20 states.
+regex [0;34m"text/x-tex"[0m created 12 states.
+regex [0;34m".+\\.pgf$"[0m created 7 states.
+regex [0;34m"text/.+"[0m created 8 states.
+regex [0;34m"appl.+/json"[0m created 12 states.
+regex [0;34m"appl.+/x-hdf5"[0m created 14 states.
++ clang -I/home/lucas/.local/src/piscou -I/home/lucas/.local/src/piscou/cbase --analyze -Xanalyzer -analyzer-output=text -Xanalyzer -analyzer-werror -Xanalyzer -analyzer-opt-analyze-headers -Wno-unused-command-line-argument -fno-color-diagnostics -std=c11 -Wfatal-errors -Wextra -Wall -Werror=all -Werror=extra -Werror -Wno-unused-function -Weverything -Wno-assign-enum -Wno-c++-compat -Wno-c++-keyword -Wno-cast-qual -Wno-constant-logical-operand -Wno-covered-switch-default -Wno-declaration-after-statement -Wno-disabled-macro-expansion -Wno-float-equal -Wno-format-nonliteral -Wno-implicit-int-enum-cast -Wno-implicit-void-ptr-cast -Wno-padded -Wno-pre-c11-compat -Wno-unsafe-buffer-usage -Wno-unused-macros -O2 -flto -march=native -ftree-vectorize -o bin/piscou main.c -lmagic -lm -lpthread
