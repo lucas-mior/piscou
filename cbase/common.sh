@@ -701,7 +701,7 @@ common_compile_cbase () {
     CC="${CC:-cc}"
 
     trace_on
-    $CC -g3 -O2 -flto -c "cbase.c" -o "cbase-${CC}.o"
+    $CC -g3 -O2 -c "cbase.c" -o "cbase.o"
     trace_off
 }
 
