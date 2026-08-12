@@ -3,13 +3,12 @@
 # shellcheck disable=SC2086
 
 dir=$(dirname "$(readlink -f "$0")")
-# shellcheck source=/dev/null
-. "$dir/cbase/common.sh"
-
 cd "$dir" || exit
-script=$(basename "$0")
 
-cbase="cbase"
+# shellcheck source=./cbase/common.sh
+. "./cbase/common.sh"
+
+script=$(basename "$0")
 
 if [ -f ./targets ]; then
     . ./targets
@@ -48,8 +47,8 @@ mkdir -p "$(dirname "$exe")"
 
 CC=$(common_get_compiler "$mode")
 
-CPPFLAGS="$CPPFLAGS -I$dir"
-CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
+CPPFLAGS="$CPPFLAGS -I."
+CPPFLAGS="$CPPFLAGS -Icbase"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
