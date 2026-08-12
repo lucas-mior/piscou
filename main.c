@@ -135,7 +135,8 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
             char *pointer = args.arena_pos;
             int64 extra_length = 0;
             int64 final_length;
-            strcpy(pointer, argument);
+            int32 argument_len = strlen32(argument);
+            memcpy64(pointer, argument, argument_len + 1);
             do {
                 char *argv_passed;
                 int64 total_length;
