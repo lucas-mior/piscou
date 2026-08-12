@@ -34,22 +34,11 @@ EOF_TARGETS
 )
 fi
 
-target="${1:-debug}"
-target_line=$target
-if [ "$target" = "cross" ] && [ -n "${2:-}" ]; then
-    target_line="$target $2"
-fi
+build_parse_args "$@"
+build_validate_mode "$script" "$targets"
+cross="$target"
 
-if ! target_supported "$targets" "$target_line" \
-        && ! target_supported "$targets" "$target"; then
-    echo "usage: $script <targets>"
-    printf '%s\n' "$targets"
-    exit 1
-fi
-
-cross="$2"
-
-printf "\n${script} ${RED}${1:-} ${2:-}$RES\n"
+build_print_invocation "$script"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
@@ -57,7 +46,7 @@ program=$(get_program "$0")
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
-CC=$(get_compiler "$target")
+CC=$(get_compiler "$mode")
 
 CPPFLAGS="$CPPFLAGS -I$dir"
 CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
@@ -97,7 +86,7 @@ if [ ! -d bin ]; then
     mkdir -p bin
 fi
 
-case "$target" in
+case "$mode" in
 check)
     set +e
 
@@ -139,7 +128,7 @@ build)
     ;;
 esac
 
-if [ "$target" = "cross" ]; then
+if [ "$mode" = "cross" ]; then
     CC="zig cc"
     CFLAGS="$CFLAGS -target $cross"
 
@@ -159,9 +148,9 @@ else
     LDFLAGS="$LDFLAGS -lpthread"
 fi
 
-case "$target" in
+case "$mode" in
 test)
-    TEST_EXCLUDE_PATTERN='(^|/)cbase/' test "$2"
+    TEST_EXCLUDE_PATTERN='(^|/)cbase/' test "$target"
     exit
     ;;
 uninstall)
