@@ -12,6 +12,14 @@ script=$(basename "$0")
 
 
 common_build_parse_args "$@"
+
+case "$mode" in
+benchmark|build|check|cross|debug|fast_feedback|install|perf|test|uninstall|valgrind)
+    ;;
+*)
+    common_build_unknown_mode
+    ;;
+esac
 cross="$target"
 
 common_build_print_invocation "$script"
@@ -65,18 +73,7 @@ fi
 
 case "$mode" in
 check)
-    set +e
-
-    CC=gcc CFLAGS="-fanalyzer -fdiagnostics-color=never" "$0" build
-
-    CFLAGS="--analyze -Xanalyzer -analyzer-output=text"
-    CFLAGS="$CFLAGS -Xanalyzer -analyzer-werror"
-    CFLAGS="$CFLAGS -Xanalyzer -analyzer-opt-analyze-headers"
-    CFLAGS="$CFLAGS -Wno-unused-command-line-argument"
-    CFLAGS="$CFLAGS -fno-color-diagnostics"
-    CC=clang CFLAGS="$CFLAGS" "$0" build
-
-    exit
+    common_build_run_analyzers build
     ;;
 debug)
     CFLAGS="$CFLAGS -g3"
@@ -100,10 +97,17 @@ valgrind)
 build)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
-cross|fast_feedback)
+cross)
+    common_build_cross_all
     CFLAGS="$CFLAGS -O2"
     ;;
+fast_feedback)
+    CFLAGS="$CFLAGS -O2"
+    ;;
+benchmark|build|check|cross|debug|fast_feedback|install|perf|test|uninstall|valgrind)
+    ;;
 *)
+    common_build_unknown_mode
     ;;
 esac
 
@@ -164,15 +168,5 @@ benchmark|build|cross|debug|fast_feedback|perf|valgrind)
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
 
     trace_off
-    ;;
-esac
-
-
-case "$mode" in
-benchmark|build|check|cross|debug|fast_feedback|install|perf|test|uninstall|valgrind)
-    ;;
-*)
-    echo "Unknown mode $mode"
-    exit 1
     ;;
 esac
