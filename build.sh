@@ -166,7 +166,6 @@ install)
     exit
     ;;
 *)
-    trace_on
     common_build_tags . gen
 
     mkdir -p gen || true
@@ -176,6 +175,8 @@ install)
         *" -DDEBUGGING="*) ;;
         *) PREPROC_CPPFLAGS="$PREPROC_CPPFLAGS -DDEBUGGING=0" ;;
     esac
+
+    trace_on
 
     $HOST_CC $PREPROC_CPPFLAGS -std=c11 -O2 \
         -o bin/meta_preproc meta_regex/meta_preproc_0_main.c -lm
