@@ -10,31 +10,8 @@ cd "$dir" || exit
 
 script=$(basename "$0")
 
-if [ -f ./targets ]; then
-    . ./targets
-else
-    targets=$(cat <<'EOF_TARGETS'
-build
-debug
-fast_feedback
-install
-uninstall
-test
-check
-benchmark
-perf
-valgrind
-cross x86_64-linux
-cross aarch64-linux
-cross x86_64-macos
-cross aarch64-macos
-cross x86_64-windows-gnu
-EOF_TARGETS
-)
-fi
 
 common_build_parse_args "$@"
-common_build_validate_mode "$script" "$targets"
 cross="$target"
 
 common_build_print_invocation "$script"
@@ -123,8 +100,10 @@ valgrind)
 build)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
-*)
+cross|fast_feedback)
     CFLAGS="$CFLAGS -O2"
+    ;;
+*)
     ;;
 esac
 
@@ -165,7 +144,7 @@ install)
     install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
     exit
     ;;
-*)
+benchmark|build|cross|debug|fast_feedback|perf|valgrind)
     common_build_tags . gen
 
     mkdir -p gen || true
@@ -185,5 +164,15 @@ install)
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
 
     trace_off
+    ;;
+esac
+
+
+case "$mode" in
+benchmark|build|check|cross|debug|fast_feedback|install|perf|test|uninstall|valgrind)
+    ;;
+*)
+    echo "Unknown mode $mode"
+    exit 1
     ;;
 esac
