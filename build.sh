@@ -81,17 +81,17 @@ check)
 debug)
     CFLAGS="$CFLAGS -g3"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
-    exe="bin/${program}_debug"
+    exe="bin/$program"
     ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1"
-    exe="bin/${program}_benchmark"
+    exe="bin/$program"
     ;;
 perf)
     CFLAGS="$CFLAGS -g3 -Og -flto"
     CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1"
-    exe="bin/${program}_perf"
+    exe="bin/$program"
     ;;
 valgrind)
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
