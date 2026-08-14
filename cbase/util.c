@@ -155,11 +155,6 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
     return result;
 }
 
-inline bool32
-strequal(char *s1, char *s2) {
-    return !strcmp(s1, s2);
-}
-
 #if !HAS_POSIX_WIN_SUBSET
 char *optarg = NULL;
 int optind = 1;
@@ -309,27 +304,6 @@ striqual_ascii_lower(char c) {
 bool32
 striqual(char *s1, char *s2) {
     return striqual2(s1, strlen32(s1), s2, strlen32(s2));
-}
-
-bool32
-optional_strequal(char *a, int32 a_len, char *b, int32 b_len) {
-    if ((a == NULL) || (b == NULL)) {
-        return false;
-    }
-
-    return strequal2(a, a_len, b, b_len);
-}
-
-bool32
-strequal2(char *a, int32 a_len, char *b, int32 b_len) {
-    if (a_len != b_len) {
-        return false;
-    }
-    if (memcmp64(a, b, a_len)) {
-        return false;
-    }
-
-    return true;
 }
 
 bool32
@@ -1054,28 +1028,6 @@ util_segv_handler(int32 unused) {
     _exit(EXIT_FAILURE);
 }
 
-noreturn void
-util_die_notify(char *program_name, char *format, ...) {
-    int32 n;
-    va_list args;
-    char buffer[BUFSIZ];
-
-    va_start(args, format);
-    n = vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
-
-    if ((n < 0) || (n >= SIZEOF(buffer))) {
-        fatal(EXIT_FAILURE);
-    }
-
-    buffer[n] = '\0';
-    write64(STDERR_FILENO, buffer, (uint32)n + 1);
-    for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
-        execlp(notifiers[i], notifiers[i], "-u", "critical", program_name,
-               buffer, NULL);
-    }
-    fatal(EXIT_FAILURE);
-}
 #endif
 
 int32
@@ -2579,7 +2531,6 @@ util_functions_sink(void) {
     (void)util_copy_file_sync;
     (void)util_copy_file_async;
     (void)send_signal;
-    (void)util_die_notify;
 #endif
     (void)util_equal_files;
 
@@ -3370,7 +3321,6 @@ main(int argc, char **argv) {
     NCALLS(1);
 
 #if OS_UNIX
-    (void)util_die_notify;
     (void)util_segv_handler;
     (void)util_copy_file_sync;
     (void)util_copy_file_async;
