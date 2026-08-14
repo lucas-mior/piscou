@@ -33,8 +33,8 @@
  *   - rapidhash source repository: https://github.com/Nicoshev/rapidhash
  */
 
-#if !defined(RAPIDHASH_C)
-#define RAPIDHASH_C
+#if !defined(RAPIDHASH_H)
+#define RAPIDHASH_H
 
 #include "cbase.h"
 #if defined(_MSC_VER)
@@ -433,4 +433,4 @@ rapidhash128(void *key, uint64 len) {
     return rapidhash128_internal(key, len, rapid_seed, rapid_secret);
 }
 
-#endif /* RAPIDHASH_C */
+#endif /* RAPIDHASH_H */
