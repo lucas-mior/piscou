@@ -104,10 +104,18 @@ jobs:
               sudo pkgin -y install file pkgconf || true
               ;;
           esac
-          echo '#include <magic.h>' \
-              | cc -x c - $(pkg-config --cflags --libs libmagic) \
-                  -o /tmp/check_magic
-          rm -f /tmp/check_magic
+          printf '%s\n' \
+              '#include <magic.h>' \
+              '' \
+              'int main(void)' \
+              '{' \
+              '    return 0;' \
+              '}' \
+              > /tmp/check_magic.c
+          cc /tmp/check_magic.c $(pkg-config --cflags --libs libmagic) \
+              -o /tmp/check_magic
+          /tmp/check_magic
+          rm -f /tmp/check_magic /tmp/check_magic.c
           cc --version
 
       - name: Build and Test
