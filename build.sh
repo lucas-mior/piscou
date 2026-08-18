@@ -32,6 +32,22 @@ mkdir -p "$(dirname "$exe")"
 
 CC=$(common_get_compiler "$mode")
 
+OS=$(uname -a)
+if [ "$mode" = "cross" ]; then
+    if [ "$target" != "all" ]; then
+        OS="$target"
+    fi
+fi
+
+PTHREAD_CFLAGS=
+case "$OS" in
+*MINGW*|*MSYS*|*CYGWIN*|*mingw*|*msys*|*cygwin*|*windows*)
+    ;;
+*)
+    PTHREAD_CFLAGS="-pthread"
+    ;;
+esac
+
 CPPFLAGS="$CPPFLAGS -I."
 CPPFLAGS="$CPPFLAGS -Icbase"
 
@@ -41,6 +57,7 @@ CFLAGS="$CFLAGS -Wextra -Wall"
 CFLAGS="$CFLAGS -Werror=all -Werror=extra"
 # CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 CFLAGS="$CFLAGS -Wno-unused-function"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 
 if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Weverything"
@@ -123,17 +140,13 @@ if [ "$mode" = "cross" ]; then
     case $cross in
     x86_64-macos|aarch64-macos)
         CFLAGS="$CFLAGS -fno-lto"
-        LDFLAGS="$LDFLAGS -lpthread"
         ;;
     *windows*)
         exe="bin/$program.exe"
         ;;
     *)
-        LDFLAGS="$LDFLAGS -lpthread"
         ;;
     esac
-else
-    LDFLAGS="$LDFLAGS -lpthread"
 fi
 
 case "$mode" in
@@ -166,7 +179,7 @@ benchmark|build|cross|debug|fast_feedback|perf|valgrind)
 
     trace_on
 
-    $HOST_CC $PREPROC_CPPFLAGS -std=c11 -O2 \
+    $HOST_CC $PREPROC_CPPFLAGS -std=c11 -O2 $PTHREAD_CFLAGS \
         -o bin/meta_preproc meta_regex/src/meta_preproc_0_main.c -lm
     ./bin/meta_preproc config.h > gen/config2.h
 
