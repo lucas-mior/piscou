@@ -36,7 +36,7 @@ typedef struct Array {
     int32 unused;
 } Array;
 
-static inline int32 get_extra_number(char *, regmatch_t);
+static inline int32 get_extra_number(char *, MetaRegexMatch);
 static inline void array_push(Array *, char *, int64);
 static inline void parse_command_run(char *const *, int64, char **);
 static noreturn void usage(FILE *);
@@ -115,7 +115,7 @@ parse_command_run(char *const *command, int64 argc, char **argv) {
 
     for (int64 i = 0; command[i]; i += 1) {
         char *argument = command[i];
-        regmatch_t matches[MAX_EXTRAS + 1];
+        MetaRegexMatch matches[MAX_EXTRAS + 1];
 
         if (strequal(regex_filename_str, argument)) {
             array_push(&args, filename, 0);
@@ -206,7 +206,7 @@ usage(FILE *stream) {
 }
 
 int32
-get_extra_number(char *string, regmatch_t pmatch) {
+get_extra_number(char *string, MetaRegexMatch pmatch) {
     char number_buffer[12] = {0};
     int64 start = pmatch.rm_so;
     int64 end = pmatch.rm_eo;
