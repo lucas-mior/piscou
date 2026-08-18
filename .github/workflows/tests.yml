@@ -1,0 +1,117 @@
+name: Test on various platforms CI
+
+on:
+  push:
+    branches:
+  pull_request:
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout meta_regex
+        uses: actions/checkout@v4
+        with:
+          repository: lucas-mior/meta_regex
+          path: meta_regex
+
+      - name: Install build deps
+        run: |
+          xcode-select --install 2>/dev/null || true
+          brew install libmagic
+          libmagic_prefix=$(brew --prefix libmagic)
+          echo "CPPFLAGS=-I${libmagic_prefix}/include ${CPPFLAGS:-}" \
+              >> "$GITHUB_ENV"
+          echo "LDFLAGS=-L${libmagic_prefix}/lib ${LDFLAGS:-}" \
+              >> "$GITHUB_ENV"
+          cc --version
+
+      - name: Build and Test
+        run: |
+          ./build.sh build
+          ./build.sh test
+
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout meta_regex
+        uses: actions/checkout@v4
+        with:
+          repository: lucas-mior/meta_regex
+          path: meta_regex
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmagic-dev
+          cc --version
+
+      - name: Build and Test
+        run: |
+          ./build.sh build
+          ./build.sh test
+
+  bsd:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.name }} VM
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: cpa.sh {0} --sync-files runner-to-vm
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: FreeBSD
+            os: freebsd
+            version: "15.1"
+          - name: OpenBSD
+            os: openbsd
+            version: "7.9"
+          - name: NetBSD
+            os: netbsd
+            version: "11.0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout meta_regex
+        uses: actions/checkout@v4
+        with:
+          repository: lucas-mior/meta_regex
+          path: meta_regex
+
+      - name: Start VM
+        uses: cross-platform-actions/action@v1.4.0
+        with:
+          operating_system: ${{ matrix.os }}
+          version: ${{ matrix.version }}
+          shell: sh
+          memory: 4G
+          cpu_count: 2
+
+      - name: Install build deps
+        run: |
+          case "$(uname -s)" in
+          FreeBSD)
+              sudo pkg install -y file || true
+              ;;
+          OpenBSD)
+              sudo pkg_add file || true
+              ;;
+          NetBSD)
+              sudo pkgin -y install file || true
+              ;;
+          esac
+          echo '#include <magic.h>' \
+              | cc -x c - -lmagic -o /tmp/check_magic
+          rm -f /tmp/check_magic
+          cc --version
+
+      - name: Build and Test
+        run: |
+          ./build.sh build
+          ./build.sh test
