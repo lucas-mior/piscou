@@ -20,11 +20,9 @@ jobs:
       - name: Install build deps
         run: |
           xcode-select --install 2>/dev/null || true
-          brew install libmagic
+          brew install libmagic pkgconf
           libmagic_prefix=$(brew --prefix libmagic)
-          echo "CPPFLAGS=-I${libmagic_prefix}/include ${CPPFLAGS:-}" \
-              >> "$GITHUB_ENV"
-          echo "LDFLAGS=-L${libmagic_prefix}/lib ${LDFLAGS:-}" \
+          echo "PKG_CONFIG_PATH=${libmagic_prefix}/lib/pkgconfig:${PKG_CONFIG_PATH:-}" \
               >> "$GITHUB_ENV"
           cc --version
 
@@ -47,7 +45,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y libmagic-dev
+          sudo apt-get install -y libmagic-dev pkg-config
           cc --version
 
       - name: Build and Test
@@ -97,17 +95,18 @@ jobs:
         run: |
           case "$(uname -s)" in
           FreeBSD)
-              sudo pkg install -y file || true
+              sudo pkg install -y file pkgconf || true
               ;;
           OpenBSD)
-              sudo pkg_add file || true
+              sudo pkg_add file pkgconf || true
               ;;
           NetBSD)
-              sudo pkgin -y install file || true
+              sudo pkgin -y install file pkgconf || true
               ;;
           esac
           echo '#include <magic.h>' \
-              | cc -x c - -lmagic -o /tmp/check_magic
+              | cc -x c - $(pkg-config --cflags --libs libmagic) \
+                  -o /tmp/check_magic
           rm -f /tmp/check_magic
           cc --version
 

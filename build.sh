@@ -63,7 +63,12 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 fi
 
-LDFLAGS="$LDFLAGS -lmagic -lm"
+PKG_CONFIG=${PKG_CONFIG:-pkg-config}
+LIBMAGIC_CFLAGS=$($PKG_CONFIG --cflags libmagic)
+LIBMAGIC_LDFLAGS=$($PKG_CONFIG --libs libmagic)
+
+CPPFLAGS="$CPPFLAGS $LIBMAGIC_CFLAGS"
+LDFLAGS="$LDFLAGS $LIBMAGIC_LDFLAGS -lm"
 
 HOST_CC=${HOST_CC:-cc}
 
