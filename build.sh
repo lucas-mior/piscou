@@ -39,7 +39,7 @@ CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall"
 CFLAGS="$CFLAGS -Werror=all -Werror=extra"
-CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
+# CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 CFLAGS="$CFLAGS -Wno-unused-function"
 
 if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
@@ -162,7 +162,7 @@ benchmark|build|cross|debug|fast_feedback|perf|valgrind)
     trace_on
 
     $HOST_CC $PREPROC_CPPFLAGS -std=c11 -O2 \
-        -o bin/meta_preproc meta_regex/meta_preproc_0_main.c -lm
+        -o bin/meta_preproc meta_regex/src/meta_preproc_0_main.c -lm
     ./bin/meta_preproc config.h > gen/config2.h
 
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS

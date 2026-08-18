@@ -11,8 +11,8 @@
   #define DEBUGGING 0
 #endif
 
-#include "meta_regex/meta_regex.h"
-#include "meta_regex/meta_match.c"
+#include "meta_regex/src/meta_regex.h"
+#include "meta_regex/src/meta_match.c"
 #include "gen/config2.h"
 
 #define PISCOU_META_MATCHERS \
