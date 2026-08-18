@@ -83,9 +83,20 @@ fi
 PKG_CONFIG=${PKG_CONFIG:-pkg-config}
 LIBMAGIC_CFLAGS=$($PKG_CONFIG --cflags libmagic)
 LIBMAGIC_LDFLAGS=$($PKG_CONFIG --libs libmagic)
+LIBMAGIC_RPATH=
+case "$(uname -s)" in
+NetBSD)
+    LIBMAGIC_LIBDIR=$($PKG_CONFIG --variable=libdir libmagic)
+    if [ -n "$LIBMAGIC_LIBDIR" ]; then
+        LIBMAGIC_RPATH="-Wl,-R$LIBMAGIC_LIBDIR"
+    fi
+    ;;
+*)
+    ;;
+esac
 
 CPPFLAGS="$CPPFLAGS $LIBMAGIC_CFLAGS"
-LDFLAGS="$LDFLAGS $LIBMAGIC_LDFLAGS -lm"
+LDFLAGS="$LDFLAGS $LIBMAGIC_LDFLAGS $LIBMAGIC_RPATH -lm"
 
 HOST_CC=${HOST_CC:-cc}
 

@@ -112,8 +112,19 @@ jobs:
               '    return 0;' \
               '}' \
               > /tmp/check_magic.c
+          magic_rpath=
+          case "$(uname -s)" in
+          NetBSD)
+              magic_libdir=$(pkg-config --variable=libdir libmagic)
+              if [ -n "$magic_libdir" ]; then
+                  magic_rpath="-Wl,-R${magic_libdir}"
+              fi
+              ;;
+          *)
+              ;;
+          esac
           cc /tmp/check_magic.c $(pkg-config --cflags --libs libmagic) \
-              -o /tmp/check_magic
+              ${magic_rpath} -o /tmp/check_magic
           /tmp/check_magic
           rm -f /tmp/check_magic /tmp/check_magic.c
           cc --version
