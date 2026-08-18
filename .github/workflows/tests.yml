@@ -95,13 +95,13 @@ jobs:
         run: |
           case "$(uname -s)" in
           FreeBSD)
-              sudo pkg install -y file pkgconf || true
+              sudo pkg install -y file pkgconf
               ;;
           OpenBSD)
-              sudo pkg_add file pkgconf || true
+              sudo pkg_add libmagic
               ;;
           NetBSD)
-              sudo pkgin -y install file pkgconf || true
+              sudo pkgin -y install file pkgconf
               ;;
           esac
           printf '%s\n' \
