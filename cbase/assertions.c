@@ -12,6 +12,57 @@
 
 #include "cbase.h"
 
+#if OS_UNIX
+sigjmp_buf assert_traps_env;
+volatile sig_atomic_t assert_traps_caught = false;
+
+static struct sigaction assert_traps_old_signal_action;
+static bool assert_traps_signal_installed = false;
+
+static noreturn void
+assert_traps_signal_handler(int signal_number) {
+    (void)signal_number;
+    assert_traps_caught = true;
+    siglongjmp(assert_traps_env, 1);
+}
+
+void
+assert_traps_install(char *file, int32 line, char *func) {
+    struct sigaction signal_action = {0};
+
+    assert_traps_caught = false;
+    signal_action.sa_handler = assert_traps_signal_handler;
+    sigemptyset(&signal_action.sa_mask);
+    signal_action.sa_flags = SA_RESTART;
+
+    if (sigaction(SIGILL, &signal_action,
+                  &assert_traps_old_signal_action) != 0) {
+        assert_error(file, line, func,
+                     "Error in sigaction: %s.\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    assert_traps_signal_installed = true;
+    return;
+}
+
+void
+assert_traps_restore(char *file, int32 line, char *func) {
+    if (!assert_traps_signal_installed) {
+        return;
+    }
+
+    if (sigaction(SIGILL, &assert_traps_old_signal_action, NULL) != 0) {
+        assert_error(file, line, func,
+                     "Error in sigaction: %s.\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    assert_traps_signal_installed = false;
+    return;
+}
+#endif
+
 void
 assert_error(char *file, int32 line, char *func, char *format, ...) {
     va_list ap;
@@ -758,18 +809,6 @@ assert_functions_sink(void) {
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 
-#if OS_LINUX
-static sig_atomic_t assertion_failed = false;
-static sigjmp_buf assert_env;
-
-static noreturn void
-handler_failed_assertion(int unused) {
-    (void)unused;
-    assertion_failed = true;
-    siglongjmp(assert_env, 1);
-}
-#endif
-
 int
 main(void) {
     ASSERT(true);
@@ -974,7 +1013,7 @@ main(void) {
         /* ASSERT_EQUAL(b, 1); */
     } 
 
-#if OS_LINUX
+#if OS_UNIX
     {
         int a = 0;
         double b = 1;
@@ -984,108 +1023,25 @@ main(void) {
         char *string_null = NULL;
         char *string_some = "some";
 
-        struct sigaction signal_action;
-        signal_action.sa_handler = handler_failed_assertion;
-        sigemptyset(&signal_action.sa_mask);
-        signal_action.sa_flags = SA_RESTART;
+        fprintf(stderr, "\nThe following assertions are supposed to fail\n");
 
-        if (sigaction(SIGILL, &signal_action, NULL) != 0) {
-            fprintf(stderr, "Error in sigaction: %s.\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-
-        fprintf(stderr, "\nThe following assertions are supposed to fail");
-        fprintf(stderr, "\nand then check the 'assertion_failed' variable\n");
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_EQUAL(a, b);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_EQUAL(string_null, string_some);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_EQUAL(string_some, 3, "none");
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_MORE(a, b);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_LESS(b, a);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_MORE_EQUAL(a, b);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_LESS_EQUAL(b, a);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_LESS((void *)&array[1], (void *)&array[0]);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_EQUAL(true, false);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_NOT_CLOSE(close_a, close_b);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_NOT_CLOSE(close_a, close_b, 0.01);
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_CONTAINS("alpha beta gamma\n", 17, "delta\n");
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_NOT_CONTAINS("alpha beta\n gamma\n", 18, "beta\n");
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_GLOB_MATCH("alpha beta gamma", "alpha*delta");
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
-
-        if (sigsetjmp(assert_env, 1) == 0) {
-            ASSERT_GLOB_NO_MATCH("alpha beta gamma", "alpha*gamma");
-        }
-        ASSERT(assertion_failed);
-        assertion_failed = false;
+        ASSERT_TRAPS(ASSERT_EQUAL(a, b));
+        ASSERT_TRAPS(ASSERT_EQUAL(string_null, string_some));
+        ASSERT_TRAPS(ASSERT_EQUAL(string_some, 3, "none"));
+        ASSERT_TRAPS(ASSERT_MORE(a, b));
+        ASSERT_TRAPS(ASSERT_LESS(b, a));
+        ASSERT_TRAPS(ASSERT_MORE_EQUAL(a, b));
+        ASSERT_TRAPS(ASSERT_LESS_EQUAL(b, a));
+        ASSERT_TRAPS(ASSERT_LESS((void *)&array[1], (void *)&array[0]));
+        ASSERT_TRAPS(ASSERT_EQUAL(true, false));
+        ASSERT_TRAPS(ASSERT_NOT_CLOSE(close_a, close_b));
+        ASSERT_TRAPS(ASSERT_NOT_CLOSE(close_a, close_b, 0.01));
+        ASSERT_TRAPS(ASSERT_CONTAINS("alpha beta gamma\n", 17, "delta\n"));
+        ASSERT_TRAPS(ASSERT_NOT_CONTAINS("alpha beta\n gamma\n", 18,
+                                         "beta\n"));
+        ASSERT_TRAPS(ASSERT_GLOB_MATCH("alpha beta gamma", "alpha*delta"));
+        ASSERT_TRAPS(ASSERT_GLOB_NO_MATCH("alpha beta gamma",
+                                          "alpha*gamma"));
     }
 #endif
 
