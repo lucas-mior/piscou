@@ -419,8 +419,26 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
 }
 ```
 
+Never check against `-1` for functions that return -1 or negative integer on
+error. Check `< 0` instead, since it works for the case where the negative
+result encodes an error number. The only exception is the `switch (fork())`
+pattern, but using `fork()` directly should be avoided anyway (use the
+`cbase/command.c` API instead which wraps `fork()`.
+
 ### Control flow and error handling
 - Avoid `goto`. Use it only for common cleanup logic.
+- Sometimes a useful pattern to avoid using goto:
+  ```c
+  do {
+      if ((a = may_fail()) < 0) {
+          break;
+      }
+      if ((b = may_fail2()) < 0) {
+          break;
+      }
+      do_something(a, b);
+  } while (0);
+  ```
 
 ### Return value for errors
 - Only model failures that callers can reasonably handle. Programmer errors
