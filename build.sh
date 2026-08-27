@@ -14,7 +14,7 @@ script=$(basename "$0")
 common_build_parse_args "$@"
 
 case "$mode" in
-benchmark|build|check|cross|debug|fast_feedback|install|perf|test|uninstall|valgrind)
+benchmark|build|check|cross|debug|debug-fast|fast_feedback|install|perf|test|uninstall|valgrind)
     ;;
 *)
     common_build_unknown_mode
@@ -113,6 +113,10 @@ debug)
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     exe="bin/$program"
     ;;
+debug-fast)
+    CFLAGS="$CFLAGS -g2 -O2 -flto -march=native -ftree-vectorize"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
+    ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DPISCOU_BENCHMARK=1"
@@ -137,7 +141,7 @@ cross)
 fast_feedback)
     CFLAGS="$CFLAGS -O2"
     ;;
-benchmark|build|check|cross|debug|fast_feedback|install|perf|test|uninstall|valgrind)
+benchmark|build|check|cross|debug|debug-fast|fast_feedback|install|perf|test|uninstall|valgrind)
     ;;
 *)
     common_build_unknown_mode
@@ -177,7 +181,7 @@ install)
     install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
     exit
     ;;
-benchmark|build|cross|debug|fast_feedback|perf|valgrind)
+benchmark|build|cross|debug|debug-fast|fast_feedback|perf|valgrind)
     common_build_tags . gen
 
     mkdir -p gen || true
