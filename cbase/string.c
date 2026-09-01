@@ -90,32 +90,6 @@ byte_matches_any(char byte, void *memory, int64 memory_len) {
     return memchr64(memory, byte, memory_len) != NULL;
 }
 
-char *
-strncpy32(char *dest, char *source, int64 space) {
-    if (DEBUGGING) {
-        if (space <= 0) {
-            error("Error: string (%.*s ...) is too long.\n", 50, source);
-            fatal(EXIT_FAILURE);
-        }
-        if ((ullong)space >= SIZE_MAX) {
-            error("Error: space is too large.\n");
-            fatal(EXIT_FAILURE);
-        }
-    }
-
-    {
-        int32 source_len = strlen32(source);
-        int64 copy_len = MIN(source_len, space);
-
-        memcpy64(dest, source, copy_len);
-        if (copy_len < space) {
-            memset64(dest + copy_len, 0, space - copy_len);
-        }
-    }
-
-    return dest;
-}
-
 int
 strncmp32(char *left, char *right, int64 size) {
     int result;
@@ -240,17 +214,9 @@ sb_opt_cstr(StrBuilder *buffer) {
 }
 
 void
-sb_init(StrBuilder *str_builder) {
-    str_builder->data = NULL;
-    str_builder->len = 0;
-    str_builder->cap = 0;
-    return;
-}
-
-void
 sb_free(StrBuilder *str_builder) {
     free2(str_builder->data, str_builder->cap);
-    sb_init(str_builder);
+    *str_builder = (StrBuilder){0};
     return;
 }
 
@@ -292,12 +258,12 @@ sb_move(StrBuilder *dest, StrBuilder *source) {
 
     sb_free(dest);
     if (source == NULL) {
-        sb_init(dest);
+        *dest = (StrBuilder){0};
         return;
     }
 
     *dest = *source;
-    sb_init(source);
+    *source = (StrBuilder){0};
     return;
 }
 
@@ -477,7 +443,7 @@ sb_steal(StrBuilder *str_builder, int32 *len, int32 *cap) {
         *cap = str_builder->cap;
     }
 
-    sb_init(str_builder);
+    *str_builder = (StrBuilder){0};
     return data;
 }
 
@@ -655,7 +621,7 @@ str_builder_array_append(StrBuilderArray *array) {
 
     item = &array->items[array->len];
     array->len += 1;
-    sb_init(item);
+    *item = (StrBuilder){0};
     return item;
 }
 
@@ -676,7 +642,7 @@ str_builder_array_append_copy(StrBuilderArray *array, StrBuilder *item) {
     index = array->len;
     dest = &array->items[index];
     array->len += 1;
-    sb_init(dest);
+    *dest = (StrBuilder){0};
     if ((err = sb_copy(dest, item)) < 0) {
         array->len -= 1;
         sb_free(dest);
@@ -694,7 +660,6 @@ string_functions_sink(void) {
     (void)striqual;
     (void)striqual2;
     (void)strncmp32;
-    (void)strncpy32;
     (void)begins_with;
     (void)ends_with;
     (void)byte_matches_any;
