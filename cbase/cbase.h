@@ -37,6 +37,8 @@ void *memmem64(void *, int64, void *, int64);
 void *memchr64(void *, int32, int64);
 void *memrchr64(void *, int32, int64);
 bool util_glob_match(char *, int32, char *, int32);
+int64 ceil64(double x);
+int64 floor64(double x);
 
 int fdtruncate64(int32 fd, int64 len);
 
@@ -402,7 +404,7 @@ _Generic((VAR), \
     default: square_int64 \
 )(VAR)
 
-#define strequal2_3(A, A_LEN, B)        strequal2(A, A_LEN, B, strlen32(B))
+#define strequal2_3(A, A_LEN, B)        strequal2(A, A_LEN, B, STRLIT_LEN(B))
 #define strequal2_4(A, A_LEN, B, B_LEN) strequal2(A, A_LEN, B, B_LEN)
 #define STREQUAL(...) SELECT_ON_NUM_ARGS(strequal2_, __VA_ARGS__)
 
@@ -450,13 +452,13 @@ _Generic((char (*)[STRLIT_LEN(LITERAL)])0, \
 )(HAYSTACK, HAYSTACK_LEN, LITERAL, STRLIT_LEN(LITERAL))
 
 #define BEGINS_WITH_3(STRING, STRING_LEN, PREFIX) \
-    begins_with(STRING, STRING_LEN, PREFIX, strlen32(PREFIX))
+    begins_with(STRING, STRING_LEN, PREFIX, STRLIT_LEN(PREFIX))
 #define BEGINS_WITH_4(STRING, STRING_LEN, PREFIX, PREFIX_LEN) \
     begins_with(STRING, STRING_LEN, PREFIX, PREFIX_LEN)
 #define BEGINS_WITH(...) SELECT_ON_NUM_ARGS(BEGINS_WITH_, __VA_ARGS__)
 
 #define ENDS_WITH_3(STRING, STRING_LEN, SUFFIX) \
-    ends_with(STRING, STRING_LEN, SUFFIX, strlen32(SUFFIX))
+    ends_with(STRING, STRING_LEN, SUFFIX, STRLIT_LEN(SUFFIX))
 #define ENDS_WITH_4(STRING, STRING_LEN, SUFFIX, SUFFIX_LEN) \
     ends_with(STRING, STRING_LEN, SUFFIX, SUFFIX_LEN)
 #define ENDS_WITH(...) SELECT_ON_NUM_ARGS(ENDS_WITH_, __VA_ARGS__)

@@ -53,8 +53,7 @@ CPPFLAGS="$CPPFLAGS -Icbase"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
-# CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
-CFLAGS="$CFLAGS -Wno-unused-function"
+CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 
 if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
