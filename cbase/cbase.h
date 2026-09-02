@@ -38,14 +38,8 @@ void *memchr64(void *, int32, int64);
 void *memrchr64(void *, int32, int64);
 bool util_glob_match(char *, int32, char *, int32);
 
-#if !defined(CBASE_SOME_MATH)
-#define CBASE_SOME_MATH 1
-#endif
-
-#if CBASE_SOME_MATH
 int64 ceil64(double x);
 int64 floor64(double x);
-#endif
 
 int fdtruncate64(int32 fd, int64 len);
 
@@ -434,19 +428,19 @@ _Generic((VAR), \
     (char[SIZE]){ LITERAL })
 
 #define MEM_LITERAL_SHORT_LENGTHS(XX) \
-    XX(2), \
-    XX(3), \
-    XX(4), \
-    XX(5), \
-    XX(6), \
-    XX(7), \
-    XX(8), \
-    XX(9), \
-    XX(10), \
-    XX(11), \
-    XX(12), \
-    XX(13), \
-    XX(14), \
+    XX(2),                            \
+    XX(3),                            \
+    XX(4),                            \
+    XX(5),                            \
+    XX(6),                            \
+    XX(7),                            \
+    XX(8),                            \
+    XX(9),                            \
+    XX(10),                           \
+    XX(11),                           \
+    XX(12),                           \
+    XX(13),                           \
+    XX(14),                           \
     XX(15)
 
 #define MEM_LITERAL_SHORT_GENERIC_SLOT(N) \
@@ -497,20 +491,20 @@ _Generic((char (*)[STRLIT_LEN(LITERAL)])0, \
     xfclose(__FILE__, __LINE__, FUNC__, F, FILENAME)
 
 #define SB_APPEND_2(BUILDER, STRING) \
-    sb_append(BUILDER, STRING, strlen32(STRING))
+    sb_append(BUILDER, STRING, STRLIT_LEN(STRING))
 #define SB_APPEND_3(BUILDER, STRING, LEN) \
     sb_append(BUILDER, STRING, LEN)
 #define SB_APPEND(...) SELECT_ON_NUM_ARGS(SB_APPEND_, __VA_ARGS__)
 
 #define HERE here_impl(__FILE__, __LINE__, FUNC__)
 
-#define NCALLS(INTERVAL) do { \
-    static int64 ncalls_ncalls = 1; \
-    if ((ncalls_ncalls % (INTERVAL)) == 0) { \
-        fprintf(stderr, "%s:%d:%s: called %lld times\n", \
-                __FILE__, __LINE__, FUNC__, ncalls_ncalls); \
-    } \
-    ncalls_ncalls += 1; \
+#define NCALLS(INTERVAL) do {                                            \
+    static int64 ncalls_ncalls = 1;                                      \
+    if ((ncalls_ncalls % (INTERVAL)) == 0) {                             \
+        fprintf(stderr, "%s:%d:%s: called %lld times\n",                 \
+                        __FILE__, __LINE__, FUNC__, ncalls_ncalls);      \
+    }                                                                    \
+    ncalls_ncalls += 1;                                                  \
 } while (0)
 
 #define PRINT_TIMINGS_3(N, T0, T1) \
@@ -764,6 +758,8 @@ void throw_away_function();
 #endif
 #include "directory.c"
 #include "threads.c"
+
+#include "some_math.c"
 
 #define ENUM_NAME CommandFlag
 #define ENUM_BITFLAGS 1

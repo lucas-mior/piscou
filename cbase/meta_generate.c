@@ -69,57 +69,11 @@ c_string_literal(char *value, int32 value_len) {
 
 bool
 c_identifier_is_keyword(char *identifier) {
-    static char *keywords[] = {
-        "_Alignas",
-        "_Alignof",
-        "_Atomic",
-        "_Bool",
-        "_Complex",
-        "_Generic",
-        "_Imaginary",
-        "_Noreturn",
-        "_Static_assert",
-        "_Thread_local",
-        "auto",
-        "break",
-        "case",
-        "char",
-        "const",
-        "continue",
-        "default",
-        "do",
-        "double",
-        "else",
-        "enum",
-        "extern",
-        "float",
-        "for",
-        "goto",
-        "if",
-        "inline",
-        "int",
-        "long",
-        "register",
-        "restrict",
-        "return",
-        "short",
-        "signed",
-        "sizeof",
-        "static",
-        "struct",
-        "switch",
-        "typedef",
-        "union",
-        "unsigned",
-        "void",
-        "volatile",
-        "while",
-    };
+    enum CKeyword keyword;
 
-    for (int32 i = 0; i < LENGTH(keywords); i += 1) {
-        if (strequal(identifier, keywords[i])) {
-            return true;
-        }
+    keyword = c_keyword_from_text(identifier, strlen32(identifier));
+    if (keyword != C_KEYWORD_INVALID) {
+        return true;
     }
     return false;
 }
@@ -278,19 +232,19 @@ c_emit_wrapped_expr(StrBuilder *out, char *indent, char *prefix, char *expr,
                     char *suffix) {
     int32 prefix_len = strlen32(prefix);
 
-    SB_APPEND(out, indent);
-    SB_APPEND(out, prefix);
+    SB_APPEND(out, indent, strlen32(indent));
+    SB_APPEND(out, prefix, strlen32(prefix));
     for (int32 i = 0; expr[i] != '\0'; i += 1) {
         SB_APPEND(out, expr + i, 1);
         if (expr[i] == '(' || expr[i] == ',') {
             SB_APPEND(out, "\n");
-            SB_APPEND(out, indent);
+            SB_APPEND(out, indent, strlen32(indent));
             for (int32 j = 0; j < prefix_len; j += 1) {
                 SB_APPEND(out, " ");
             }
         }
     }
-    SB_APPEND(out, suffix);
+    SB_APPEND(out, suffix, strlen32(suffix));
     SB_APPEND(out, "\n");
 }
 
