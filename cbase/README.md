@@ -96,7 +96,7 @@ formatter yet.
 
 ## Alternative usage: compile cbase as a separate object
 ```sh
-cc -std=c11 -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700 -c cbase.c -o cbase.o
+cc -std=c11 -c cbase.c -o cbase.o
 cc -std=c11 your_main.c cbase.o
 ```
 
