@@ -417,7 +417,7 @@ static int32
 fmt_validate_flags(FormatSpec *spec, enum FmtFlags allowed_flags) {
     ASSERT(spec != NULL);
 
-    if ((spec->flags & ~allowed_flags) != 0) {
+    if (spec->flags & ~allowed_flags) {
         return -EINVAL;
     }
 
@@ -473,7 +473,8 @@ fmt_validate_spec(FormatSpec *spec) {
         if (!fmt_length_is_integer(spec->length)) {
             return -EINVAL;
         }
-        if (spec->flags != 0 || fmt_has_width(spec)
+        if (spec->flags
+            || fmt_has_width(spec)
             || fmt_has_precision(spec)) {
             return -EINVAL;
         }
@@ -484,7 +485,8 @@ fmt_validate_spec(FormatSpec *spec) {
         if (spec->length != FMT_LENGTH_NONE) {
             return -EINVAL;
         }
-        if (spec->flags != 0 || fmt_has_width(spec)
+        if (spec->flags
+            || fmt_has_width(spec)
             || fmt_has_precision(spec)) {
             return -EINVAL;
         }
@@ -543,6 +545,7 @@ typedef struct FormatSink {
     int32 total;
     int32 status;
     bool unchecked;
+    bool write_count;
 } FormatSink;
 
 static int32
@@ -565,6 +568,7 @@ fmt_sink_init(FormatSink *sink, char *buffer, int64 capacity) {
     sink->total = 0;
     sink->status = 0;
     sink->unchecked = false;
+    sink->write_count = true;
 
     if (capacity > 0) {
         buffer[0] = '\0';
@@ -862,14 +866,11 @@ fmt_integer_base(char conversion) {
 
 static int32
 fmt_integer_digits(char *digits, uint64 value, int32 base, bool upper) {
-    char lower_digits[] = "0123456789abcdef";
-    char upper_digits[] = "0123456789ABCDEF";
-    char reversed[64];
+    char *lower_digits = "0123456789abcdef";
+    char *upper_digits = "0123456789ABCDEF";
     char *digit_table;
+    char reversed[64];
     int32 len;
-
-    ASSERT(digits != NULL);
-    ASSERT(base == 2 || base == 8 || base == 10 || base == 16);
 
     if (upper) {
         digit_table = upper_digits;
@@ -884,10 +885,32 @@ fmt_integer_digits(char *digits, uint64 value, int32 base, bool upper) {
 
     len = 0;
     while (value > 0) {
-        uint64 digit = value%(uint64)base;
+        uint64 digit;
+
+        switch (base) {
+            case 16:
+                digit = value & 15;
+                value >>= 4;
+                break;
+            case 10:
+                digit = value % 10;
+                value /= 10;
+                break;
+            case 8:
+                digit = value & 7;
+                value >>= 3;
+                break;
+            case 2:
+                digit = value & 1;
+                value >>= 1;
+                break;
+            default:
+                digit = value % (uint64)base;
+                value /= (uint64)base;
+                break;
+        }
 
         reversed[len] = digit_table[digit];
-        value /= (uint64)base;
         len += 1;
     }
 
@@ -920,11 +943,11 @@ fmt_integer_prefix(FormatSpec *spec, FormatIntegerValue value,
             prefix[0] = '-';
             return 1;
         }
-        if ((spec->flags & FMT_FLAG_SIGN) != 0) {
+        if (spec->flags & FMT_FLAG_SIGN) {
             prefix[0] = '+';
             return 1;
         }
-        if ((spec->flags & FMT_FLAG_SPACE) != 0) {
+        if (spec->flags & FMT_FLAG_SPACE) {
             prefix[0] = ' ';
             return 1;
         }
@@ -1008,8 +1031,8 @@ fmt_write_integer(FormatSink *sink, FormatSpec *spec,
     inner_len = prefix_len + precision_zeros + digit_len;
 
     zero_pad = 0;
-    if ((spec->flags & FMT_FLAG_ZERO) != 0
-        && (spec->flags & FMT_FLAG_LEFT) == 0
+    if ((spec->flags & FMT_FLAG_ZERO)
+        && !(spec->flags & FMT_FLAG_LEFT)
         && !fmt_has_precision(spec)) {
         zero_pad = fmt_pad_len(spec->width, inner_len);
     }
@@ -1026,7 +1049,7 @@ fmt_write_integer(FormatSink *sink, FormatSpec *spec,
     if (digit_len > 0) {
         fmt_sink_write(sink, digits, digit_len);
     }
-    if ((spec->flags & FMT_FLAG_LEFT) != 0) {
+    if (spec->flags & FMT_FLAG_LEFT) {
         fmt_sink_write_repeat(sink, ' ', spaces);
     }
     return;
@@ -1072,7 +1095,7 @@ fmt_write_padded_bytes(FormatSink *sink, FormatSpec *spec,
     if (len > 0) {
         fmt_sink_write(sink, data, len);
     }
-    if ((spec->flags & FMT_FLAG_LEFT) != 0) {
+    if (spec->flags & FMT_FLAG_LEFT) {
         fmt_sink_write_repeat(sink, ' ', spaces);
     }
     return;
@@ -1199,7 +1222,7 @@ fmt_write_pointer(FormatSink *sink, FormatSpec *spec, void *pointer) {
     }
     fmt_sink_write(sink, prefix, 2);
     fmt_sink_write(sink, digits, digit_len);
-    if ((spec->flags & FMT_FLAG_LEFT) != 0) {
+    if (spec->flags & FMT_FLAG_LEFT) {
         fmt_sink_write_repeat(sink, ' ', spaces);
     }
     return;
@@ -1247,7 +1270,8 @@ fmt_count_fits(FormatSpec *spec, int64 count) {
 }
 
 static int32
-fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
+fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count,
+                bool write_count) {
     ASSERT(spec != NULL);
     ASSERT(args != NULL);
     ASSERT_NON_NEGATIVE(count);
@@ -1262,7 +1286,9 @@ fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
         if (pointer == NULL) {
             return -EINVAL;
         }
-        *pointer = (int8)count;
+        if (write_count) {
+            *pointer = (int8)count;
+        }
         return 0;
     }
     if (spec->length == FMT_LENGTH_H) {
@@ -1271,7 +1297,9 @@ fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
         if (pointer == NULL) {
             return -EINVAL;
         }
-        *pointer = (int16)count;
+        if (write_count) {
+            *pointer = (int16)count;
+        }
         return 0;
     }
     if (spec->length == FMT_LENGTH_LL) {
@@ -1280,7 +1308,9 @@ fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
         if (pointer == NULL) {
             return -EINVAL;
         }
-        *pointer = count;
+        if (write_count) {
+            *pointer = count;
+        }
         return 0;
     }
     if (spec->length == FMT_LENGTH_W8) {
@@ -1289,7 +1319,9 @@ fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
         if (pointer == NULL) {
             return -EINVAL;
         }
-        *pointer = (int8)count;
+        if (write_count) {
+            *pointer = (int8)count;
+        }
         return 0;
     }
     if (spec->length == FMT_LENGTH_W16) {
@@ -1298,7 +1330,9 @@ fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
         if (pointer == NULL) {
             return -EINVAL;
         }
-        *pointer = (int16)count;
+        if (write_count) {
+            *pointer = (int16)count;
+        }
         return 0;
     }
     if (spec->length == FMT_LENGTH_W32) {
@@ -1307,7 +1341,9 @@ fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
         if (pointer == NULL) {
             return -EINVAL;
         }
-        *pointer = (int32)count;
+        if (write_count) {
+            *pointer = (int32)count;
+        }
         return 0;
     }
     if (spec->length == FMT_LENGTH_W64) {
@@ -1316,7 +1352,9 @@ fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
         if (pointer == NULL) {
             return -EINVAL;
         }
-        *pointer = count;
+        if (write_count) {
+            *pointer = count;
+        }
         return 0;
     }
 
@@ -1327,7 +1365,9 @@ fmt_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
         if (pointer == NULL) {
             return -EINVAL;
         }
-        *pointer = (int32)count;
+        if (write_count) {
+            *pointer = (int32)count;
+        }
         return 0;
     }
 }
@@ -1341,7 +1381,7 @@ fmt_handle_count(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
     if (sink->status < 0) {
         return sink->status;
     }
-    return fmt_store_count(spec, args, sink->total);
+    return fmt_store_count(spec, args, sink->total, sink->write_count);
 }
 
 
@@ -1670,7 +1710,7 @@ fmt_big_uint_has_low_bits(FormatBigUInt *value, int32 bits) {
         uint32 mask;
 
         mask = (UINT32_C(1) << partial_bits) - 1;
-        if ((value->words[full_words] & mask) != 0) {
+        if (value->words[full_words] & mask) {
             return true;
         }
     }
@@ -2172,10 +2212,10 @@ fmt_float_sign(double value, FormatSpec *spec) {
     if (signbit(value)) {
         return '-';
     }
-    if ((spec->flags & FMT_FLAG_SIGN) != 0) {
+    if (spec->flags & FMT_FLAG_SIGN) {
         return '+';
     }
-    if ((spec->flags & FMT_FLAG_SPACE) != 0) {
+    if (spec->flags & FMT_FLAG_SPACE) {
         return ' ';
     }
 
@@ -2337,7 +2377,7 @@ fmt_float_hex_should_round(char first_digit, char *digits, int32 precision) {
     } else {
         even_digit = fmt_hex_digit_value(first_digit);
     }
-    return (even_digit & 1) != 0;
+    return even_digit & 1;
 }
 
 static void
@@ -2512,7 +2552,7 @@ static bool UNUSED
 fmt_big_uint_is_odd(FormatBigUInt *value) {
     ASSERT(value != NULL);
 
-    return value->len > 0 && (value->words[0] & 1) != 0;
+    return value->len > 0 && (value->words[0] & 1);
 }
 
 #if FMT_LDOUBLE_SUPPORTED
@@ -2564,10 +2604,10 @@ fmt_ldouble_sign(ldouble value, FormatSpec *spec) {
     if (signbit(value)) {
         return '-';
     }
-    if ((spec->flags & FMT_FLAG_SIGN) != 0) {
+    if (spec->flags & FMT_FLAG_SIGN) {
         return '+';
     }
-    if ((spec->flags & FMT_FLAG_SPACE) != 0) {
+    if (spec->flags & FMT_FLAG_SPACE) {
         return ' ';
     }
 
@@ -2661,7 +2701,7 @@ fmt_ldouble_generate_fixed_body(FormatSpec *spec, ldouble value,
         return status;
     }
     if ((status = fmt_binary_float_scaled_decimal(&parts,
-                                                  (int32)spec->precision,
+                                                  spec->precision,
                                                   &integer, &remainder)) < 0) {
         return status;
     }
@@ -2678,9 +2718,11 @@ fmt_ldouble_generate_fixed_body(FormatSpec *spec, ldouble value,
 
     digit_len = fmt_big_uint_to_decimal(&integer, digits, digit_cap);
     if (digit_len >= 0) {
-        status = fmt_ldouble_write_fixed_digits(
-            buffer, capacity, digits, digit_len, (int32)spec->precision,
-            (spec->flags & FMT_FLAG_ALTERNATE) != 0);
+        status = fmt_ldouble_write_fixed_digits(buffer, capacity,
+                                                digits, digit_len,
+                                                spec->precision,
+                                                spec->flags
+                                                & FMT_FLAG_ALTERNATE);
     } else {
         status = digit_len;
     }
@@ -2874,7 +2916,7 @@ fmt_ldouble_scientific_digits(FormatBinaryFloat *parts, ldouble value,
             } else if (tail_nonzero) {
                 round_up = true;
             } else {
-                round_up = ((digits[significant_len - 1] - '0') & 1) != 0;
+                round_up = (digits[significant_len - 1] - '0') & 1;
             }
             status = fmt_decimal_round_digits(digits, &integer_digit_len,
                                               significant_len, round_up);
@@ -2892,7 +2934,7 @@ fmt_ldouble_scientific_digits(FormatBinaryFloat *parts, ldouble value,
             bool round_up;
 
             round_up = fmt_remainder_should_round(
-                remainder, ((digits[integer_digit_len - 1] - '0') & 1) != 0);
+                remainder, (digits[integer_digit_len - 1] - '0') & 1);
             status = fmt_decimal_round_digits(digits, &integer_digit_len,
                                               significant_len, round_up);
             if (status < 0) {
@@ -3011,7 +3053,7 @@ fmt_ldouble_generate_scientific_body(FormatSpec *spec, ldouble value,
         return status;
     }
 
-    significant_len = (int32)spec->precision + 1;
+    significant_len = spec->precision + 1;
     digit_cap = FMT_LDOUBLE_MAX_FIXED_PREFIX + significant_len;
     if (digit_cap < SIZEOF(stack_digits)) {
         digit_cap = SIZEOF(stack_digits);
@@ -3030,11 +3072,13 @@ fmt_ldouble_generate_scientific_body(FormatSpec *spec, ldouble value,
                                            digits, digit_cap, &digit_len,
                                            &decimal_exponent);
     if (status == 0) {
+        bool alternate = spec->flags & FMT_FLAG_ALTERNATE;
+        bool upper = fmt_float_is_upper(spec->conversion);
         status = fmt_ldouble_write_scientific_digits(buffer, capacity,
                                                      digits, digit_len,
-                                                     (int32)spec->precision,
-            decimal_exponent, (spec->flags & FMT_FLAG_ALTERNATE) != 0,
-            fmt_float_is_upper(spec->conversion));
+                                                     spec->precision,
+                                                     decimal_exponent,
+                                                     alternate, upper);
     }
 
     if (digits != stack_digits) {
@@ -3401,7 +3445,7 @@ fmt_ldouble_generate_hex_body(FormatSpec *spec, ldouble value,
     available_digits = fmt_ldouble_hex_digit_count(&parts);
     digit_cap = available_digits;
     if (spec->precision > digit_cap) {
-        digit_cap = (int32)spec->precision;
+        digit_cap = spec->precision;
     }
     if (digit_cap < 1) {
         digit_cap = 1;
@@ -3437,13 +3481,13 @@ fmt_ldouble_generate_hex_body(FormatSpec *spec, ldouble value,
     } else {
         if (spec->precision < available_digits) {
             fmt_ldouble_hex_round(&first_digit, digits,
-                                  available_digits, (int32)spec->precision,
+                                  available_digits, spec->precision,
                                   upper);
         }
         for (int32 i = available_digits; i < spec->precision; i += 1) {
             digits[i] = '0';
         }
-        digit_len = (int32)spec->precision;
+        digit_len = spec->precision;
     }
 
     status = fmt_ldouble_write_hex_body(spec, buffer, capacity,
@@ -3619,9 +3663,9 @@ fmt_float_generate_hex_body(FormatSpec *spec, double value,
         ASSERT(spec->precision <= INT32_MAX);
         if (spec->precision < FMT_DOUBLE_HEX_DIGITS) {
             fmt_float_hex_round(&first_digit, digits,
-                                (int32)spec->precision, upper);
+                                spec->precision, upper);
         }
-        digit_len = (int32)spec->precision;
+        digit_len = spec->precision;
     }
 
     len = 0;
@@ -4351,16 +4395,21 @@ fmt_vsprintf(char *buffer, int64 capacity, char *format, va_list args) {
     }
 
     if (DEBUGGING) {
+        FormatSink check_sink;
         va_list check_args;
-        int32 estimate_len;
+        int32 len;
 
-        va_copy(check_args, args);
-        estimate_len = fmt_vsnprintf_estimate(format, check_args);
-        va_end(check_args);
-        if (estimate_len < 0) {
-            return estimate_len;
+        if ((status = fmt_sink_init(&check_sink, NULL, 0)) < 0) {
+            return status;
         }
-        if ((int64)estimate_len >= capacity) {
+        check_sink.write_count = false;
+        va_copy(check_args, args);
+        len = fmt_vsnprintf_sink(&check_sink, format, check_args);
+        va_end(check_args);
+        if (len < 0) {
+            return len;
+        }
+        if ((int64)len >= capacity) {
             return -ENOSPC;
         }
     }
@@ -5363,6 +5412,11 @@ test_fmt_public_api(void) {
     len = fmt_snprintf(buffer, SIZEOF(buffer), "public:%d:%s", 42, "ok");
     ASSERT_EQUAL(len, 12);
     ASSERT_EQUAL(buffer, len + 1, "public:42:ok", 13);
+
+    ASSERT_LESS_EQUAL(SIZEOF(buffer), fmt_snprintf_estimate("%g", 1.0));
+    len = fmt_sprintf(buffer, SIZEOF(buffer), "%g", 1.0);
+    ASSERT_EQUAL(len, 1);
+    ASSERT_EQUAL(buffer, "1");
 
     len = fmt_snprintf(tiny, SIZEOF(tiny), "abcdef");
     ASSERT_EQUAL(len, 6);
