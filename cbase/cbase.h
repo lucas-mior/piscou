@@ -145,9 +145,9 @@ typedef struct StrFlexList {
     Arena *arena;
 } StrFlexList;
 
-#define SFLIT(literal) ((StrFlex *)&(struct {            \
-    int32 len;                                           \
-    char data[sizeof(literal)];                          \
+#define SFLIT(literal) ((StrFlex *)&(struct {  \
+    int32 len;                                 \
+    char data[sizeof(literal)];                \
 }){ sizeof(literal) - 1, literal })
 
 #if OS_UNIX
@@ -463,26 +463,26 @@ bool test_symlink_supported(char *dir);
 #endif
 void here_impl(char *file, int32 line, char *func);
 
-#define STRING_FROM_ARRAY(BUFFER, SEP, ARRAY, LENGTH)                          \
-_Generic((ARRAY),                                                              \
-    double *: string_from_doubles,                                             \
-    char **: string_from_strings                                               \
+#define STRING_FROM_ARRAY(BUFFER, SEP, ARRAY, LENGTH)  \
+_Generic((ARRAY),                                      \
+    double *: string_from_doubles,                     \
+    char **: string_from_strings                       \
 )(BUFFER, SIZEOF(BUFFER), SEP, ARRAY, LENGTH)
 
-#define CLAMP(VAR, VMIN, VMAX)                                                 \
-_Generic((VAR),                                                                \
-    float:   clamp_double,                                                     \
-    double:  clamp_double,                                                     \
-    int32:   clamp_int32,                                                      \
-    default: clamp_int64                                                       \
+#define CLAMP(VAR, VMIN, VMAX)                         \
+_Generic((VAR),                                        \
+    float:   clamp_double,                             \
+    double:  clamp_double,                             \
+    int32:   clamp_int32,                              \
+    default: clamp_int64                               \
 )(VAR, VMIN, VMAX)
 
-#define SQUARE(VAR)                                                            \
-_Generic((VAR),                                                                \
-    float:   square_double,                                                    \
-    double:  square_double,                                                    \
-    int32:   square_int32,                                                     \
-    default: square_int64                                                      \
+#define SQUARE(VAR)                                    \
+_Generic((VAR),                                        \
+    float:   square_double,                            \
+    double:  square_double,                            \
+    int32:   square_int32,                             \
+    default: square_int64                              \
 )(VAR)
 
 #define strequal2_3(A, A_LEN, B)        strequal2(A, A_LEN, B, STRLIT_LEN(B))
@@ -554,7 +554,7 @@ _Generic((char (*)[STRLIT_LEN(LITERAL)])0,                                     \
 #define ITOA(BUFFER, NUM) itoa2(BUFFER, SIZEOF(BUFFER), NUM)
 
 #define SNPRINTF(BUFFER, FORMAT, ...)                                          \
-    snprintf2(BUFFER, SIZEOF(BUFFER), FORMAT, __VA_ARGS__)
+    fmt_sprintf(BUFFER, SIZEOF(BUFFER), FORMAT, __VA_ARGS__)
 #define STRFTIME(BUFFER, FORMAT, TIME)                                         \
     strftime2(BUFFER, SIZEOF(BUFFER), FORMAT, TIME)
 
