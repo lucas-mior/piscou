@@ -347,11 +347,6 @@ rapidhash(void *key, int64 len) {
     return rapidhash_withSeed(key, len, rapid_seed);
 }
 
-typedef struct {
-    uint64 lo;
-    uint64 hi;
-} rapidhash128_t;
-
 INLINE rapidhash128_t
 rapidhash128_internal(void *key, uint64 len, uint64 seed, const uint64 *secret) {
     uint8 *p = key;
@@ -410,7 +405,7 @@ rapidhash128_internal(void *key, uint64 len, uint64 seed, const uint64 *secret) 
     }
 }
 
-INLINE rapidhash128_t
+rapidhash128_t
 rapidhash128(void *key, uint64 len) {
     return rapidhash128_internal(key, len, rapid_seed, rapid_secret);
 }
