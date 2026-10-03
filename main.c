@@ -38,7 +38,7 @@ typedef struct Array {
 
 static inline int32 get_extra_number(char *, MetaRegexMatch);
 static inline void array_push(Array *, char *, int64);
-static inline void parse_command_run(char *const *, int64, char **);
+static inline void parse_cmd_run(char *const *, int64, char **);
 static noreturn void usage(FILE *);
 
 static char *filename;
@@ -96,7 +96,7 @@ main(int argc, char **argv) {
         }
 
         found = true;
-        parse_command_run(rules[i].command, argc - 2, &argv[2]);
+        parse_cmd_run(rules[i].command, argc - 2, &argv[2]);
     }
 
     if (!found) {
@@ -109,7 +109,7 @@ main(int argc, char **argv) {
 }
 
 void
-parse_command_run(char *const *command, int64 argc, char **argv) {
+parse_cmd_run(char *const *command, int64 argc, char **argv) {
     Array args = {0};
     args.arena_pos = args.arena;
 
