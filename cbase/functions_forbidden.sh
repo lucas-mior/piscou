@@ -71,7 +71,8 @@ if [ -n "$common_libc_never" ] \
     fi
 
     {
-        for common_libc_search_dir in . cbase src test tests; do
+        for common_libc_search_dir in \
+                . cbase src test tests examples cyblocks tools; do
             if [ ! -d "$common_libc_search_dir" ]; then
                 continue
             fi
@@ -174,7 +175,7 @@ if [ -n "$common_libc_never" ] \
         common_libc_status=1
         error "%s %s\n" \
             "In order to understand and learn how to fix the problems above," \
-            "read cbase/c-guidelines.md"
+            "read cbase/c-guidelines.md and cbase/c-format.md"
     fi
 
     rm -f \

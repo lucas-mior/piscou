@@ -1379,7 +1379,7 @@ cmd_argv0_set(Command *command, char *argument) {
     int32 argument_len = strlen32(argument);
     char *copy;
 
-    ASSERT_POSITIVE(command->argc);
+    ASSERT_GT(command->argc, 0);
     copy = cmd_argument_alloc(command, argument_len + 1);
     memcpy64(copy, argument, argument_len + 1);
     command->argv[0] = copy;
@@ -1514,29 +1514,46 @@ cmd_printf(Command *command, char *fmt, ...) {
 
 void
 cmd_env_printf(Command *command, char *fmt, ...) {
+    FmtPlan plan;
     va_list ap;
     va_list ap2;
-    int32 n;
+    int32 estimate;
+    int32 len;
     char *argument;
+
+    if (DEBUGGING) {
+        ASSERT_LT(strlen32(fmt), FMT_PLAN_MAX_FORMAT_LEN);
+    }
 
     va_start(ap, fmt);
     va_copy(ap2, ap);
-    n = vsnprintf(NULL, 0, fmt, ap);
+    estimate = fmt_vsnprintf_estimate_plan(&plan, fmt, ap);
     va_end(ap);
 
-    if (n < 0) {
+    if (estimate < 0) {
         va_end(ap2);
         error("Error formatting \"%s\".", fmt);
         fatal(EXIT_FAILURE);
     }
 
-    argument = malloc2(n + 1);
-    n = vsnprintf(argument, (size_t)n + 1, fmt, ap2);
+    argument = malloc2(estimate + 1);
+    len = fmt_vsnprintf_planned(&plan, argument, estimate + 1, ap2);
     va_end(ap2);
 
-    cmd_env_push_length(command, argument, n);
+    if (len < 0) {
+        free2(argument, estimate + 1);
+        error("Error formatting \"%s\".", fmt);
+        fatal(EXIT_FAILURE);
+    }
+    if (len > estimate) {
+        free2(argument, estimate + 1);
+        error("Error: Format estimate was too small for \"%s\".", fmt);
+        fatal(EXIT_FAILURE);
+    }
 
-    free2(argument, n + 1);
+    cmd_env_push_length(command, argument, len);
+
+    free2(argument, estimate + 1);
     return;
 }
 
@@ -1679,7 +1696,7 @@ main(int argc, char **argv) {
         ASSERT_EQ(cmd.result.status, 7);
         ASSERT(cmd.result.exited);
         ASSERT_EQ(cmd.result.exit_status, 7);
-        ASSERT_POSITIVE(cmd.run_elapsed_ns);
+        ASSERT_GT(cmd.run_elapsed_ns, 0);
 
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
@@ -1722,7 +1739,7 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
         ASSERT(cmd.stdin_buffer == NULL);
-        ASSERT_NEGATIVE((cmd_stdin_buffer_set(&cmd, NULL, 0)));
+        ASSERT_LT((cmd_stdin_buffer_set(&cmd, NULL, 0)), 0);
 
         {
             enum {
@@ -1826,7 +1843,7 @@ main(int argc, char **argv) {
         ASSERT_EQ(cmd.result.status, 7);
         ASSERT(cmd.result.exited);
         ASSERT_EQ(cmd.result.exit_status, 7);
-        ASSERT_POSITIVE(cmd.run_elapsed_ns);
+        ASSERT_GT(cmd.run_elapsed_ns, 0);
 
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
@@ -1876,7 +1893,7 @@ main(int argc, char **argv) {
 #if OS_UNIX
         CMD_PUSH(&cmd, "sh", "-c", "exit 9");
         ASSERT_ZERO((cmd_run_async(&cmd, CMD_NEW_PROCESS_GROUP)));
-        ASSERT_POSITIVE(cmd.result.pid);
+        ASSERT_GT(cmd.result.pid, 0);
         ASSERT_ZERO(cmd_wait(&cmd));
         ASSERT_EQ(cmd.result.status, 9);
 
@@ -1890,7 +1907,7 @@ main(int argc, char **argv) {
         ASSERT(!cmd_run_async(&cmd,
                                   CMD_CAPTURE_STDOUT
                                   |CMD_CAPTURE_STDERR));
-        ASSERT_POSITIVE(cmd.result.pid);
+        ASSERT_GT(cmd.result.pid, 0);
         cmd_result_read_captured(&cmd);
         ASSERT_ZERO(cmd_wait(&cmd));
         ASSERT_EQ(cmd.result.stdout_output, "asyncout");

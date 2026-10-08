@@ -629,8 +629,8 @@ string_array_copy(StringArray *dest, StringArray *source) {
             return err;
         }
         for (int32 i = 0; i < source->len; i += 1) {
-            if ((err = string_array_append_copy(
-                     &replacement, &source->items[i])) < 0) {
+            if ((err = string_array_append_copy(&replacement,
+                                                &source->items[i])) < 0) {
                 string_array_destroy(&replacement);
                 return err;
             }
@@ -897,7 +897,7 @@ main(void) {
         string_from_strings(b, sizeof(b), "|", strs, 3);
         ASSERT_EQ(b, "one|two|three");
         string_from_doubles(b, sizeof(b), ",", dbls, 2);
-        ASSERT_POSITIVE(strlen32(b));
+        ASSERT_GT(strlen32(b), 0);
     }
 
     exit(EXIT_SUCCESS);
