@@ -24,6 +24,7 @@ static Rule rules[] = {
 {{NULL,    R(".+\\.mo$")         }, {"pygmentize", "#piscou-file#"}},
 {{NULL,    R(".+\\.blend$")      }, {"blend.sh", "#piscou-file#"}},
 {{NULL,    R(".+\\.csv")         }, {"csv.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
+{{NULL,    R(".+\\.tsv")         }, {"tsv.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{NULL,    R(".+\\.dot")         }, {"dot.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{NULL,    R(".+\\.kicad_pro$")  }, {"kicad.sh", "#piscou-file#", "#piscou-0#", "#piscou-1#", "#piscou-2#", "#piscou-3#"}},
 {{NULL,    R(".+\\.sed$")        }, {"pygmentize", "#piscou-file#"}},
