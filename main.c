@@ -146,8 +146,8 @@ parse_cmd_run(char *const *command, int64 argc, char **argv) {
                 int32 extra_index = get_extra_number(pointer, matches[1]);
 
                 if (extra_index >= argc) {
-                    error("Extra argument %d not passed to piscou. Ignoring...\n",
-                          extra_index);
+                    error("Extra argument %d not passed to piscou."
+                          "Ignoring...\n", extra_index);
                     goto ignore;
                 }
 
@@ -175,18 +175,18 @@ parse_cmd_run(char *const *command, int64 argc, char **argv) {
     ignore:
         continue;
     }
-    
+
     if (DEBUGGING) {
         for (int32 i = 0; i < args.len; i += 1) {
             printf("args.array[%d] = %s\n", i, args.array[i]);
         }
     }
-    
+
     if (args.array[0] == NULL) {
         error("Invalid command.\n");
         exit(EXIT_FAILURE);
     }
-    
+
     if (!DEBUGGING) {
         char full_command[MAX_ARGUMENT_LENGTH*MAX_ARGS];
 

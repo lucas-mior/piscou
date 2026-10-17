@@ -114,6 +114,49 @@ class ForbiddenPatternsTests(unittest.TestCase):
         ):
             self.assertIn(rule, output)
 
+    def test_project_source_whitespace_violations(self):
+        output = self.run_perl(
+            "src/sample.c",
+            "\tint32 value;  \n" +
+            "x" * 80 + "\n" +
+            "x" * 81 + "\n",
+        )
+        for rule in (
+            "tab character is forbidden",
+            "trailing whitespace",
+            "line exceeds 80 columns",
+        ):
+            self.assertIn(rule, output)
+        self.assertEqual(output.count("line exceeds 80 columns"), 1)
+        self.assertIn("sample.c:3:line exceeds 80 columns", output)
+
+    def test_project_source_unicode_column_limit(self):
+        output = self.run_perl(
+            "src/sample.c",
+            "я" * 80 + "\n" +
+            "я" * 81 + "\n",
+        )
+        self.assertEqual(output.count("line exceeds 80 columns"), 1)
+        self.assertIn("sample.c:2:line exceeds 80 columns", output)
+
+    def test_generated_meta_headers_are_ignored(self):
+        contents = "#ifdef FEATURE\n\tint value = sizeof(int);  \n#endif\n"
+        self.assertEqual(
+            self.run_perl("src/sample.meta.h", contents), "",
+        )
+        self.assertEqual(
+            self.run_perl("src/sample.meta.h", contents, file_list=True), "",
+        )
+
+    def test_cecup_source_accepts_up_to_100_columns(self):
+        output = self.run_perl(
+            "cecup/src/sample.c",
+            "x" * 100 + "\n" +
+            "x" * 101 + "\n",
+        )
+        self.assertEqual(output.count("line exceeds 100 columns"), 1)
+        self.assertIn("sample.c:2:line exceeds 100 columns", output)
+
     def test_ifdef_ifndef_are_rejected_in_project_sources(self):
         output = self.run_perl(
             "src/sample.c",
@@ -556,6 +599,13 @@ class ForbiddenPatternsTests(unittest.TestCase):
         result = self.run_shell(TEST_FILTER="ryu", TEST_MAXDEPTH="1")
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("extra.c:1:line exceeds 80 columns", result.stderr)
+
+    def test_shell_ignores_generated_meta_headers(self):
+        self.prepare_shell_checker()
+        self.write("cbase/functions_never_use.txt", "malloc\n")
+        self.write("src/generated.meta.h", "void *value = malloc(1);\n")
+        result = self.run_shell()
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_explicit_exclusion_still_applies(self):
         self.prepare_shell_checker()
