@@ -100,8 +100,8 @@ main(int argc, char **argv) {
     }
 
     if (!found) {
-        printf("No previewer set for file:\n\n%s:\n    %s\n",
-               basename(argv[1]), file_mime);
+        fmt_printf("No previewer set for file:\n\n%s:\n    %s\n",
+                   basename(argv[1]), file_mime);
     } else {
         error("Every previewer failed.\n");
     }
