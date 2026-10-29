@@ -178,7 +178,7 @@ parse_cmd_run(char **command, int64 argc, char **argv) {
 
     if (DEBUGGING) {
         for (int32 i = 0; i < args.len; i += 1) {
-            printf("args.array[%d] = %s\n", i, args.array[i]);
+            fmt_printf("args.array[%d] = %s\n", i, args.array[i]);
         }
     }
 
