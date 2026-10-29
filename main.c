@@ -200,8 +200,8 @@ parse_cmd_run(char **command, int64 argc, char **argv) {
 
 void
 usage(FILE *stream) {
-    fprintf(stream,
-            "usage: piscou #piscou-file# [ #piscou-0# #piscou-1# ... ]\n");
+    fmt_fprintf(stream,
+                "usage: piscou #piscou-file# [ #piscou-0# #piscou-1# ... ]\n");
     exit(stream != stdout);
 }
 
