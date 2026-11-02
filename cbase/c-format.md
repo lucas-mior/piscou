@@ -424,6 +424,39 @@ default:
       do_only_one_thing();
   ```
 
+- Never put two consecutive opening braces (`{{` or `{ {`) or two consecutive
+  closing braces (`}}` or `} }`) on the same line. Put nested braces on
+  separate lines and indent each nested level by four spaces; dedent closing
+  braces to match their openings. This applies to blocks, array and struct
+  initializers, and compound literals. Braces in string/character literals
+  and comments do not count.
+  ```c
+  // bad
+  int32 matrix[][2] = {{1, 2}, {3, 4}};
+
+  // good
+  int32 matrix[][2] = {
+      {
+          1, 2,
+      },
+      {
+          3, 4,
+      },
+  };
+
+  // bad
+  if (condition) {{
+      do_something();
+  }}
+
+  // good
+  if (condition) {
+      {
+          do_something();
+      }
+  }
+  ```
+
 ## If expressions
 when an operand of `&&` or `||` is itself a binary expression,
 parenthesize that operand:
@@ -558,8 +591,8 @@ function_with_long_name_and_multiple_arguments(MyStruct *handle,
                                                double a, double b);
 ```
 
-In function calls/definitions/headers, try to make the `_len` of a variable in
-the same line of the object it refers to:
+In calls/definitions/headers, keep a variable with its `_len`, or an
+array with `LENGTH(array)`, on the same line whenever possible:
 ```c
 // bad
 static void
@@ -659,8 +692,11 @@ Break lines longer than 80 characters with the backslash. Example:
 ```
 
 ## Initialization
-Use line breaks indentation for struct initialization,
-except when initializing to zero:
+Use line breaks and indentation for designated struct initialization with
+multiple members, including compound struct literals. A single designated
+member may remain on one line, with or without a trailing comma. Positional
+struct initialization may also remain on one line. Zero initialization with
+`{0}` is exempt:
 
 ```c
 typedef struct MyStruct {
@@ -668,8 +704,11 @@ typedef struct MyStruct {
     char *other;
 } MyStruct;
 
-// bad
-MyStruct my_struct = { .string = "string", };
+// good: one designated member
+MyStruct my_struct = {.string = "string"};
+
+// good: one designated member with a trailing comma
+MyStruct my_struct = {.string = "string",};
 
 // good
 MyStruct my_struct = {
@@ -682,8 +721,8 @@ MyStruct my_struct = {
     .other = "other",
 };
 
-// bad
-MyStruct my_struct = { .string = "string", .other = "other", };
+// bad: two designated members on one line
+MyStruct my_struct = {.string = "string", .other = "other"};
 
 // bad
 MyStruct my_struct = {
@@ -692,6 +731,18 @@ MyStruct my_struct = {
 
 // good
 MyStruct my_struct = {0};
+
+// good: positional initialization
+MyStruct my_struct2 = {"string", "other"};
+
+// good: one designated member in a compound literal
+my_struct = (MyStruct){.string = "string"};
+
+// good: multiple designated members in a compound literal
+my_struct = (MyStruct){
+    .string = "string",
+    .other = "other",
+};
 ```
 
 Also indent structs inside structs.
