@@ -982,13 +982,13 @@ test_cmd_exists(char *command) {
 #define ENUM_BITFLAGS 0
 #define ENUM_PREFIX_ WEEK_DAY_
 #define ENUM_FIELDS \
-    XX(WEEK_DAY_SUNDAY, sunday)    \
-    XX(WEEK_DAY_MONDAY, monday)    \
-    XX(WEEK_DAY_TUESDAY, tuesday)  \
+    XX(WEEK_DAY_SUNDAY, "sunday")  \
+    XX(WEEK_DAY_MONDAY, "monday")  \
+    XX(WEEK_DAY_TUESDAY, "tuesday") \
     XX(WEEK_DAY_WEDNESDAY)         \
     XX(WEEK_DAY_THURSDAY)          \
-    XX(WEEK_DAY_FRIDAY, friday)    \
-    XX(WEEK_DAY_SATURDAY, saturday)
+    XX(WEEK_DAY_FRIDAY, "friday")  \
+    XX(WEEK_DAY_SATURDAY, "saturday")
 #include "xenums.c"
 
 #define ENUM_NAME PowerOfTwo
@@ -1225,7 +1225,7 @@ main(int argc, char **argv) {
     ASSERT_EQ(CLAMP(0.2, -0.1, 0.1),   0.1);
     ASSERT_EQ(CLAMP(-0.2, -0.1, 0.1), -0.1);
 
-    ASSERT_ZERO(CLAMP(+0, -1, +1));
+    ASSERT_EQ(CLAMP(+0, -1, +1), 0);
     ASSERT_EQ(CLAMP(+2, -1, +1), +1);
     ASSERT_EQ(CLAMP(-2, -1, +1), -1);
 
