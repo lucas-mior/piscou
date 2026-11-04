@@ -136,6 +136,93 @@ Important: only try 2 if 1 does not work, only try 3 if 2 and 1 do not work,
 only try 4 if 1, 2, and 3 do not work, and so on. Remember to do a final pass,
 do the alignment, as explained in 2.
 
+## Array indexing
+Similar to the function calls rules above, never break immediately after the
+opening bracket:
+```c
+    // bad
+    int32 value = my_array_has_a_long_name[
+        idx];
+    // good
+    int32 value = my_array_has_a_long_name[idx];
+```
+
+Sometimes it might be useful to break at arithmetic operators:
+```c
+    // bad
+    int32 value = my_array_has_a_long_name[
+        variable_long_name*cols + another_variable];
+
+    // good
+    int32 value = my_array_has_a_long_name[variable_long_name*cols
+                                           + another_variable];
+```
+
+When an index expression spans multiple lines, align each continuation line
+with the first index token (immediately after `[`), not with the indentation
+of the containing statement:
+```c
+    // bad
+    int32 value = my_array_has_a_long_name[variable_long_name*cols
+        + another_variable];
+
+    // good
+    int32 value = my_array_has_a_long_name[variable_long_name*cols
+                                           + another_variable];
+```
+
+Sometimes it might be useful to break after the assignment operator:
+```c
+    // bad
+    int32 value = my_array_has_a_long_name[
+        function_that_returns_index_does_not_fit()];
+
+    // good
+    int32 value =
+        my_array_has_a_long_name[function_that_returns_index_does_not_fit()];
+```
+
+As a last resource, sometimes it might be useful to create auxiliar variables.
+```c
+    // bad
+    int32 value = my_array_has_a_long_name[
+        function_that_returns_index_does_not_fit_here()];
+
+    // good
+    int32 idx = function_that_returns_index_does_not_fit_here();
+    int32 value = my_array_has_a_long_name[idx];
+```
+
+## Arithmetic line wrapping and alignment
+For simple assignments to arithmetic expressions, break before binary
+arithmetic operators (`+`, `-`, `*`, `/`, `%`) when a line break is needed.
+Align a wrapped operator with the beginning of its left-hand precedence
+subexpression. Higher-precedence operations can therefore be indented further
+than lower-precedence operations:
+
+```c
+// bad: continuation is not aligned with the right-hand expression
+// and the next operator is not aligned with its precedence group.
+double x = 2.0*a_long_variable
+   + (some_other_variable*(xyz + 4.0)) / SQUARE(variable);
+
+double x = 2.0*a_long_variable
+               + (some_other_variable*(xyz + 4.0)) / SQUARE(variable);
+
+// good: + aligns with the first token after =
+double x = 2.0*a_long_variable
+           + (some_other_variable*(xyz + 4.0)) / SQUARE(variable);
+
+// also good: / aligns with the parenthesized right-hand term
+double x = 2.0*a_long_variable
+           + (some_other_variable*(xyz + 4.0))
+             / SQUARE(variable);
+```
+
+The arithmetic-assignment check does not inspect arithmetic inside function
+calls or array subscripts. Parenthesized arithmetic subexpressions follow
+their own precedence alignment.
+
 ## Rules for reducing long lines.
 When it happens that a line of code has more than 80 chars, the rules are:
 For function calls, check the rules above.
@@ -521,6 +608,21 @@ if (this_condition
     && (x < 0)
     && (y > 1)
     && this_other_condition) {
+}
+```
+
+For an `if` or `else if` with just one comparison operator, keep the entire
+`if (...) {` header on one line when it fits within the 80-column limit.
+This includes comparisons with parenthesized operands.
+
+```c
+// bad: the combined header fits
+if (fields
+    == (FIELD_T1 | FIELD_NSTEPS)) {
+}
+
+// good
+if (fields == (FIELD_T1 | FIELD_NSTEPS)) {
 }
 ```
 

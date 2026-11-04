@@ -153,8 +153,7 @@ parse_cmd_run(char **command, int64 argc, char **argv) {
 
                 argv_passed = argv[extra_index];
                 extra_length = strlen32(argv_passed);
-                total_length = (int64)(pointer - args.arena_pos)
-                                       + extra_length + left;
+                total_length = pointer - args.arena_pos + extra_length + left;
                 if (total_length >= MAX_ARGUMENT_LENGTH) {
                     error("Too long argument. Max length is %d.\n",
                           MAX_ARGUMENT_LENGTH);
