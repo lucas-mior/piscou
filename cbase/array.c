@@ -5,11 +5,11 @@
 #define ARRAY_C
 
 #if !defined(TESTING_array)
-#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_array 1
-#else
-#define TESTING_array 0
-#endif
+  #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+  #define TESTING_array 1
+  #else
+  #define TESTING_array 0
+  #endif
 #endif
 
 #include "cbase.h"
