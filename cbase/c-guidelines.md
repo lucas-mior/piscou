@@ -1298,16 +1298,23 @@ if (number_of_stuff >= capacity) {
 
 When checking whether a count, length, or capacity is nonzero, prefer
 `> 0` over `!= 0`: these quantities represent non-negative amounts. For
-`csanecheck`, this rule applies to direct comparisons with literal `0`
-(including `0 != buffer_cap`) where an identifier or final member ends in
-`_count`, `_len`, `_cap`, or `_capacity`, or follows `n<name>s` (for example,
-`nitems`, `nrows`, or `ninput_channels`). The final member of a struct access
-also matches the exact names `count`, `len`, `cap`, and `capacity` (e.g.,
-`mstruct->len != 0`); standalone variables with these bare names are not
-matched. Parentheses around the operands do not change the rule. Names
-ending in `_status` or `_success` are not treated as counts by the
-`n<name>s` pattern. It does not apply to arithmetic expressions or calls
-that merely contain such a name.
+`csanecheck`, this rule applies to direct comparisons with literal `0`,
+including `0 != ...`, when a variable, final struct member, or directly
+called function has a count-shaped name:
+
+- The suffixes `_count`, `_len`, `_cap`, or `_capacity` (e.g., `get_count()`).
+- The plural-count prefix `n<name>s` (e.g., `nitems`, `ninput_channels`),
+  including struct members such as `mstruct->nitems`.
+- The plural-count suffix `_n<name>s` (e.g., `file_nitems`, `get_nrows()`).
+- For struct members, the exact names `count`, `len`, `cap`, and `capacity`,
+  including direct calls such as `mstruct->count()`. Standalone variables
+  or functions with those bare names are not matched.
+
+The check accepts `.` and `->` member access, parentheses around operands,
+and direct calls with or without arguments. It does not infer the meaning of
+arithmetic expressions, indexing, or chained calls. Names ending in
+`_status`, `_success`, `nstatus`, or `nsuccess` are excluded from the
+plural-count patterns.
 
 Use `!= 0` only when zero is a distinct sentinel or value, rather than an
 empty count (for example, a coordinate that can be negative).
@@ -1351,6 +1358,28 @@ if (mstruct->len != 0 || mstruct->count != 0) {
 // good
 if (mstruct->len > 0 || mstruct->count > 0) {
     // at least one member is nonzero
+}
+
+// bad: plural-count member and suffixed variable
+if (mstruct->nitems != 0 || buffer_nrows != 0) {
+    // at least one count is nonzero
+}
+
+// good
+if (mstruct->nitems > 0 || buffer_nrows > 0) {
+    // at least one count is nonzero
+}
+
+// bad: direct functions returning counts
+if (get_count() != 0 || buffer_capacity() != 0
+    || get_nitems() != 0 || obj->len() != 0) {
+    // at least one count is nonzero
+}
+
+// good
+if (get_count() > 0 || buffer_capacity() > 0
+    || get_nitems() > 0 || obj->len() > 0) {
+    // at least one count is nonzero
 }
 
 // bad
