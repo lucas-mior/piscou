@@ -15,17 +15,17 @@
 #include "meta_regex/src/meta_match.c"
 #include "gen/config2.h"
 
-#define PISCOU_META_MATCHERS \
-    (enum Matcher) \
-    (MATCHER_BTNFA | MATCHER_TDFA | MATCHER_LAZY_DFA \
+#define PISCOU_META_MATCHERS                                           \
+    (enum Matcher)                                                     \
+    (MATCHER_BTNFA | MATCHER_TDFA | MATCHER_LAZY_DFA                   \
      | MATCHER_STATIC_DFA)
 
-#define MATCH_SUBEXPRESSIONS(R, S, PMATCHES) \
-    (meta_regex_match((R), (uint8 *)(S), strlen32(S), (PMATCHES), \
+#define MATCH_SUBEXPRESSIONS(R, S, PMATCHES)                           \
+    (meta_regex_match((R), (uint8 *)(S), strlen32(S), (PMATCHES),      \
                       LENGTH(PMATCHES), PISCOU_META_MATCHERS) == 0)
 
-#define MATCH_REGEX_SIMPLE(R, S) \
-    (meta_regex_match((R), (uint8 *)(S), strlen32(S), NULL, 0, \
+#define MATCH_REGEX_SIMPLE(R, S)                                       \
+    (meta_regex_match((R), (uint8 *)(S), strlen32(S), NULL, 0,         \
                       PISCOU_META_MATCHERS) == 0)
 
 typedef struct Array {

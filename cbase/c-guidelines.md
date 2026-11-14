@@ -1565,6 +1565,31 @@ use_discrete_tree =
   // good, if we care about the specific negative error code.
   ASSERT_EQ(access(path, F_OK), 0);
   ```
+- Do not assign to a variable and immediately assert that same variable in a
+  separate statement. Put the assignment inside `ASSERT` instead, with an
+  extra pair of parentheses. Whitespace and comments between the two
+  statements do not make the separate assertion acceptable; intervening code
+  does not fall under this rule.
+  ```c
+  // bad
+  baseline = cy_create_input(sys, 4, 0.5, 10.0);
+  ASSERT(baseline);
+
+  // good
+  ASSERT((baseline = cy_create_input(sys, 4, 0.5, 10.0)));
+  ```
+- Do not initialize a `bool` variable and immediately assert that same
+  variable in a separate statement. Assert the initializer expression
+  directly instead (`STYLE-ASSERT-BOOL-INIT`). Comments and blank lines do
+  not separate the statements for this rule.
+  ```c
+  // bad
+  bool ok = validate(value);
+  ASSERT(ok);
+
+  // good
+  ASSERT(validate(value));
+  ```
 - Prefer `ASSERT_EQ(value, 0);` instead of `ASSERT(value == 0)`.
 - `ASSERT_EQ` and `ASSERT_NE` accept either constant or variable
   operands. For integer comparisons, both operands are normalized to `llong`.
@@ -1982,6 +2007,25 @@ double x = 2.0*a_long_variable
 double x = 2.0*a_long_variable
            + (some_other_variable*(xyz + 4.0))
              / SQUARE(varibale);
+```
+
+The arithmetic precedence and alignment rules also apply within function-call
+arguments. When an argument spans multiple lines, align its arithmetic
+operators with the first operand of their precedence group. If keeping the
+argument on the opening line would place that operand too far to the right,
+break after the preceding comma:
+
+```c
+// bad
+free2(sys->execution.input_history.u, sys->execution.input_history.capacity
+                            *sys->config.input_history.nsignals
+                            *SIZEOF(*(sys->execution.input_history.u)));
+
+// good
+free2(sys->execution.input_history.u,
+      sys->execution.input_history.capacity
+      *sys->config.input_history.nsignals
+      *SIZEOF(*(sys->execution.input_history.u)));
 ```
 
 ## Abbreviations (and not abbreviate)
