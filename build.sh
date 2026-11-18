@@ -150,6 +150,51 @@ if [ "$mode" = "cross" ]; then
 fi
 
 case "$mode" in
+benchmark|build|cross|debug|debug-fast|fast_feedback|perf|test|valgrind)
+    case "${PISCOU_REGEX_BACKEND:-auto}" in
+    auto)
+        if [ -d meta_regex ]; then
+            regex_backend=meta
+        else
+            regex_backend=libc
+        fi
+        ;;
+    meta|libc)
+        regex_backend=$PISCOU_REGEX_BACKEND
+        ;;
+    *)
+        printf 'Invalid PISCOU_REGEX_BACKEND: %s (expected auto, meta, or libc).\n' \
+            "$PISCOU_REGEX_BACKEND" >&2
+        exit 1
+        ;;
+    esac
+
+    if [ "$regex_backend" = meta ]; then
+        for regex_file in \
+            meta_regex/src/meta_regex.h \
+            meta_regex/src/meta_match.c \
+            meta_regex/src/meta_preproc.h \
+            meta_regex/src/meta_preproc_0_main.c \
+            meta_regex/src/meta_preproc_1_parse_regex.c \
+            meta_regex/src/meta_preproc_1_parse_tnfa.c \
+            meta_regex/src/meta_preproc_1_parse_tdfa.c \
+            meta_regex/src/meta_preproc_1_parse_source.c \
+            meta_regex/src/meta_preproc_2_gen.c; do
+            if [ ! -f "$regex_file" ]; then
+                printf 'Incomplete meta_regex dependency: missing %s.\n' \
+                    "$regex_file" >&2
+                exit 1
+            fi
+        done
+        CPPFLAGS="$CPPFLAGS -DPISCOU_REGEX_BACKEND_LIBC=0"
+    else
+        CPPFLAGS="$CPPFLAGS -DPISCOU_REGEX_BACKEND_LIBC=1"
+    fi
+    printf 'Regex backend: %s\n' "$regex_backend"
+    ;;
+esac
+
+case "$mode" in
 test)
     TEST_EXCLUDE_PATTERN='(^|/)cbase/' common_test "$target"
     exit
@@ -171,17 +216,21 @@ benchmark|build|cross|debug|debug-fast|fast_feedback|perf|valgrind)
 
     mkdir -p gen || true
 
-    PREPROC_CPPFLAGS="$CPPFLAGS"
-    case " $PREPROC_CPPFLAGS " in
-        *" -DDEBUGGING="*) ;;
-        *) PREPROC_CPPFLAGS="$PREPROC_CPPFLAGS -DDEBUGGING=0" ;;
-    esac
+    if [ "$regex_backend" = meta ]; then
+        PREPROC_CPPFLAGS="$CPPFLAGS"
+        case " $PREPROC_CPPFLAGS " in
+            *" -DDEBUGGING="*) ;;
+            *) PREPROC_CPPFLAGS="$PREPROC_CPPFLAGS -DDEBUGGING=0" ;;
+        esac
+    fi
 
     trace_on
 
-    $HOST_CC $PREPROC_CPPFLAGS -std=c11 -O2 $PTHREAD_CFLAGS \
-        -o bin/meta_preproc meta_regex/src/meta_preproc_0_main.c -lm
-    ./bin/meta_preproc config.h > gen/config2.h
+    if [ "$regex_backend" = meta ]; then
+        $HOST_CC $PREPROC_CPPFLAGS -std=c11 -O2 $PTHREAD_CFLAGS \
+            -o bin/meta_preproc meta_regex/src/meta_preproc_0_main.c -lm
+        ./bin/meta_preproc config.h > gen/config2.h
+    fi
 
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
 

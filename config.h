@@ -2,19 +2,19 @@
 #define CONFIG_H
 
 #include "cbase.h"
-#include "meta_regex/src/meta_regex.h"
+#include "piscou_regex.h"
 
 #define MAX_ARGS 16
 #define MAX_EXTRAS 10
 #define MAX_ARGUMENT_LENGTH 256
 
 typedef struct Rule {
-    MetaRegex *match[2];
+    PiscouRegex *match[2];
     char *command[MAX_ARGS];
 } Rule;
 
-static MetaRegex *piscou_regex_extras = R("^#piscou-([0-9])#$");
-static MetaRegex *piscou_regex_extras_more = R("#piscou-([0-9])#");
+static PiscouRegex *piscou_regex_extras = R("^#piscou-([0-9])#$");
+static PiscouRegex *piscou_regex_extras_more = R("#piscou-([0-9])#");
 
 static Rule rules[] = {
 /* mimetype           filename    command */

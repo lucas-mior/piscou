@@ -1,7 +1,7 @@
-.TH piscou 1 "November 2023" "Version 1.0" "User Commands"
+.TH piscou 1 "November 2026" "Version 1.0" "User Commands"
 
 .SH NAME
-piscou \- File previewer that executes a program according to the file's mimetype.
+piscou \- File previewer that executes a program according to a file's MIME type and/or filename.
 
 .SH SYNOPSIS
 .B piscou
@@ -10,10 +10,48 @@ piscou \- File previewer that executes a program according to the file's mimetyp
 
 .SH DESCRIPTION
 .B piscou
-is a file previewer that executes a program based on the file's mimetype. It is designed to be as fast as possible, and users can choose previewing programs with short startup times.
+is a file previewer that executes a program based on a file's MIME type and/or filename. It is designed to be as fast as possible, and users can choose previewing programs with short startup times.
 
 .PP
 Users can pass up to 10 arguments to the program after the filename.
+
+.SH BUILD REQUIREMENTS
+A C11 compiler, pkg-config, and the libmagic development files are required.
+The meta_regex source tree is optional on platforms supporting POSIX
+.BR regex.h .
+.SH REGEX BACKENDS
+The build selects a regex backend using the
+.B PISCOU_REGEX_BACKEND
+environment variable:
+.TP
+.B auto
+Default. Use meta_regex when the
+.B meta_regex/
+directory exists; otherwise use the POSIX libc backend.
+.TP
+.B meta
+Require the full meta_regex source tree under
+.BR meta_regex/src/ .
+.TP
+.B libc
+Use POSIX
+.B regex.h
+even if meta_regex is present.
+.PP
+For example:
+.PP
+.nf
+PISCOU_REGEX_BACKEND=libc ./build.sh
+PISCOU_REGEX_BACKEND=meta ./build.sh
+.fi
+.PP
+If meta_regex is present but incomplete, automatic selection reports an
+error. Forced libc mode does not require the meta_regex files. In meta_regex
+mode, the build generates
+.B gen/config2.h
+with meta_preproc; libc mode includes
+.B config.h
+directly without preprocessing.
 
 .SH CONFIGURATION
 .P
@@ -22,6 +60,26 @@ Edit
 and recompile. Note that by default,
 .B piscou
 might call programs that are not installed on your system.
+.PP
+Rules use the
+.B R("pattern")
+macro in either backend, including in static initializers. The two-argument
+.B R("pattern", flags)
+form is also supported, as are META_RE_NONE, META_RE_YESSUB, and
+META_RE_NOSUB. Patterns may match a MIME type, filename, or both; at
+least one matching field must be set.
+.PP
+The libc backend uses POSIX extended regular expressions (REG_EXTENDED).
+PCRE-specific syntax is not supported there. The meta_regex implementation
+may behave differently for some patterns or capture groups; prefer the
+shared POSIX ERE subset for portable configurations.
+.PP
+The
+.B #piscou-N#
+placeholders select extra command-line arguments, including when embedded
+within another argument. To compare both backends when meta_regex is
+available, run
+.BR ./tests/regex_backends.sh .
 
 .SH LIMITATIONS
 .P

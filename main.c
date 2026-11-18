@@ -5,28 +5,18 @@
 #include "cbase.h"
 
 #include <magic.h>
-#include <regex.h>
 
 #if !defined(DEBUGGING)
   #define DEBUGGING 0
 #endif
 
-#include "meta_regex/src/meta_regex.h"
-#include "meta_regex/src/meta_match.c"
+#define PISCOU_REGEX_IMPLEMENT
+#include "piscou_regex.h"
+#if PISCOU_REGEX_BACKEND_LIBC
+#include "config.h"
+#else
 #include "gen/config2.h"
-
-#define PISCOU_META_MATCHERS                                           \
-    (enum Matcher)                                                     \
-    (MATCHER_BTNFA | MATCHER_TDFA | MATCHER_LAZY_DFA                   \
-     | MATCHER_STATIC_DFA)
-
-#define MATCH_SUBEXPRESSIONS(R, S, PMATCHES)                           \
-    (meta_regex_match((R), (uint8 *)(S), strlen32(S), (PMATCHES),      \
-                      LENGTH(PMATCHES), PISCOU_META_MATCHERS) == 0)
-
-#define MATCH_REGEX_SIMPLE(R, S)                                       \
-    (meta_regex_match((R), (uint8 *)(S), strlen32(S), NULL, 0,         \
-                      PISCOU_META_MATCHERS) == 0)
+#endif
 
 typedef struct Array {
     char arena[MAX_EXTRAS*MAX_ARGUMENT_LENGTH];
@@ -36,7 +26,7 @@ typedef struct Array {
     int32 unused;
 } Array;
 
-static inline int32 get_extra_number(char *, MetaRegexMatch);
+static inline int32 get_extra_number(char *, PiscouRegexMatch);
 static inline void array_push(Array *, char *, int64);
 static inline void parse_cmd_run(char **, int64, char **);
 static noreturn void usage(FILE *);
@@ -76,21 +66,21 @@ main(int argc, char **argv) {
     }
 
     for (int64 i = 0; i < LENGTH(rules); i += 1) {
-        MetaRegex *mime_pat = rules[i].match[0];
-        MetaRegex *path_pat = rules[i].match[1];
+        PiscouRegex *mime_pat = rules[i].match[0];
+        PiscouRegex *path_pat = rules[i].match[1];
 
         if (mime_pat == NULL && path_pat == NULL) {
             continue;
         }
 
         if (mime_pat) {
-            if (!MATCH_REGEX_SIMPLE(mime_pat, (char *)file_mime)) {
+            if (!piscou_regex_match(mime_pat, (char *)file_mime, NULL, 0)) {
                 continue;
             }
         }
 
         if (path_pat) {
-            if (!MATCH_REGEX_SIMPLE(path_pat, filename)) {
+            if (!piscou_regex_match(path_pat, filename, NULL, 0)) {
                 continue;
             }
         }
@@ -115,13 +105,14 @@ parse_cmd_run(char **command, int64 argc, char **argv) {
 
     for (int64 i = 0; command[i]; i += 1) {
         char *argument = command[i];
-        MetaRegexMatch matches[MAX_EXTRAS + 1];
+        PiscouRegexMatch matches[MAX_EXTRAS + 1];
 
         if (strequal(regex_filename_str, argument)) {
             array_push(&args, filename, 0);
             continue;
         }
-        if (MATCH_SUBEXPRESSIONS(piscou_regex_extras, argument, matches)) {
+        if (piscou_regex_match(piscou_regex_extras, argument,
+                               matches, LENGTH(matches))) {
             int32 extra_index = get_extra_number(argument, matches[1]);
             if (extra_index >= argc) {
                 error("Extra argument %d not passed to piscou. Ignoring...\n",
@@ -131,7 +122,8 @@ parse_cmd_run(char **command, int64 argc, char **argv) {
             array_push(&args, argv[extra_index], 0);
             continue;
         }
-        if (MATCH_SUBEXPRESSIONS(piscou_regex_extras_more, argument, matches)) {
+        if (piscou_regex_match(piscou_regex_extras_more, argument,
+                               matches, LENGTH(matches))) {
             char *pointer = args.arena_pos;
             int64 extra_length = 0;
             int64 final_length;
@@ -163,8 +155,8 @@ parse_cmd_run(char **command, int64 argc, char **argv) {
                 memmove64(&pointer[start + extra_length], &pointer[end], left);
                 memcpy64(&pointer[start], argv_passed, extra_length);
                 pointer += (extra_length + start);
-            } while (MATCH_SUBEXPRESSIONS(piscou_regex_extras_more,
-                                          pointer, matches));
+            } while (piscou_regex_match(piscou_regex_extras_more, pointer,
+                                        matches, LENGTH(matches)));
 
             final_length = (int64)(pointer - args.arena_pos);
             array_push(&args, NULL, final_length);
@@ -205,7 +197,7 @@ usage(FILE *stream) {
 }
 
 int32
-get_extra_number(char *string, MetaRegexMatch pmatch) {
+get_extra_number(char *string, PiscouRegexMatch pmatch) {
     char number_buffer[12] = {0};
     int64 start = pmatch.rm_so;
     int64 end = pmatch.rm_eo;
